@@ -221,6 +221,9 @@ class AuthTest extends WebTestCase
         $this->registerAndVerifyUser($email, $password);
         $tokens = $this->loginUser($email, $password);
 
+        // Wait 1 second to ensure different JWT timestamp (iat claim)
+        sleep(1);
+
         // Test refresh
         $this->client->request('POST', '/api/v1/auth/refresh', [], [], [
             'CONTENT_TYPE' => 'application/json',
