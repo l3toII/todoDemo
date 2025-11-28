@@ -1,0 +1,24 @@
+parameters:
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    App\Controller\:
+        resource: '../src/Controller/'
+        tags: ['controller.service_arguments']
+
+    # Apple Sign-In Service Configuration
+    App\Service\AppleSignInService:
+        arguments:
+            $appleClientId: '%env(APPLE_CLIENT_ID)%'
+            $appleTeamId: '%env(APPLE_TEAM_ID)%'
+            $appleKeyId: '%env(APPLE_KEY_ID)%'
