@@ -2,12 +2,12 @@
   ============================================================================
   SYNC IMPACT REPORT
   ============================================================================
-  Version change: 1.1.0 → 1.2.0 (MINOR: new principle added + full translation)
+  Version change: 1.2.0 → 1.3.0 (MINOR: new principle added)
 
-  Modified principles: All principles translated from French to English
+  Modified principles: None
 
   Added sections:
-    - XV. Infrastructure-First (CI/CD pipeline MUST be operational before any feature work)
+    - XVI. GitHub Issues Tracking (features MUST be tracked as GitHub issues)
 
   Removed sections: None
 
@@ -336,6 +336,38 @@ This principle establishes a mandatory prerequisite for all feature work:
 
 **Rationale**: A functional CI/CD pipeline is the foundation of modern software development. Without it, code quality cannot be guaranteed, deployments are risky, and the team cannot iterate safely. Establishing infrastructure first prevents technical debt accumulation and ensures every feature benefits from automated quality gates from day one.
 
+### XVI. GitHub Issues Tracking
+
+**Every feature MUST be tracked as a GitHub issue, and the issue MUST be closed upon merge to `develop`.**
+
+**Mandatory practices**:
+- Each feature (`feat/*` branch) MUST reference a GitHub issue in its branch name: `feat/<issue-id>-<description>`
+- Each bug fix (`fix/*` branch) MUST reference a GitHub issue: `fix/<issue-id>-<description>`
+- The GitHub issue MUST be created BEFORE work begins on the feature
+- PR descriptions MUST include `Closes #<issue-id>` or `Fixes #<issue-id>` to enable automatic closure
+- Issues MUST be automatically closed when the associated PR is merged to `develop`
+
+**Issue requirements**:
+- **Title**: Clear, concise description of the feature or fix
+- **Description**: Acceptance criteria, context, and any relevant links to spec.md or tasks.md
+- **Labels**: Appropriate labels (feature, bug, enhancement, etc.)
+- **Milestone**: Assigned to the current sprint/milestone when applicable
+- **Assignee**: At least one assignee responsible for the work
+
+**Workflow**:
+1. Create GitHub issue describing the feature/fix
+2. Create branch with issue ID: `feat/<issue-id>-description`
+3. Reference issue in commits: `feat(scope): description (#<issue-id>)`
+4. Open PR with `Closes #<issue-id>` in description
+5. Issue auto-closes on merge to `develop`
+
+**Prohibited practices**:
+- NEVER create a `feat/*` or `fix/*` branch without a corresponding GitHub issue
+- NEVER merge a PR without proper issue linkage
+- NEVER manually close issues that should be auto-closed by PR merge
+
+**Rationale**: GitHub issues provide traceability, enable project management visibility, facilitate team communication, and create an audit trail of all changes. Automatic closure ensures issues stay synchronized with actual code state.
+
 ## Development Workflow
 
 ### Pull Request Process
@@ -412,4 +444,4 @@ This principle establishes a mandatory prerequisite for all feature work:
 
 This constitution SUPERSEDES all other practices. In case of conflict between this constitution and other documents, the constitution prevails.
 
-**Version**: 1.2.0 | **Ratified**: 2025-11-28 | **Last Amended**: 2025-11-28
+**Version**: 1.3.0 | **Ratified**: 2025-11-28 | **Last Amended**: 2025-11-28
