@@ -1,0 +1,264 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches-ignore:
+      - main
+  pull_request:
+    branches:
+      - main
+      - develop
+
+env:
+  PHP_VERSION: '8.2'
+  NODE_VERSION: '20'
+
+jobs:
+  api-lint:
+    name: API - Lint (PHPStan)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: pdo_mysql, intl, zip, gd, opcache, mbstring
+          coverage: none
+
+      - name: Validate composer.json
+        run: composer validate --strict
+        working-directory: ./api
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+        working-directory: ./api
+
+      - name: Run PHPStan
+        run: vendor/bin/phpstan analyse src --level=6
+        working-directory: ./api
+
+  api-code-style:
+    name: API - Code Style (PHP-CS-Fixer)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: pdo_mysql, intl, zip, gd, opcache, mbstring
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+        working-directory: ./api
+
+      - name: Run PHP-CS-Fixer
+        run: vendor/bin/php-cs-fixer fix --dry-run --diff
+        working-directory: ./api
+
+  api-tests:
+    name: API - Tests (PHPUnit)
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mariadb:10.11
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: gtd_app_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: pdo_mysql, intl, zip, gd, opcache, mbstring
+          coverage: xdebug
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+        working-directory: ./api
+
+      - name: Run migrations
+        run: php bin/console doctrine:migrations:migrate --no-interaction --env=test
+        working-directory: ./api
+        env:
+          DATABASE_URL: mysql://root:root@127.0.0.1:3306/gtd_app_test
+
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit --coverage-clover coverage.xml
+        working-directory: ./api
+        env:
+          DATABASE_URL: mysql://root:root@127.0.0.1:3306/gtd_app_test
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./api/coverage.xml
+          flags: api
+          name: api-coverage
+
+  web-lint:
+    name: Web - Lint (ESLint)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ./web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./web
+
+      - name: Run ESLint
+        run: npm run lint
+        working-directory: ./web
+
+  web-format:
+    name: Web - Format (Prettier)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ./web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./web
+
+      - name: Check formatting
+        run: npm run format:check
+        working-directory: ./web
+
+  web-tests:
+    name: Web - Tests (Jest)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ./web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./web
+
+      - name: Run tests
+        run: npm test -- --coverage
+        working-directory: ./web
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./web/coverage/coverage-final.json
+          flags: web
+          name: web-coverage
+
+  web-build:
+    name: Web - Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ./web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./web
+
+      - name: Build
+        run: npm run build
+        working-directory: ./web
+
+      - name: Check bundle size
+        run: |
+          BUNDLE_SIZE=$(du -sb web/dist | cut -f1)
+          MAX_SIZE=204800
+          if [ $BUNDLE_SIZE -gt $MAX_SIZE ]; then
+            echo "Bundle size ($BUNDLE_SIZE bytes) exceeds maximum ($MAX_SIZE bytes)"
+            exit 1
+          fi
+
+  security-api:
+    name: Security - API (Composer Audit)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          coverage: none
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+        working-directory: ./api
+
+      - name: Run security audit
+        run: composer audit
+        working-directory: ./api
+
+  security-web:
+    name: Security - Web (NPM Audit)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./web
+
+      - name: Run security audit
+        run: npm audit --audit-level=moderate
+        working-directory: ./web
+
+  quality-gate:
+    name: Quality Gate
+    runs-on: ubuntu-latest
+    needs: [api-lint, api-code-style, api-tests, web-lint, web-format, web-tests, web-build, security-api, security-web]
+
+    steps:
+      - name: All checks passed
+        run: echo "✅ All CI checks passed successfully"

@@ -49,28 +49,28 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 ### Phase 0.1: Development Environment
 
-- [ ] [S0-001] Setup Docker Compose configuration for local development `infra/docker-compose.yml`
-- [ ] [S0-002] Create API Dockerfile with PHP 8.2-FPM and Nginx `infra/docker/api/Dockerfile`
-- [ ] [S0-003] Create Web Dockerfile for React development `infra/docker/web/Dockerfile`
-- [ ] [S0-004] Create MariaDB Docker configuration with initialization scripts `infra/docker/db/`
-- [ ] [S0-005] Create environment template files `api/.env.example`, `web/.env.example`
-- [ ] [S0-005b] Create FeatureFlag entity and migration `api/src/Entity/FeatureFlag.php`, `api/migrations/Version009CreateFeatureFlagsTable.php`
+- [x] [S0-001] Setup Docker Compose configuration for local development `infra/docker-compose.yml`
+- [x] [S0-002] Create API Dockerfile with PHP 8.2-FPM and Nginx `infra/docker/api/Dockerfile`
+- [x] [S0-003] Create Web Dockerfile for React development `infra/docker/web/Dockerfile`
+- [x] [S0-004] Create MariaDB Docker configuration with initialization scripts `infra/docker/db/`
+- [x] [S0-005] Create environment template files `api/.env.example`, `web/.env.example`
+- [ ] [S0-005b] Create FeatureFlag entity and migration `api/src/Entity/FeatureFlag.php`, `api/migrations/Version009CreateFeatureFlagsTable.php` ⚠️ Deferred to Symfony setup
 
 ### Phase 0.2: CI Pipeline
 
-- [ ] [S0-006] Create GitHub Actions CI workflow for API (PHP lint, PHPStan, PHPUnit) `.github/workflows/ci.yml`
-- [ ] [S0-007] Add CI steps for Web (ESLint, Prettier, Jest, build) `.github/workflows/ci.yml`
-- [ ] [S0-008] Add security scanning (composer audit, npm audit) `.github/workflows/ci.yml`
-- [ ] [S0-009] Configure code coverage reporting (Codecov or similar) `.github/workflows/ci.yml`
-- [ ] [S0-010] Add branch protection rules for main and develop `Repository Settings`
+- [x] [S0-006] Create GitHub Actions CI workflow for API (PHP lint, PHPStan, PHPUnit) `.github/workflows/ci.yml`
+- [x] [S0-007] Add CI steps for Web (ESLint, Prettier, Jest, build) `.github/workflows/ci.yml`
+- [x] [S0-008] Add security scanning (composer audit, npm audit) `.github/workflows/ci.yml`
+- [x] [S0-009] Configure code coverage reporting (Codecov or similar) `.github/workflows/ci.yml`
+- [ ] [S0-010] Add branch protection rules for main and develop `Repository Settings` ⚠️ Manual GitHub configuration required
 
 ### Phase 0.3: CD Pipeline
 
-- [ ] [S0-011] Create GitHub Actions CD workflow for staging deployment `.github/workflows/cd.yml`
-- [ ] [S0-012] Create GitHub Actions CD workflow for production deployment `.github/workflows/cd.yml`
-- [ ] [S0-013] Configure health check endpoints and monitoring `/api/health`
-- [ ] [S0-014] Document rollback procedures `docs/deployment.md`
-- [ ] [S0-015] Verify complete infrastructure checklist passes (Constitution XV)
+- [x] [S0-011] Create GitHub Actions CD workflow for staging deployment `.github/workflows/cd.yml`
+- [x] [S0-012] Create GitHub Actions CD workflow for production deployment `.github/workflows/cd.yml`
+- [x] [S0-013] Configure health check endpoints and monitoring `/api/health` - Documented in CD workflow
+- [x] [S0-014] Document rollback procedures `docs/deployment.md`
+- [ ] [S0-015] Verify complete infrastructure checklist passes (Constitution XV) ⚠️ Requires actual deployment
 
 ---
 
