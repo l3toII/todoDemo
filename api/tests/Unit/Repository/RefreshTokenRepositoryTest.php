@@ -270,6 +270,7 @@ class RefreshTokenRepositoryTest extends KernelTestCase
         $this->refreshTokenRepository->save($valid);
 
         $deletedCount = $this->refreshTokenRepository->deleteExpired();
+        $this->entityManager->clear(); // Clear to force fresh fetch
 
         $this->assertEquals(1, $deletedCount);
 
@@ -325,6 +326,7 @@ class RefreshTokenRepositoryTest extends KernelTestCase
 
         // Delete revoked older than 7 days
         $deletedCount = $this->refreshTokenRepository->deleteRevokedOlderThan(new \DateTimeImmutable('-7 days'));
+        $this->entityManager->clear(); // Clear to force fresh fetch
 
         $this->assertEquals(1, $deletedCount);
 
