@@ -62,7 +62,7 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 - [X] [S0-007] Add CI steps for Web (ESLint, Prettier, Jest, build) `.github/workflows/ci.yml`
 - [X] [S0-008] Add security scanning (composer audit, npm audit) `.github/workflows/ci.yml`
 - [X] [S0-009] Configure code coverage reporting (Codecov or similar) `.github/workflows/ci.yml`
-- [ ] [S0-010] Add branch protection rules for main and develop `Repository Settings`
+- [X] [S0-010] Add branch protection rules for main and develop `Repository Settings`
 
 ### Phase 0.3: CD Pipeline
 
@@ -70,7 +70,7 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 - [X] [S0-012] Create GitHub Actions CD workflow for production deployment `.github/workflows/cd.yml`
 - [X] [S0-013] Configure health check endpoints and monitoring `/api/health`
 - [X] [S0-014] Document rollback procedures `docs/deployment.md`
-- [ ] [S0-015] Verify complete infrastructure checklist passes (Constitution XV)
+- [X] [S0-015] Verify complete infrastructure checklist passes (Constitution XV)
 
 ---
 
@@ -346,12 +346,12 @@ POL-* runs after all feature tasks complete
 ## Verification Checklist
 
 Before marking Sprint 0 complete:
-- [ ] All GitHub issues created for P1-P7 features (Constitution XVI)
-- [ ] All Docker containers start successfully
-- [ ] CI pipeline passes on test PR
-- [ ] CD pipeline deploys to staging
-- [ ] Health checks return 200 OK
-- [ ] Branch protection rules enforced
+- [X] All GitHub issues created for P1-P7 features (Constitution XVI)
+- [X] All Docker containers start successfully
+- [X] CI pipeline passes on test PR
+- [X] CD pipeline deploys to staging
+- [X] Health checks return 200 OK
+- [X] Branch protection rules enforced
 
 Before marking each User Story complete:
 - [ ] All unit tests pass (> 80% coverage)
