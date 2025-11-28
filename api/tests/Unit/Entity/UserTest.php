@@ -197,4 +197,144 @@ class UserTest extends TestCase
         $this->assertNotEquals($originalUpdatedAt, $user->getUpdatedAt());
         $this->assertGreaterThan($originalUpdatedAt, $user->getUpdatedAt());
     }
+
+    // =========================================================================
+    // Verification Token Tests
+    // =========================================================================
+
+    public function testVerificationTokenGetterSetter(): void
+    {
+        $user = new User();
+        $token = bin2hex(random_bytes(32));
+
+        $user->setVerificationToken($token);
+
+        $this->assertEquals($token, $user->getVerificationToken());
+    }
+
+    public function testVerificationTokenExpiresAtGetterSetter(): void
+    {
+        $user = new User();
+        $expiresAt = new \DateTimeImmutable('+24 hours');
+
+        $user->setVerificationTokenExpiresAt($expiresAt);
+
+        $this->assertEquals($expiresAt, $user->getVerificationTokenExpiresAt());
+    }
+
+    public function testIsVerificationTokenExpiredWhenNotExpired(): void
+    {
+        $user = new User();
+        $user->setVerificationToken('token');
+        $user->setVerificationTokenExpiresAt(new \DateTimeImmutable('+1 hour'));
+
+        $this->assertFalse($user->isVerificationTokenExpired());
+    }
+
+    public function testIsVerificationTokenExpiredWhenExpired(): void
+    {
+        $user = new User();
+        $user->setVerificationToken('token');
+        $user->setVerificationTokenExpiresAt(new \DateTimeImmutable('-1 hour'));
+
+        $this->assertTrue($user->isVerificationTokenExpired());
+    }
+
+    public function testIsVerificationTokenExpiredWhenNoExpirySet(): void
+    {
+        $user = new User();
+
+        // Should be considered expired when no expiry is set
+        $this->assertTrue($user->isVerificationTokenExpired());
+    }
+
+    public function testIsVerified(): void
+    {
+        $user = new User();
+
+        $this->assertFalse($user->isVerified());
+
+        $user->setVerifiedAt(new \DateTimeImmutable());
+
+        $this->assertTrue($user->isVerified());
+    }
+
+    public function testMarkAsVerifiedClearsVerificationToken(): void
+    {
+        $user = new User();
+        $user->setVerificationToken('token');
+        $user->setVerificationTokenExpiresAt(new \DateTimeImmutable('+24 hours'));
+        $user->setStatus(User::STATUS_PENDING_VERIFICATION);
+
+        $user->markAsVerified();
+
+        $this->assertNull($user->getVerificationToken());
+        $this->assertNull($user->getVerificationTokenExpiresAt());
+        $this->assertEquals(User::STATUS_ACTIVE, $user->getStatus());
+    }
+
+    // =========================================================================
+    // Password Reset Token Tests
+    // =========================================================================
+
+    public function testPasswordResetTokenGetterSetter(): void
+    {
+        $user = new User();
+        $token = bin2hex(random_bytes(32));
+
+        $user->setPasswordResetToken($token);
+
+        $this->assertEquals($token, $user->getPasswordResetToken());
+    }
+
+    public function testPasswordResetTokenExpiresAtGetterSetter(): void
+    {
+        $user = new User();
+        $expiresAt = new \DateTimeImmutable('+1 hour');
+
+        $user->setPasswordResetTokenExpiresAt($expiresAt);
+
+        $this->assertEquals($expiresAt, $user->getPasswordResetTokenExpiresAt());
+    }
+
+    public function testIsPasswordResetTokenExpiredWhenNotExpired(): void
+    {
+        $user = new User();
+        $user->setPasswordResetToken('token');
+        $user->setPasswordResetTokenExpiresAt(new \DateTimeImmutable('+1 hour'));
+
+        $this->assertFalse($user->isPasswordResetTokenExpired());
+    }
+
+    public function testIsPasswordResetTokenExpiredWhenExpired(): void
+    {
+        $user = new User();
+        $user->setPasswordResetToken('token');
+        $user->setPasswordResetTokenExpiresAt(new \DateTimeImmutable('-1 hour'));
+
+        $this->assertTrue($user->isPasswordResetTokenExpired());
+    }
+
+    public function testIsPasswordResetTokenExpiredWhenNoExpirySet(): void
+    {
+        $user = new User();
+
+        // Should be considered expired when no expiry is set
+        $this->assertTrue($user->isPasswordResetTokenExpired());
+    }
+
+    public function testClearPasswordResetToken(): void
+    {
+        $user = new User();
+        $user->setPasswordResetToken('token');
+        $user->setPasswordResetTokenExpiresAt(new \DateTimeImmutable('+1 hour'));
+
+        $this->assertNotNull($user->getPasswordResetToken());
+        $this->assertNotNull($user->getPasswordResetTokenExpiresAt());
+
+        $user->clearPasswordResetToken();
+
+        $this->assertNull($user->getPasswordResetToken());
+        $this->assertNull($user->getPasswordResetTokenExpiresAt());
+    }
 }
