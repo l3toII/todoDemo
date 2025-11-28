@@ -6,7 +6,6 @@
 .phpunit.result.cache
 
 # Composer
-composer.lock
 composer.phar
 
 # Symfony
