@@ -66,6 +66,22 @@ class UserRepository extends ServiceEntityRepository
     }
 
     /**
+     * Find user by verification token
+     */
+    public function findByVerificationToken(string $token): ?User
+    {
+        return $this->findOneBy(['verificationToken' => $token]);
+    }
+
+    /**
+     * Find user by password reset token
+     */
+    public function findByPasswordResetToken(string $token): ?User
+    {
+        return $this->findOneBy(['passwordResetToken' => $token]);
+    }
+
+    /**
      * Find all active users
      *
      * @return User[]

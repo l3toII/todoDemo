@@ -63,6 +63,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $verifiedAt = null;
 
+    #[ORM\Column(type: Types::STRING, length: 64, nullable: true)]
+    private ?string $verificationToken = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $verificationTokenExpiresAt = null;
+
+    #[ORM\Column(type: Types::STRING, length: 64, nullable: true)]
+    private ?string $passwordResetToken = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $passwordResetTokenExpiresAt = null;
+
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
     private ?\DateTimeImmutable $lastLoginAt = null;
 
@@ -188,9 +200,83 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function markAsVerified(): self
     {
         $this->verifiedAt = new \DateTimeImmutable();
+        $this->verificationToken = null;
+        $this->verificationTokenExpiresAt = null;
         if ($this->status === self::STATUS_PENDING_VERIFICATION) {
             $this->status = self::STATUS_ACTIVE;
         }
+        return $this;
+    }
+
+    public function isVerified(): bool
+    {
+        return $this->verifiedAt !== null;
+    }
+
+    public function getVerificationToken(): ?string
+    {
+        return $this->verificationToken;
+    }
+
+    public function setVerificationToken(?string $verificationToken): self
+    {
+        $this->verificationToken = $verificationToken;
+        return $this;
+    }
+
+    public function getVerificationTokenExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->verificationTokenExpiresAt;
+    }
+
+    public function setVerificationTokenExpiresAt(?\DateTimeImmutable $expiresAt): self
+    {
+        $this->verificationTokenExpiresAt = $expiresAt;
+        return $this;
+    }
+
+    public function isVerificationTokenExpired(): bool
+    {
+        if ($this->verificationTokenExpiresAt === null) {
+            return true;
+        }
+        return $this->verificationTokenExpiresAt < new \DateTimeImmutable();
+    }
+
+    public function getPasswordResetToken(): ?string
+    {
+        return $this->passwordResetToken;
+    }
+
+    public function setPasswordResetToken(?string $passwordResetToken): self
+    {
+        $this->passwordResetToken = $passwordResetToken;
+        return $this;
+    }
+
+    public function getPasswordResetTokenExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->passwordResetTokenExpiresAt;
+    }
+
+    public function setPasswordResetTokenExpiresAt(?\DateTimeImmutable $expiresAt): self
+    {
+        $this->passwordResetTokenExpiresAt = $expiresAt;
+        return $this;
+    }
+
+    public function isPasswordResetTokenExpired(): bool
+    {
+        if ($this->passwordResetTokenExpiresAt === null) {
+            return true;
+        }
+        return $this->passwordResetTokenExpiresAt < new \DateTimeImmutable();
+    }
+
+    public function clearPasswordResetToken(): self
+    {
+        $this->passwordResetToken = null;
+        $this->passwordResetTokenExpiresAt = null;
         return $this;
     }
 

@@ -33,3 +33,6 @@ composer.phar
 .vscode/
 .idea/
 *.sublime-*
+
+# JWT keys (generated locally, not in version control)
+/config/jwt/*.pem
