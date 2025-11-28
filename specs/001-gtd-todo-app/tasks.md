@@ -7,16 +7,21 @@
 
 ## Overview
 
-Total tasks: 89
-- Sprint 0 (Infrastructure): 15 tasks
-- P1 User Account Management: 14 tasks
+Total tasks: 119
+- Sprint 0 (Infrastructure): 16 tasks
+- P1 User Account Management: 21 tasks
 - P2 Capture Ideas and Tasks: 10 tasks
 - P3 Clarify and Process: 8 tasks
-- P4 Organize with Contexts: 8 tasks
+- P4 Organize with Contexts: 13 tasks
 - P5 Project Management: 10 tasks
 - P6 Weekly Review: 8 tasks
 - P7 Calendar and Deadlines: 8 tasks
-- Polish & Finalization: 8 tasks
+- Cross-Cutting (Sync & Offline): 5 tasks
+- Integration Tests: 6 tasks
+- Edge Cases: 5 tasks
+- Polish & Finalization: 9 tasks
+
+> **Note**: iOS app (FR-027) is descoped to Phase 2. Web MVP delivers all P1-P7 features first. iOS tasks will be added in a separate planning cycle after web MVP completion.
 
 ---
 
@@ -31,6 +36,7 @@ Total tasks: 89
 - [ ] [S0-003] Create Web Dockerfile for React development `infra/docker/web/Dockerfile`
 - [ ] [S0-004] Create MariaDB Docker configuration with initialization scripts `infra/docker/db/`
 - [ ] [S0-005] Create environment template files `api/.env.example`, `web/.env.example`
+- [ ] [S0-005b] Create FeatureFlag entity and migration `api/src/Entity/FeatureFlag.php`, `api/migrations/Version009CreateFeatureFlagsTable.php`
 
 ### Phase 0.2: CI Pipeline
 
@@ -66,10 +72,17 @@ Total tasks: 89
 - [ ] [P1-005] [P1] [Story-1] Configure LexikJWTAuthenticationBundle with key generation `api/config/packages/lexik_jwt_authentication.yaml`
 - [ ] [P1-006] [P1] [Story-1] Create AuthController with login endpoint `api/src/Controller/AuthController.php`
 - [ ] [P1-007] [P1] [Story-1] Implement refresh token rotation with RefreshToken entity `api/src/Entity/RefreshToken.php`
+- [ ] [P1-007b] [P1] [Story-1] Create database migration for refresh_tokens table `api/migrations/Version008CreateRefreshTokensTable.php`
 - [ ] [P1-008] [P1] [Story-1] Implement Apple Sign-In verification service `api/src/Service/AppleSignInService.php`
 - [ ] [P1-009] [P1] [Story-1] Create registration endpoint with email verification `api/src/Controller/RegistrationController.php`
 - [ ] [P1-010] [P1] [Story-1] Create password reset flow with secure tokens `api/src/Controller/PasswordResetController.php`
 - [ ] [P1-011] [P1] [Story-1] Write functional tests for all auth endpoints `api/tests/Functional/AuthTest.php`
+
+### Phase 1.2b: Backend - Session & Account Management (FR-006, FR-006b)
+
+- [ ] [P1-018] [P1] [Story-1] Implement session timeout with auto-logout after inactivity `api/src/EventSubscriber/SessionTimeoutSubscriber.php`
+- [ ] [P1-019] [P1] [Story-1] Create account deletion endpoint with cascade delete (GDPR) `api/src/Controller/AccountController.php`
+- [ ] [P1-020] [P1] [Story-1] Implement hard delete service for all user data `api/src/Service/AccountDeletionService.php`
 
 ### Phase 1.3: Frontend - Auth Module
 
@@ -132,7 +145,8 @@ Total tasks: 89
 
 - [ ] [P4-001] [P4] [Story-4] Create Context Doctrine entity `api/src/Entity/Context.php`
 - [ ] [P4-002] [P4] [Story-4] Create TaskContext join entity for M:N relationship `api/src/Entity/TaskContext.php`
-- [ ] [P4-003] [P4] [Story-4] Create database migrations for contexts and task_contexts `api/migrations/Version002CreateContextsTable.php`
+- [ ] [P4-003] [P4] [Story-4] Create database migration for contexts table `api/migrations/Version002CreateContextsTable.php`
+- [ ] [P4-003b] [P4] [Story-4] Create database migration for task_contexts join table `api/migrations/Version005CreateTaskContextsTable.php`
 - [ ] [P4-004] [P4] [Story-4] Create seed command for default contexts `api/src/Command/SeedContextsCommand.php`
 - [ ] [P4-005] [P4] [Story-4] Create ContextController with CRUD endpoints `api/src/Controller/ContextController.php`
 
@@ -141,6 +155,13 @@ Total tasks: 89
 - [ ] [P4-006] [P4] [Story-4] Create contexts Redux slice `web/src/features/contexts/contextsSlice.ts`
 - [ ] [P4-007] [P4] [Story-4] Create ContextFilterSidebar component `web/src/components/ContextFilterSidebar.tsx`
 - [ ] [P4-008] [P4] [Story-4] Write E2E tests for context filtering `web/tests/e2e/contexts.spec.ts`
+
+### Phase 4.3: Frontend - GTD List Views (FR-016)
+
+- [ ] [P4-009] [P4] [Story-4] Create NextActionsPage with filtered task list `web/src/pages/NextActionsPage.tsx`
+- [ ] [P4-010] [P4] [Story-4] Create WaitingForPage with delegated/blocked tasks `web/src/pages/WaitingForPage.tsx`
+- [ ] [P4-011] [P4] [Story-4] Create SomedayMaybePage with deferred tasks `web/src/pages/SomedayMaybePage.tsx`
+- [ ] [P4-012] [P4] [Story-4] Create ReferencePage for non-actionable items `web/src/pages/ReferencePage.tsx`
 
 ---
 
@@ -218,13 +239,37 @@ Total tasks: 89
 
 ---
 
+## Integration Tests (Constitution II)
+
+Per Constitution II, each component MUST have integration tests.
+
+- [ ] [INT-001] Write integration tests for Auth module (login, register, refresh, Apple Sign-In) `api/tests/Integration/AuthIntegrationTest.php`
+- [ ] [INT-002] Write integration tests for Task module (CRUD, status transitions) `api/tests/Integration/TaskIntegrationTest.php`
+- [ ] [INT-003] Write integration tests for Project module (CRUD, next action logic) `api/tests/Integration/ProjectIntegrationTest.php`
+- [ ] [INT-004] Write integration tests for Context module (CRUD, task associations) `api/tests/Integration/ContextIntegrationTest.php`
+- [ ] [INT-005] Write integration tests for Review module (start, complete, reminders) `api/tests/Integration/ReviewIntegrationTest.php`
+- [ ] [INT-006] Write integration tests for Calendar module (events, reminders) `api/tests/Integration/CalendarIntegrationTest.php`
+
+---
+
+## Edge Cases (from spec.md)
+
+- [ ] [EDGE-001] Implement orphan task handling on project deletion (move to inbox) `api/src/EventSubscriber/ProjectDeleteSubscriber.php`
+- [ ] [EDGE-002] Add inbox overflow alert when >100 unprocessed items `web/src/components/InboxOverflowAlert.tsx`
+- [ ] [EDGE-003] Implement draft auto-save on session expiry `web/src/hooks/useDraftAutoSave.ts`
+- [ ] [EDGE-004] Add unsaved changes warning before logout/navigation `web/src/components/UnsavedChangesGuard.tsx`
+- [ ] [EDGE-005] Write E2E tests for edge case scenarios `web/tests/e2e/edge-cases.spec.ts`
+
+---
+
 ## Polish & Finalization
 
-### Documentation & Quality
+### Documentation & Quality (Constitution IX)
 
 - [ ] [POL-001] Generate OpenAPI documentation from API `api/src/OpenApi/`
 - [ ] [POL-002] Update quickstart.md with final setup instructions `specs/001-gtd-todo-app/quickstart.md`
 - [ ] [POL-003] Create CHANGELOG.md with version history `CHANGELOG.md`
+- [ ] [POL-003b] Create README.md with project overview and quick start `README.md`
 - [ ] [POL-004] Ensure 80% code coverage across all modules
 
 ### Performance & Accessibility
@@ -236,24 +281,44 @@ Total tasks: 89
 
 ---
 
+## Post-MVP: Analytics & Metrics (SC-003, SC-005, SC-008, SC-009)
+
+> **Note**: The following success criteria require analytics infrastructure not included in MVP:
+> - SC-003: 80% of users empty inbox weekly (requires usage tracking)
+> - SC-005: 70% users complete weekly review (requires usage tracking)
+> - SC-008: 30-day retention rate >60% (requires cohort analytics)
+> - SC-009: 40% stress reduction (requires user surveys)
+>
+> These will be addressed in Phase 2 with analytics integration (Mixpanel/Amplitude or similar).
+
+---
+
 ## Task Dependencies
 
 ```
 Sprint 0 (S0-*) ──BLOCKING──> All P1-P7 tasks
 
 P1-001 → P1-002 → P1-003 (User entity chain)
-P1-005 → P1-006 → P1-007 (Auth backend chain)
+P1-005 → P1-006 → P1-007 → P1-007b (Auth backend chain)
+P1-018 → P1-019 → P1-020 (Session/GDPR chain, after P1-001)
 P1-012 → P1-013 → P1-014 → P1-017 (Auth frontend chain)
 
 P2-001 → P2-002 → P2-003 → P2-004 (Task entity chain)
 P2-006 → P2-007 → P2-010 (Inbox frontend chain)
 
-P4-001 → P4-002 → P4-003 (Context entity chain)
+P4-001 → P4-002 → P4-003 → P4-003b (Context entity chain)
+P4-003b depends on P2-003 (tasks table must exist for join table)
+P4-009 → P4-010 → P4-011 → P4-012 (GTD list views, after P4-006)
+
 P5-001 → P5-002 → P5-003 → P5-004 (Project entity chain)
+EDGE-001 depends on P5-005 (project controller must exist)
+
 P6-001 → P6-002 → P6-003 (Review entity chain)
 P7-001 → P7-002 → P7-003 (Calendar entity chain)
 
 SYNC-* depends on P2-* (Task entity must exist)
+INT-* runs after corresponding feature tasks complete
+EDGE-* runs after core features complete
 POL-* runs after all feature tasks complete
 ```
 
