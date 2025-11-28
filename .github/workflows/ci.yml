@@ -110,6 +110,12 @@ jobs:
         run: composer install --prefer-dist --no-progress --no-interaction
         working-directory: ./api
 
+      - name: Create database schema
+        run: php bin/console doctrine:migrations:migrate --no-interaction
+        working-directory: ./api
+        env:
+          APP_ENV: test
+
       - name: Run PHPUnit
         env:
           APP_ENV: test
