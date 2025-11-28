@@ -28,6 +28,13 @@ jobs:
         run: composer validate --strict
         working-directory: ./api
 
+      - name: Setup .env file
+        run: |
+          cp .env.example .env
+          echo "APP_ENV=test" >> .env
+          echo "APP_SECRET=test-secret-for-ci" >> .env
+        working-directory: ./api
+
       - name: Cache Composer dependencies
         uses: actions/cache@v4
         with:
@@ -83,6 +90,13 @@ jobs:
           php-version: ${{ env.PHP_VERSION }}
           extensions: pdo_mysql, intl, zip, gd, opcache, mbstring
           coverage: pcov
+
+      - name: Setup .env file
+        run: |
+          cp .env.example .env
+          echo "APP_ENV=test" >> .env
+          echo "APP_SECRET=test-secret-for-ci" >> .env
+        working-directory: ./api
 
       - name: Cache Composer dependencies
         uses: actions/cache@v4
