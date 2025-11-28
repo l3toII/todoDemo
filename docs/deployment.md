@@ -22,7 +22,7 @@ This document describes the deployment procedures for the GTD Todo App, includin
 
 ### Automatic Deployment (Staging)
 
-1. Push to `main` branch
+1. Push to `001-gtd-todo-app` branch (integration branch)
 2. CI pipeline runs (linting, tests, security scans)
 3. If CI passes, Docker images are built and pushed to registry
 4. Images are deployed to staging environment

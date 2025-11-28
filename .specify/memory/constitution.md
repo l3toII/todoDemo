@@ -2,12 +2,16 @@
   ============================================================================
   SYNC IMPACT REPORT
   ============================================================================
-  Version change: 1.2.0 → 1.3.0 (MINOR: new principle added)
+  Version change: 1.3.0 → 1.4.0 (MINOR: principles clarified for flexibility)
 
-  Modified principles: None
+  Modified principles:
+    - V. Git Flow Discipline: Added feature-branch model support
+    - VI. CI/CD Pipeline: Clarified integration branch flexibility
+    - XV. Infrastructure-First: Updated for integration branch deployment
+    - XVI. GitHub Issues Tracking: Clarified closure on integration branch merge
+    - Development Workflow: Updated PR process and pre-merge checklist
 
-  Added sections:
-    - XVI. GitHub Issues Tracking (features MUST be tracked as GitHub issues)
+  Added sections: None
 
   Removed sections: None
 
@@ -18,7 +22,9 @@
     - .specify/templates/checklist-template.md: ✅ Compatible
     - .specify/templates/agent-file-template.md: ✅ Compatible
 
-  Follow-up TODOs: None
+  Follow-up TODOs:
+    - Update all project documentation to reference integration branch
+    - Configure CD pipeline for feature-branch deployment to staging
   ============================================================================
 -->
 
@@ -91,12 +97,18 @@ The project MUST follow Git Flow with these conventions:
 
 **Main branches**:
 - `main`: Production code, always deployable
-- `develop`: Integration branch for development
+- **Integration branch**: Either `develop` (persistent) OR `<feature-id>-<name>` (feature-specific)
+  - `develop`: Persistent integration branch for traditional Git Flow
+  - `001-feature-name`: Feature-specific integration branch (merges to `main` when complete)
+
+**Branch Model Flexibility**: Projects MAY choose between:
+1. **Classic Git Flow**: Persistent `main` + `develop` branches
+2. **Feature-Branch Model**: `main` + long-lived feature branch (e.g., `001-gtd-todo-app`)
 
 **Working branches** (naming mandatory):
-- `feat/<issue-id>-<description>`: New features
+- `feat/<issue-id>-<description>`: New features (branch from integration branch)
 - `fix/<issue-id>-<description>`: Bug fixes
-- `hotfix/<issue-id>-<description>`: Urgent production fixes
+- `hotfix/<issue-id>-<description>`: Urgent production fixes (branch from `main`)
 - `release/<version>`: Release preparation
 - `spec/<issue-id>-<description>`: Specification document changes (.specify/*)
 - `refactor/<issue-id>-<description>`: Refactoring without functional changes
@@ -105,12 +117,12 @@ The project MUST follow Git Flow with these conventions:
 - `chore/<issue-id>-<description>`: Maintenance, dependencies, configuration
 
 **Prohibited practices**:
-- NEVER push directly to `main` or `develop`
+- NEVER push directly to `main` or integration branch without PR
 - NEVER force push on shared branches
 - NEVER merge without approved code review
 - NEVER commit on a branch not conforming to naming conventions
 
-**Rationale**: Git Flow structures development, facilitates releases, and maintains clean history.
+**Rationale**: Git Flow structures development, facilitates releases, and maintains clean history. Feature-branch model allows focused development on major features before main integration.
 
 ### VI. CI/CD Pipeline
 
@@ -127,8 +139,8 @@ The project MUST have a complete CI/CD pipeline:
 **Continuous Deployment (CD)** - Mandatory for merges:
 - Integration tests on staging environment
 - Automated E2E tests
-- Automatic deployment to staging (develop)
-- Manual or semi-automatic deployment to production (main)
+- Automatic deployment to staging (integration branch: `develop` or feature branch)
+- Manual or semi-automatic deployment to production (`main`)
 - Automated rollback on health check failures
 
 **Quality Gates** (blocking):
@@ -315,10 +327,10 @@ This principle establishes a mandatory prerequisite for all feature work:
 
 **Pre-requisites before ANY feature work**:
 - `main` branch MUST be deployed to production environment
-- `develop` branch MUST be deployed to staging environment
+- Integration branch (`develop` or feature branch) MUST be deployed to staging environment
 - CI pipeline MUST be fully operational (build, test, lint, security scan)
 - CD pipeline MUST be fully operational (auto-deploy to staging, manual deploy to production)
-- Branch protection rules MUST be enforced on `main` and `develop`
+- Branch protection rules MUST be enforced on `main` and integration branch
 - Quality gates MUST be configured and blocking
 
 **Infrastructure checklist** (MUST all pass before feature development):
@@ -338,14 +350,14 @@ This principle establishes a mandatory prerequisite for all feature work:
 
 ### XVI. GitHub Issues Tracking
 
-**Every feature MUST be tracked as a GitHub issue, and the issue MUST be closed upon merge to `develop`.**
+**Every feature MUST be tracked as a GitHub issue, and the issue MUST be closed upon merge to the integration branch.**
 
 **Mandatory practices**:
 - Each feature (`feat/*` branch) MUST reference a GitHub issue in its branch name: `feat/<issue-id>-<description>`
 - Each bug fix (`fix/*` branch) MUST reference a GitHub issue: `fix/<issue-id>-<description>`
 - The GitHub issue MUST be created BEFORE work begins on the feature
 - PR descriptions MUST include `Closes #<issue-id>` or `Fixes #<issue-id>` to enable automatic closure
-- Issues MUST be automatically closed when the associated PR is merged to `develop`
+- Issues MUST be automatically closed when the associated PR is merged to the **integration branch** (`develop` or feature branch like `001-gtd-todo-app`)
 
 **Issue requirements**:
 - **Title**: Clear, concise description of the feature or fix
@@ -356,10 +368,10 @@ This principle establishes a mandatory prerequisite for all feature work:
 
 **Workflow**:
 1. Create GitHub issue describing the feature/fix
-2. Create branch with issue ID: `feat/<issue-id>-description`
+2. Create branch with issue ID: `feat/<issue-id>-description` (from integration branch)
 3. Reference issue in commits: `feat(scope): description (#<issue-id>)`
-4. Open PR with `Closes #<issue-id>` in description
-5. Issue auto-closes on merge to `develop`
+4. Open PR targeting integration branch with `Closes #<issue-id>` in description
+5. Issue auto-closes on merge to integration branch (`develop` or `001-gtd-todo-app`)
 
 **Prohibited practices**:
 - NEVER create a `feat/*` or `fix/*` branch without a corresponding GitHub issue
@@ -374,9 +386,10 @@ This principle establishes a mandatory prerequisite for all feature work:
 
 1. **Creation**: From a branch conforming to Git Flow naming
 2. **Description**: PR template with context, changes, tests
-3. **CI**: Pipeline MUST pass (build, tests, linting)
-4. **Review**: Minimum 1 approval required
-5. **Merge**: Squash merge to develop, merge commit to main
+3. **Target**: PRs target integration branch (`develop` or feature branch) or `main`
+4. **CI**: Pipeline MUST pass (build, tests, linting)
+5. **Review**: Minimum 1 approval required
+6. **Merge**: Squash merge to integration branch, merge commit to `main`
 
 ### Code Review Checklist
 
@@ -416,7 +429,7 @@ This principle establishes a mandatory prerequisite for all feature work:
 - All CI checks pass
 - Code review approved
 - No conflicts
-- Branch up-to-date with develop
+- Branch up-to-date with target (integration branch or `main`)
 
 ## Governance
 
@@ -444,4 +457,4 @@ This principle establishes a mandatory prerequisite for all feature work:
 
 This constitution SUPERSEDES all other practices. In case of conflict between this constitution and other documents, the constitution prevails.
 
-**Version**: 1.3.0 | **Ratified**: 2025-11-28 | **Last Amended**: 2025-11-28
+**Version**: 1.4.0 | **Ratified**: 2025-11-28 | **Last Amended**: 2025-11-28

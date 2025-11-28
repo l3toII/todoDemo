@@ -280,7 +280,7 @@ docker build -t gtd-web:latest -f infra/docker/web/Dockerfile .
 
 See `.github/workflows/` for GitHub Actions pipelines:
 - `ci.yml`: Runs on every push (lint, test, build)
-- `cd.yml`: Deploys on merge to develop/main
+- `cd.yml`: Deploys on merge to 001-gtd-todo-app/main
 
 ## Troubleshooting
 

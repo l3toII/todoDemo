@@ -62,7 +62,7 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 - [X] [S0-007] Add CI steps for Web (ESLint, Prettier, Jest, build) `.github/workflows/ci.yml`
 - [X] [S0-008] Add security scanning (composer audit, npm audit) `.github/workflows/ci.yml`
 - [X] [S0-009] Configure code coverage reporting (Codecov or similar) `.github/workflows/ci.yml`
-- [X] [S0-010] Add branch protection rules for main and develop `Repository Settings`
+- [X] [S0-010] Add branch protection rules for main and 001-gtd-todo-app `Repository Settings`
 
 ### Phase 0.3: CD Pipeline
 

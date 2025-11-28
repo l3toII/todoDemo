@@ -167,10 +167,10 @@
 3. iOS: `xcodebuild test` (on macOS runner)
 4. Security: `composer audit`, `npm audit`
 
-**CD (on merge to develop/main)**:
+**CD (on merge to 001-gtd-todo-app/main)**:
 1. Build Docker images (api, web)
 2. Push to container registry
-3. Deploy to staging (develop) / production (main)
+3. Deploy to staging (001-gtd-todo-app) / production (main)
 4. Run E2E tests against staging
 5. Health check verification
 6. Rollback on failure
@@ -193,7 +193,7 @@
 
 **Environment Strategy**:
 - Local: docker-compose with hot reload
-- Staging: Deployed on develop merge
+- Staging: Deployed on 001-gtd-todo-app merge
 - Production: Manual trigger on main merge
 
 ### 10. Feature Flags Implementation
