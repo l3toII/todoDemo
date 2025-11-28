@@ -7,8 +7,8 @@
 
 ## Overview
 
-Total tasks: 119
-- Sprint 0 (Infrastructure): 16 tasks
+Total tasks: 127
+- Sprint 0 (Infrastructure + GitHub Issues): 24 tasks
 - P1 User Account Management: 21 tasks
 - P2 Capture Ideas and Tasks: 10 tasks
 - P3 Clarify and Process: 8 tasks
@@ -23,11 +23,29 @@ Total tasks: 119
 
 > **Note**: iOS app (FR-027) is descoped to Phase 2. Web MVP delivers all P1-P7 features first. iOS tasks will be added in a separate planning cycle after web MVP completion.
 
+> **Terminology**: This project uses "Task" as the canonical entity name. The terms "action" and "task" in GTD literature are equivalent and both refer to the `Task` entity in our data model.
+
 ---
 
-## Sprint 0: Infrastructure Setup (Constitution XV - BLOCKING)
+## Sprint 0: Infrastructure Setup (Constitution XV & XVI - BLOCKING)
 
 **BLOCKING**: No `feat/*` branches until ALL Sprint 0 tasks complete.
+
+### Phase 0.0: GitHub Issues Setup (Constitution XVI)
+
+Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE implementation begins.
+
+- [ ] [S0-016] Create GitHub issue for P1: User Account Management (FR-001 to FR-006b)
+- [ ] [S0-017] Create GitHub issue for P2: Capture Ideas and Tasks (FR-007 to FR-009)
+- [ ] [S0-018] Create GitHub issue for P3: Clarify and Process Tasks (FR-010 to FR-012)
+- [ ] [S0-019] Create GitHub issue for P4: Organize with Contextual Lists (FR-013 to FR-016)
+- [ ] [S0-020] Create GitHub issue for P5: Project Management (FR-017 to FR-019)
+- [ ] [S0-021] Create GitHub issue for P6: Weekly Review (FR-020 to FR-022)
+- [ ] [S0-022] Create GitHub issue for P7: Calendar and Deadlines (FR-023 to FR-025)
+- [ ] [S0-023] Create GitHub issue for Cross-Cutting: Sync & Offline (FR-026 to FR-028)
+
+> **Note**: After issues are created, all `feat/*` branches MUST follow naming convention: `feat/<issue-id>-<description>`
+> Example: `feat/42-user-account-management`
 
 ### Phase 0.1: Development Environment
 
@@ -296,6 +314,7 @@ Per Constitution II, each component MUST have integration tests.
 ## Task Dependencies
 
 ```
+Sprint 0 Phase 0.0 (S0-016 to S0-023) ──BLOCKING──> All feat/* branches
 Sprint 0 (S0-*) ──BLOCKING──> All P1-P7 tasks
 
 P1-001 → P1-002 → P1-003 (User entity chain)
@@ -327,6 +346,7 @@ POL-* runs after all feature tasks complete
 ## Verification Checklist
 
 Before marking Sprint 0 complete:
+- [ ] All GitHub issues created for P1-P7 features (Constitution XVI)
 - [ ] All Docker containers start successfully
 - [ ] CI pipeline passes on test PR
 - [ ] CD pipeline deploys to staging

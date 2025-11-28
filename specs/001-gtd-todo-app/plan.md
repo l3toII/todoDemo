@@ -162,11 +162,13 @@ infra/
 │   ├── api/
 │   ├── web/
 │   └── db/
-├── docker-compose.yml   # Local development
-└── .github/
-    └── workflows/       # CI/CD pipelines
-        ├── ci.yml
-        └── cd.yml
+└── docker-compose.yml   # Local development
+
+# CI/CD (repository root)
+.github/
+└── workflows/           # GitHub Actions pipelines
+    ├── ci.yml
+    └── cd.yml
 ```
 
 **Structure Decision**: Web + Mobile (Option 3) with API-first architecture. Three main components: `api/` (Symfony backend), `web/` (React frontend), `ios/` (Swift app). All share the same API contracts defined in `specs/001-gtd-todo-app/contracts/`.
