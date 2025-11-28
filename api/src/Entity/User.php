@@ -23,7 +23,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public const STATUS_DELETED = 'deleted';
 
     #[ORM\Id]
-    #[ORM\Column(type: 'uuid', unique: true)]
+    #[ORM\Column(type: 'guid', unique: true)]
     private Uuid $id;
 
     #[ORM\Column(type: Types::STRING, length: 255, unique: true)]

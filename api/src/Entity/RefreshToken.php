@@ -15,7 +15,7 @@ use Symfony\Component\Uid\Uuid;
 class RefreshToken
 {
     #[ORM\Id]
-    #[ORM\Column(type: 'uuid', unique: true)]
+    #[ORM\Column(type: 'guid', unique: true)]
     private Uuid $id;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
