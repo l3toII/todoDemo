@@ -1,0 +1,185 @@
+name: CD Pipeline
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-push:
+    name: Build and Push Docker Images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      api-image: ${{ steps.meta-api.outputs.tags }}
+      web-image: ${{ steps.meta-web.outputs.tags }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract API metadata
+        id: meta-api
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/api
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+
+      - name: Build and push API image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./infra/docker/api/Dockerfile
+          push: true
+          tags: ${{ steps.meta-api.outputs.tags }}
+          labels: ${{ steps.meta-api.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Extract Web metadata
+        id: meta-web
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/web
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha,prefix={{branch}}-
+
+      - name: Build and push Web image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./infra/docker/web/Dockerfile
+          push: true
+          tags: ${{ steps.meta-web.outputs.tags }}
+          labels: ${{ steps.meta-web.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'staging'
+    environment:
+      name: staging
+      url: https://staging.gtd-app.example.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Staging
+        run: |
+          echo "Deploying to staging environment..."
+          echo "API Image: ${{ needs.build-and-push.outputs.api-image }}"
+          echo "Web Image: ${{ needs.build-and-push.outputs.web-image }}"
+          # TODO: Add actual deployment commands here
+          # Example: kubectl set image deployment/api api=${{ needs.build-and-push.outputs.api-image }}
+          # Example: kubectl set image deployment/web web=${{ needs.build-and-push.outputs.web-image }}
+
+      - name: Run database migrations
+        run: |
+          echo "Running database migrations on staging..."
+          # TODO: Add migration command
+          # Example: kubectl exec -it deployment/api -- php bin/console doctrine:migrations:migrate --no-interaction
+
+      - name: Health check
+        run: |
+          echo "Performing health check on staging..."
+          # TODO: Add actual health check
+          # Example: curl -f https://staging.gtd-app.example.com/api/health || exit 1
+
+      - name: Notify deployment
+        if: success()
+        run: |
+          echo "Staging deployment successful"
+          # TODO: Add notification (Slack, Discord, etc.)
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.environment == 'production'
+    environment:
+      name: production
+      url: https://gtd-app.example.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create backup
+        run: |
+          echo "Creating database backup before production deployment..."
+          # TODO: Add backup command
+          # Example: kubectl exec -it deployment/api -- php bin/console app:database:backup
+
+      - name: Deploy to Production
+        run: |
+          echo "Deploying to production environment..."
+          echo "API Image: ${{ needs.build-and-push.outputs.api-image }}"
+          echo "Web Image: ${{ needs.build-and-push.outputs.web-image }}"
+          # TODO: Add actual deployment commands here
+          # Example: kubectl set image deployment/api api=${{ needs.build-and-push.outputs.api-image }}
+          # Example: kubectl set image deployment/web web=${{ needs.build-and-push.outputs.web-image }}
+
+      - name: Run database migrations
+        run: |
+          echo "Running database migrations on production..."
+          # TODO: Add migration command
+          # Example: kubectl exec -it deployment/api -- php bin/console doctrine:migrations:migrate --no-interaction
+
+      - name: Health check
+        run: |
+          echo "Performing health check on production..."
+          # TODO: Add actual health check
+          # Example: curl -f https://gtd-app.example.com/api/health || exit 1
+
+      - name: Smoke tests
+        run: |
+          echo "Running smoke tests on production..."
+          # TODO: Add smoke tests
+          # Example: npm run test:smoke
+
+      - name: Notify deployment
+        if: success()
+        run: |
+          echo "Production deployment successful"
+          # TODO: Add notification (Slack, Discord, etc.)
+
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "Deployment failed, rolling back..."
+          # TODO: Add rollback procedure
+          # Example: kubectl rollout undo deployment/api
+          # Example: kubectl rollout undo deployment/web

@@ -35,41 +35,41 @@ Total tasks: 127
 
 Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE implementation begins.
 
-- [ ] [S0-016] Create GitHub issue for P1: User Account Management (FR-001 to FR-006b)
-- [ ] [S0-017] Create GitHub issue for P2: Capture Ideas and Tasks (FR-007 to FR-009)
-- [ ] [S0-018] Create GitHub issue for P3: Clarify and Process Tasks (FR-010 to FR-012)
-- [ ] [S0-019] Create GitHub issue for P4: Organize with Contextual Lists (FR-013 to FR-016)
-- [ ] [S0-020] Create GitHub issue for P5: Project Management (FR-017 to FR-019)
-- [ ] [S0-021] Create GitHub issue for P6: Weekly Review (FR-020 to FR-022)
-- [ ] [S0-022] Create GitHub issue for P7: Calendar and Deadlines (FR-023 to FR-025)
-- [ ] [S0-023] Create GitHub issue for Cross-Cutting: Sync & Offline (FR-026 to FR-028)
+- [X] [S0-016] Create GitHub issue for P1: User Account Management (FR-001 to FR-006b)
+- [X] [S0-017] Create GitHub issue for P2: Capture Ideas and Tasks (FR-007 to FR-009)
+- [X] [S0-018] Create GitHub issue for P3: Clarify and Process Tasks (FR-010 to FR-012)
+- [X] [S0-019] Create GitHub issue for P4: Organize with Contextual Lists (FR-013 to FR-016)
+- [X] [S0-020] Create GitHub issue for P5: Project Management (FR-017 to FR-019)
+- [X] [S0-021] Create GitHub issue for P6: Weekly Review (FR-020 to FR-022)
+- [X] [S0-022] Create GitHub issue for P7: Calendar and Deadlines (FR-023 to FR-025)
+- [X] [S0-023] Create GitHub issue for Cross-Cutting: Sync & Offline (FR-026 to FR-028)
 
 > **Note**: After issues are created, all `feat/*` branches MUST follow naming convention: `feat/<issue-id>-<description>`
 > Example: `feat/42-user-account-management`
 
 ### Phase 0.1: Development Environment
 
-- [ ] [S0-001] Setup Docker Compose configuration for local development `infra/docker-compose.yml`
-- [ ] [S0-002] Create API Dockerfile with PHP 8.2-FPM and Nginx `infra/docker/api/Dockerfile`
-- [ ] [S0-003] Create Web Dockerfile for React development `infra/docker/web/Dockerfile`
-- [ ] [S0-004] Create MariaDB Docker configuration with initialization scripts `infra/docker/db/`
-- [ ] [S0-005] Create environment template files `api/.env.example`, `web/.env.example`
-- [ ] [S0-005b] Create FeatureFlag entity and migration `api/src/Entity/FeatureFlag.php`, `api/migrations/Version009CreateFeatureFlagsTable.php`
+- [X] [S0-001] Setup Docker Compose configuration for local development `infra/docker-compose.yml`
+- [X] [S0-002] Create API Dockerfile with PHP 8.2-FPM and Nginx `infra/docker/api/Dockerfile`
+- [X] [S0-003] Create Web Dockerfile for React development `infra/docker/web/Dockerfile`
+- [X] [S0-004] Create MariaDB Docker configuration with initialization scripts `infra/docker/db/`
+- [X] [S0-005] Create environment template files `api/.env.example`, `web/.env.example`
+- [X] [S0-005b] Create FeatureFlag entity and migration `api/src/Entity/FeatureFlag.php`, `api/migrations/Version009CreateFeatureFlagsTable.php`
 
 ### Phase 0.2: CI Pipeline
 
-- [ ] [S0-006] Create GitHub Actions CI workflow for API (PHP lint, PHPStan, PHPUnit) `.github/workflows/ci.yml`
-- [ ] [S0-007] Add CI steps for Web (ESLint, Prettier, Jest, build) `.github/workflows/ci.yml`
-- [ ] [S0-008] Add security scanning (composer audit, npm audit) `.github/workflows/ci.yml`
-- [ ] [S0-009] Configure code coverage reporting (Codecov or similar) `.github/workflows/ci.yml`
+- [X] [S0-006] Create GitHub Actions CI workflow for API (PHP lint, PHPStan, PHPUnit) `.github/workflows/ci.yml`
+- [X] [S0-007] Add CI steps for Web (ESLint, Prettier, Jest, build) `.github/workflows/ci.yml`
+- [X] [S0-008] Add security scanning (composer audit, npm audit) `.github/workflows/ci.yml`
+- [X] [S0-009] Configure code coverage reporting (Codecov or similar) `.github/workflows/ci.yml`
 - [ ] [S0-010] Add branch protection rules for main and develop `Repository Settings`
 
 ### Phase 0.3: CD Pipeline
 
-- [ ] [S0-011] Create GitHub Actions CD workflow for staging deployment `.github/workflows/cd.yml`
-- [ ] [S0-012] Create GitHub Actions CD workflow for production deployment `.github/workflows/cd.yml`
-- [ ] [S0-013] Configure health check endpoints and monitoring `/api/health`
-- [ ] [S0-014] Document rollback procedures `docs/deployment.md`
+- [X] [S0-011] Create GitHub Actions CD workflow for staging deployment `.github/workflows/cd.yml`
+- [X] [S0-012] Create GitHub Actions CD workflow for production deployment `.github/workflows/cd.yml`
+- [X] [S0-013] Configure health check endpoints and monitoring `/api/health`
+- [X] [S0-014] Document rollback procedures `docs/deployment.md`
 - [ ] [S0-015] Verify complete infrastructure checklist passes (Constitution XV)
 
 ---

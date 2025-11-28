@@ -1,0 +1,32 @@
+# Universal patterns
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/
+*.log
+
+# Environment files
+.env*
+!.env.example
+!.env.local.example
+
+# Dependencies
+node_modules/
+vendor/
+
+# Build outputs
+dist/
+build/
+
+# IDE
+*.sublime-*
+.phpstorm.meta.php
+_ide_helper*.php
+
+# OS
+.AppleDouble
+.LSOverride
+Icon
+._*

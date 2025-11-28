@@ -1,0 +1,43 @@
+# Version control
+.git/
+.gitignore
+.gitattributes
+
+# Dependencies (will be installed in container)
+node_modules/
+vendor/
+
+# Environment files
+.env*
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Logs
+*.log*
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Documentation
+README.md
+docs/
+specs/
+.claude/
+.specify/
+
+# CI/CD
+.github/

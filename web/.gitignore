@@ -1,0 +1,39 @@
+# Node/React/TypeScript specific
+node_modules/
+/dist/
+/build/
+/.vite/
+*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment
+.env*
+!.env.example
+
+# Tests
+/coverage/
+/.nyc_output/
+
+# Build artifacts
+dist-ssr
+*.local
+
+# Editor
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS
+.DS_Store
+Thumbs.db

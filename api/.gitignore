@@ -1,0 +1,35 @@
+# PHP/Symfony specific
+/vendor/
+/var/
+/bin/.phpunit
+/phpunit.xml
+.phpunit.result.cache
+
+# Composer
+composer.lock
+composer.phar
+
+# Symfony
+/.env.local
+/.env.local.php
+/.env.*.local
+/public/bundles/
+/public/uploads/
+
+# Cache and logs
+/var/cache/*
+/var/log/*
+!/var/cache/.gitkeep
+!/var/log/.gitkeep
+
+# Build
+/phpstan.neon
+
+# Tests
+/coverage/
+.phpunit.cache
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
