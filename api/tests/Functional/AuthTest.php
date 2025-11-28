@@ -389,11 +389,19 @@ class AuthTest extends WebTestCase
             'password' => $password,
         ]));
 
-        // In a real test, you would extract the verification token from the email
-        // For now, we'll manually verify the user through the database or a test helper
-        // This is a placeholder - in production tests, you'd need to:
-        // 1. Get verification token from test email service or database
-        // 2. Call /api/v1/auth/verify-email with the token
+        // Get the verification token from the database
+        $container = static::getContainer();
+        $userRepository = $container->get('App\Repository\UserRepository');
+        $user = $userRepository->findByEmail($email);
+
+        if ($user && $user->getVerificationToken()) {
+            // Use the real verification endpoint
+            $this->client->request('POST', '/api/v1/auth/verify-email', [], [], [
+                'CONTENT_TYPE' => 'application/json',
+            ], json_encode([
+                'token' => $user->getVerificationToken(),
+            ]));
+        }
     }
 
     private function loginUser(string $email, string $password): array
