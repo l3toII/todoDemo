@@ -96,6 +96,7 @@ jobs:
           cp .env.example .env
           echo "APP_ENV=test" >> .env
           echo "APP_SECRET=test-secret-for-ci" >> .env
+          echo "DATABASE_URL=mysql://gtd_test:gtd_test@127.0.0.1:3306/gtd_test?serverVersion=10.11.0-MariaDB" >> .env
         working-directory: ./api
 
       - name: Cache Composer dependencies
@@ -111,7 +112,6 @@ jobs:
 
       - name: Run PHPUnit
         env:
-          DATABASE_URL: mysql://gtd_test:gtd_test@127.0.0.1:3306/gtd_test?serverVersion=10.11.0-MariaDB
           APP_ENV: test
         run: |
           if [ -f "vendor/bin/phpunit" ]; then

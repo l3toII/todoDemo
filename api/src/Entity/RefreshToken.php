@@ -2,11 +2,12 @@
 
 namespace App\Entity;
 
+use App\Repository\RefreshTokenRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: RefreshTokenRepository::class)]
 #[ORM\Table(name: 'refresh_tokens')]
 #[ORM\Index(name: 'idx_refresh_token_user', columns: ['user_id'])]
 #[ORM\Index(name: 'idx_refresh_token_hash', columns: ['token_hash'])]
