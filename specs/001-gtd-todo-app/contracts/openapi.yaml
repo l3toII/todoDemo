@@ -1,0 +1,1403 @@
+openapi: 3.1.0
+info:
+  title: GTD Todo App API
+  description: API for GTD (Getting Things Done) productivity application
+  version: 1.0.0
+  contact:
+    name: API Support
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local development
+  - url: https://staging.gtd-app.example.com/api/v1
+    description: Staging environment
+  - url: https://api.gtd-app.example.com/api/v1
+    description: Production
+
+tags:
+  - name: Auth
+    description: Authentication endpoints
+  - name: Users
+    description: User management
+  - name: Tasks
+    description: Task (inbox item) management
+  - name: Projects
+    description: Project management
+  - name: Contexts
+    description: Context management
+  - name: Reviews
+    description: Weekly review management
+  - name: Calendar
+    description: Calendar events
+  - name: Sync
+    description: Data synchronization
+
+paths:
+  # ============== AUTH ==============
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register new user
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User created, verification email sent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '409':
+          description: Email already exists
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login with email/password
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Invalid credentials
+
+  /auth/apple:
+    post:
+      tags: [Auth]
+      summary: Login/Register with Apple Sign-In
+      operationId: appleSignIn
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppleSignInRequest'
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Refresh access token
+      operationId: refreshToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: New tokens issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '401':
+          description: Invalid or expired refresh token
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout and revoke refresh token
+      operationId: logout
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Logged out successfully
+
+  /auth/password/forgot:
+    post:
+      tags: [Auth]
+      summary: Request password reset
+      operationId: forgotPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+      responses:
+        '202':
+          description: Reset email sent (if account exists)
+
+  /auth/password/reset:
+    post:
+      tags: [Auth]
+      summary: Reset password with token
+      operationId: resetPassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordRequest'
+      responses:
+        '200':
+          description: Password reset successful
+        '400':
+          description: Invalid or expired token
+
+  /auth/verify/{token}:
+    get:
+      tags: [Auth]
+      summary: Verify email address
+      operationId: verifyEmail
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Email verified
+        '400':
+          description: Invalid or expired token
+
+  # ============== USERS ==============
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Get current user profile
+      operationId: getCurrentUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+
+    patch:
+      tags: [Users]
+      summary: Update current user profile
+      operationId: updateCurrentUser
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+
+    delete:
+      tags: [Users]
+      summary: Delete account (GDPR)
+      operationId: deleteCurrentUser
+      security:
+        - bearerAuth: []
+      responses:
+        '204':
+          description: Account deleted permanently
+
+  /users/me/preferences:
+    put:
+      tags: [Users]
+      summary: Update notification preferences
+      operationId: updatePreferences
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreferencesRequest'
+      responses:
+        '200':
+          description: Preferences updated
+
+  # ============== TASKS ==============
+  /tasks:
+    get:
+      tags: [Tasks]
+      summary: List tasks with filters
+      operationId: listTasks
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/TaskStatus'
+        - name: context_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: project_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - name: due_before
+          in: query
+          schema:
+            type: string
+            format: date
+        - $ref: '#/components/parameters/cursor'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Task list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskListResponse'
+
+    post:
+      tags: [Tasks]
+      summary: Capture new task to inbox
+      operationId: createTask
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTaskRequest'
+      responses:
+        '201':
+          description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+
+  /tasks/{id}:
+    get:
+      tags: [Tasks]
+      summary: Get task by ID
+      operationId: getTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Task details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      tags: [Tasks]
+      summary: Update task
+      operationId: updateTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: Task updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+        '409':
+          description: Version conflict
+
+    delete:
+      tags: [Tasks]
+      summary: Delete task
+      operationId: deleteTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '204':
+          description: Task deleted
+
+  /tasks/{id}/complete:
+    post:
+      tags: [Tasks]
+      summary: Mark task as completed
+      operationId: completeTask
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Task completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskResponse'
+
+  /tasks/{id}/contexts:
+    put:
+      tags: [Tasks]
+      summary: Set task contexts
+      operationId: setTaskContexts
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [context_ids]
+              properties:
+                context_ids:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+      responses:
+        '200':
+          description: Contexts updated
+
+  # ============== PROJECTS ==============
+  /projects:
+    get:
+      tags: [Projects]
+      summary: List projects
+      operationId: listProjects
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/ProjectStatus'
+        - $ref: '#/components/parameters/cursor'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Project list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectListResponse'
+
+    post:
+      tags: [Projects]
+      summary: Create project
+      operationId: createProject
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectRequest'
+      responses:
+        '201':
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectResponse'
+
+  /projects/{id}:
+    get:
+      tags: [Projects]
+      summary: Get project with tasks
+      operationId: getProject
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '200':
+          description: Project details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectDetailResponse'
+
+    patch:
+      tags: [Projects]
+      summary: Update project
+      operationId: updateProject
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProjectRequest'
+      responses:
+        '200':
+          description: Project updated
+
+    delete:
+      tags: [Projects]
+      summary: Delete project
+      operationId: deleteProject
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '204':
+          description: Project deleted (tasks moved to inbox)
+
+  # ============== CONTEXTS ==============
+  /contexts:
+    get:
+      tags: [Contexts]
+      summary: List all contexts (defaults + user custom)
+      operationId: listContexts
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Context list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextListResponse'
+
+    post:
+      tags: [Contexts]
+      summary: Create custom context
+      operationId: createContext
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateContextRequest'
+      responses:
+        '201':
+          description: Context created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContextResponse'
+
+  /contexts/{id}:
+    patch:
+      tags: [Contexts]
+      summary: Update custom context
+      operationId: updateContext
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateContextRequest'
+      responses:
+        '200':
+          description: Context updated
+
+    delete:
+      tags: [Contexts]
+      summary: Archive custom context
+      operationId: deleteContext
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '204':
+          description: Context archived
+
+  # ============== REVIEWS ==============
+  /reviews:
+    get:
+      tags: [Reviews]
+      summary: List review history
+      operationId: listReviews
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/cursor'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Review list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewListResponse'
+
+    post:
+      tags: [Reviews]
+      summary: Start weekly review
+      operationId: startReview
+      security:
+        - bearerAuth: []
+      responses:
+        '201':
+          description: Review started
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewResponse'
+        '409':
+          description: Review already in progress
+
+  /reviews/current:
+    get:
+      tags: [Reviews]
+      summary: Get current in-progress review
+      operationId: getCurrentReview
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current review
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReviewDetailResponse'
+        '404':
+          description: No review in progress
+
+  /reviews/{id}/complete:
+    post:
+      tags: [Reviews]
+      summary: Complete weekly review
+      operationId: completeReview
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notes:
+                  type: string
+      responses:
+        '200':
+          description: Review completed
+
+  # ============== CALENDAR ==============
+  /calendar:
+    get:
+      tags: [Calendar]
+      summary: List calendar events
+      operationId: listCalendarEvents
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: start_date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: end_date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Calendar events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarEventListResponse'
+
+    post:
+      tags: [Calendar]
+      summary: Create calendar event
+      operationId: createCalendarEvent
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCalendarEventRequest'
+      responses:
+        '201':
+          description: Event created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CalendarEventResponse'
+
+  /calendar/{id}:
+    patch:
+      tags: [Calendar]
+      summary: Update calendar event
+      operationId: updateCalendarEvent
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCalendarEventRequest'
+      responses:
+        '200':
+          description: Event updated
+
+    delete:
+      tags: [Calendar]
+      summary: Delete calendar event
+      operationId: deleteCalendarEvent
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/id'
+      responses:
+        '204':
+          description: Event deleted
+
+  # ============== SYNC ==============
+  /sync/changes:
+    get:
+      tags: [Sync]
+      summary: Get changes since timestamp
+      operationId: getChanges
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: since
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date-time
+          description: ISO 8601 timestamp
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Changed entities
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncResponse'
+
+    post:
+      tags: [Sync]
+      summary: Push local changes
+      operationId: pushChanges
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SyncPushRequest'
+      responses:
+        '200':
+          description: Sync result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncPushResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    cursor:
+      name: cursor
+      in: query
+      schema:
+        type: string
+      description: Pagination cursor
+
+    limit:
+      name: limit
+      in: query
+      schema:
+        type: integer
+        default: 50
+        maximum: 100
+
+  responses:
+    ValidationError:
+      description: Validation error
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetail'
+
+  schemas:
+    # ---- Auth ----
+    RegisterRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    AppleSignInRequest:
+      type: object
+      required: [identity_token]
+      properties:
+        identity_token:
+          type: string
+        authorization_code:
+          type: string
+
+    RefreshRequest:
+      type: object
+      required: [refresh_token]
+      properties:
+        refresh_token:
+          type: string
+
+    ResetPasswordRequest:
+      type: object
+      required: [token, password]
+      properties:
+        token:
+          type: string
+        password:
+          type: string
+          minLength: 8
+
+    TokenResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        expires_in:
+          type: integer
+        token_type:
+          type: string
+          default: Bearer
+
+    # ---- User ----
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        status:
+          type: string
+        timezone:
+          type: string
+        notification_preferences:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        timezone:
+          type: string
+        current_password:
+          type: string
+        new_password:
+          type: string
+          minLength: 8
+
+    PreferencesRequest:
+      type: object
+      properties:
+        email_notifications:
+          type: boolean
+        push_notifications:
+          type: boolean
+        review_reminder_day:
+          type: integer
+          minimum: 0
+          maximum: 6
+        review_reminder_time:
+          type: string
+          format: time
+
+    # ---- Task ----
+    TaskStatus:
+      type: string
+      enum: [inbox, clarified, next_action, waiting_for, someday_maybe, reference, completed, deleted]
+
+    CreateTaskRequest:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          maxLength: 500
+        notes:
+          type: string
+        project_id:
+          type: string
+          format: uuid
+        context_ids:
+          type: array
+          items:
+            type: string
+            format: uuid
+
+    UpdateTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 500
+        notes:
+          type: string
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        project_id:
+          type: string
+          format: uuid
+          nullable: true
+        energy_level:
+          type: string
+          enum: [low, medium, high]
+          nullable: true
+        time_estimate:
+          type: integer
+          nullable: true
+        due_date:
+          type: string
+          format: date
+          nullable: true
+        due_time:
+          type: string
+          format: time
+          nullable: true
+        position:
+          type: integer
+        version:
+          type: integer
+          description: Required for optimistic locking
+
+    TaskResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        notes:
+          type: string
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        project_id:
+          type: string
+          format: uuid
+        contexts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContextResponse'
+        energy_level:
+          type: string
+        time_estimate:
+          type: integer
+        due_date:
+          type: string
+          format: date
+        due_time:
+          type: string
+          format: time
+        position:
+          type: integer
+        version:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+
+    TaskListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskResponse'
+        next_cursor:
+          type: string
+        total:
+          type: integer
+
+    # ---- Project ----
+    ProjectStatus:
+      type: string
+      enum: [active, on_hold, completed, cancelled]
+
+    CreateProjectRequest:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        outcome:
+          type: string
+
+    UpdateProjectRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        outcome:
+          type: string
+        status:
+          $ref: '#/components/schemas/ProjectStatus'
+        review_date:
+          type: string
+          format: date
+        position:
+          type: integer
+        version:
+          type: integer
+
+    ProjectResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        outcome:
+          type: string
+        status:
+          $ref: '#/components/schemas/ProjectStatus'
+        review_date:
+          type: string
+          format: date
+        position:
+          type: integer
+        version:
+          type: integer
+        task_count:
+          type: integer
+        completed_task_count:
+          type: integer
+        has_next_action:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ProjectDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/ProjectResponse'
+        - type: object
+          properties:
+            tasks:
+              type: array
+              items:
+                $ref: '#/components/schemas/TaskResponse'
+            next_action:
+              $ref: '#/components/schemas/TaskResponse'
+
+    ProjectListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectResponse'
+        next_cursor:
+          type: string
+
+    # ---- Context ----
+    CreateContextRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          maxLength: 50
+          pattern: '^@.+'
+        icon:
+          type: string
+        color:
+          type: string
+          pattern: '^#[0-9A-Fa-f]{6}$'
+
+    UpdateContextRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 50
+        icon:
+          type: string
+        color:
+          type: string
+        position:
+          type: integer
+
+    ContextResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        icon:
+          type: string
+        color:
+          type: string
+        is_default:
+          type: boolean
+        status:
+          type: string
+        position:
+          type: integer
+
+    ContextListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContextResponse'
+
+    # ---- Review ----
+    ReviewResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [in_progress, completed, skipped]
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+        inbox_count:
+          type: integer
+        projects_reviewed:
+          type: integer
+        actions_created:
+          type: integer
+
+    ReviewDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/ReviewResponse'
+        - type: object
+          properties:
+            inbox_items:
+              type: array
+              items:
+                $ref: '#/components/schemas/TaskResponse'
+            projects_needing_review:
+              type: array
+              items:
+                $ref: '#/components/schemas/ProjectResponse'
+            waiting_items:
+              type: array
+              items:
+                $ref: '#/components/schemas/TaskResponse'
+
+    ReviewListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReviewResponse'
+        next_cursor:
+          type: string
+
+    # ---- Calendar ----
+    CreateCalendarEventRequest:
+      type: object
+      required: [title, start_date]
+      properties:
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        start_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        all_day:
+          type: boolean
+          default: false
+        reminder_minutes:
+          type: integer
+        recurrence_rule:
+          type: string
+
+    UpdateCalendarEventRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        start_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        all_day:
+          type: boolean
+        status:
+          type: string
+          enum: [scheduled, completed, cancelled]
+        reminder_minutes:
+          type: integer
+        version:
+          type: integer
+
+    CalendarEventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        start_date:
+          type: string
+          format: date
+        start_time:
+          type: string
+          format: time
+        end_time:
+          type: string
+          format: time
+        all_day:
+          type: boolean
+        status:
+          type: string
+        reminder_minutes:
+          type: integer
+        recurrence_rule:
+          type: string
+        version:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+
+    CalendarEventListResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/CalendarEventResponse'
+
+    # ---- Sync ----
+    SyncResponse:
+      type: object
+      properties:
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskResponse'
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProjectResponse'
+        contexts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContextResponse'
+        calendar_events:
+          type: array
+          items:
+            $ref: '#/components/schemas/CalendarEventResponse'
+        server_time:
+          type: string
+          format: date-time
+        has_more:
+          type: boolean
+
+    SyncPushRequest:
+      type: object
+      properties:
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateTaskRequest'
+        projects:
+          type: array
+          items:
+            $ref: '#/components/schemas/UpdateProjectRequest'
+
+    SyncPushResponse:
+      type: object
+      properties:
+        accepted:
+          type: array
+          items:
+            type: string
+            format: uuid
+        conflicts:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+              type:
+                type: string
+              server_version:
+                type: integer
+              server_data:
+                type: object
+        server_time:
+          type: string
+          format: date-time
+
+    # ---- Common ----
+    ProblemDetail:
+      type: object
+      properties:
+        type:
+          type: string
+          format: uri
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        instance:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
