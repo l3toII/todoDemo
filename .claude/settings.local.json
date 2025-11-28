@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh issue create --title \"P2: Capture Ideas and Tasks\" --body \"$(cat <<''EOF''\n## User Story\nAs a user, I want to quickly capture all my ideas, tasks, and information into a centralized \"inbox\" so that I can free my mind and not forget anything.\n\n## Functional Requirements\n- FR-007: Free text capture to inbox in < 3 interactions\n- FR-008: Automatically timestamp each captured item\n- FR-009: Real-time sync between web and iOS (< 5s delay)\n\n## Acceptance Criteria\n1. User can type text and press \"Capture\" to add to inbox with timestamp\n2. Item captured on web appears in iOS app\n3. Quick shortcut (widget/keyboard) enables capture in < 5 seconds\n\n## Tasks\nSee tasks.md: P2-001 to P2-010 (10 tasks)\n\n## Priority\nP2 - First fundamental GTD step\n\n## References\n- Spec: specs/001-gtd-todo-app/spec.md (User Story 2)\n- Tasks: specs/001-gtd-todo-app/tasks.md (P2 section)\nEOF\n)\")",
+      "Bash(gh issue create:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -1,0 +1,91 @@
+version: '3.8'
+
+services:
+  db:
+    image: mariadb:10.11
+    container_name: gtd_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: gtd_app
+      MYSQL_USER: gtd
+      MYSQL_PASSWORD: gtd_dev
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./docker/db/init:/docker-entrypoint-initdb.d
+    networks:
+      - gtd_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "gtd", "-pgtd_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ..
+      dockerfile: infra/docker/api/Dockerfile
+    container_name: gtd_api
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    volumes:
+      - ../api:/var/www/html
+      - ./docker/api/php.ini:/usr/local/etc/php/conf.d/custom.ini
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=mysql://gtd:gtd_dev@db:3306/gtd_app?serverVersion=10.11.0-MariaDB
+      - APP_ENV=dev
+      - APP_SECRET=changeme_in_production
+    networks:
+      - gtd_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  web:
+    build:
+      context: ..
+      dockerfile: infra/docker/web/Dockerfile
+    container_name: gtd_web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../web:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8000/api/v1
+      - VITE_APPLE_CLIENT_ID=com.example.gtd
+    networks:
+      - gtd_network
+    command: npm run dev -- --host 0.0.0.0
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: gtd_mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - gtd_network
+
+volumes:
+  db_data:
+    driver: local
+
+networks:
+  gtd_network:
+    driver: bridge

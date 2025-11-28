@@ -35,14 +35,14 @@ Total tasks: 127
 
 Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE implementation begins.
 
-- [ ] [S0-016] Create GitHub issue for P1: User Account Management (FR-001 to FR-006b)
-- [ ] [S0-017] Create GitHub issue for P2: Capture Ideas and Tasks (FR-007 to FR-009)
-- [ ] [S0-018] Create GitHub issue for P3: Clarify and Process Tasks (FR-010 to FR-012)
-- [ ] [S0-019] Create GitHub issue for P4: Organize with Contextual Lists (FR-013 to FR-016)
-- [ ] [S0-020] Create GitHub issue for P5: Project Management (FR-017 to FR-019)
-- [ ] [S0-021] Create GitHub issue for P6: Weekly Review (FR-020 to FR-022)
-- [ ] [S0-022] Create GitHub issue for P7: Calendar and Deadlines (FR-023 to FR-025)
-- [ ] [S0-023] Create GitHub issue for Cross-Cutting: Sync & Offline (FR-026 to FR-028)
+- [x] [S0-016] Create GitHub issue for P1: User Account Management (FR-001 to FR-006b) - Issue #2
+- [x] [S0-017] Create GitHub issue for P2: Capture Ideas and Tasks (FR-007 to FR-009) - Issue #3
+- [x] [S0-018] Create GitHub issue for P3: Clarify and Process Tasks (FR-010 to FR-012) - Issue #4
+- [x] [S0-019] Create GitHub issue for P4: Organize with Contextual Lists (FR-013 to FR-016) - Issue #5
+- [x] [S0-020] Create GitHub issue for P5: Project Management (FR-017 to FR-019) - Issue #6
+- [x] [S0-021] Create GitHub issue for P6: Weekly Review (FR-020 to FR-022) - Issue #7
+- [x] [S0-022] Create GitHub issue for P7: Calendar and Deadlines (FR-023 to FR-025) - Issue #8
+- [x] [S0-023] Create GitHub issue for Cross-Cutting: Sync & Offline (FR-026 to FR-028) - Issue #9
 
 > **Note**: After issues are created, all `feat/*` branches MUST follow naming convention: `feat/<issue-id>-<description>`
 > Example: `feat/42-user-account-management`
