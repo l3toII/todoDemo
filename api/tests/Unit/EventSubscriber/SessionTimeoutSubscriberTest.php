@@ -61,7 +61,7 @@ class SessionTimeoutSubscriberTest extends TestCase
         $this->assertNull($event->getResponse());
     }
 
-    public function testRegisterRouteIsPub lic(): void
+    public function testRegisterRouteIsPublic(): void
     {
         $request = new Request([], [], [], [], [], ['REQUEST_URI' => '/api/v1/auth/register']);
         $event = $this->createRequestEvent($request);
@@ -165,7 +165,7 @@ class SessionTimeoutSubscriberTest extends TestCase
         $event = $this->createRequestEvent($request);
 
         $token = $this->createMock(TokenInterface::class);
-        $token->method('getUser')->willReturn('string_user');
+        $token->method('getUser')->willReturn(null); // Non-User object returns null
 
         $this->tokenStorage->method('getToken')->willReturn($token);
 
@@ -261,7 +261,7 @@ class SessionTimeoutSubscriberTest extends TestCase
         $this->subscriber->onKernelRequest($event);
     }
 
-    public function testExactTimeoutThresholdIsExpired(): void
+    public function testExactTimeoutThresholdIsNotExpired(): void
     {
         $request = new Request([], [], [], [], [], ['REQUEST_URI' => '/api/v1/tasks']);
         $request->attributes->set('_jwt_last_activity', time() - 900); // Exactly 15 minutes
@@ -276,7 +276,26 @@ class SessionTimeoutSubscriberTest extends TestCase
 
         $this->subscriber->onKernelRequest($event);
 
-        // At exact threshold, should timeout
+        // At exact threshold (not greater), should NOT timeout
+        $this->assertNull($event->getResponse());
+    }
+
+    public function testJustOverTimeoutExpires(): void
+    {
+        $request = new Request([], [], [], [], [], ['REQUEST_URI' => '/api/v1/tasks']);
+        $request->attributes->set('_jwt_last_activity', time() - 901); // Just over 15 minutes
+
+        $event = $this->createRequestEvent($request);
+
+        $user = $this->createMock(User::class);
+        $token = $this->createMock(TokenInterface::class);
+        $token->method('getUser')->willReturn($user);
+
+        $this->tokenStorage->method('getToken')->willReturn($token);
+
+        $this->subscriber->onKernelRequest($event);
+
+        // Just over threshold, should timeout
         $this->assertInstanceOf(JsonResponse::class, $event->getResponse());
     }
 

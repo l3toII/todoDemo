@@ -67,25 +67,22 @@ class AccountDeletionServiceTest extends TestCase
     {
         $user = $this->createTestUser();
 
+        $callCount = 0;
         $this->logger->expects($this->exactly(2))
             ->method('info')
-            ->withConsecutive(
-                [
-                    'Starting account deletion',
-                    $this->callback(function ($context) use ($user) {
-                        return isset($context['user_id'])
-                            && isset($context['email'])
-                            && $context['email'] === 'test@example.com';
-                    })
-                ],
-                [
-                    'Account deletion completed successfully',
-                    $this->callback(function ($context) use ($user) {
-                        return isset($context['user_id'])
-                            && isset($context['email']);
-                    })
-                ]
-            );
+            ->willReturnCallback(function ($message, $context) use (&$callCount) {
+                $callCount++;
+                if ($callCount === 1) {
+                    $this->assertEquals('Starting account deletion', $message);
+                    $this->assertArrayHasKey('user_id', $context);
+                    $this->assertArrayHasKey('email', $context);
+                    $this->assertEquals('test@example.com', $context['email']);
+                } elseif ($callCount === 2) {
+                    $this->assertEquals('Account deletion completed successfully', $message);
+                    $this->assertArrayHasKey('user_id', $context);
+                    $this->assertArrayHasKey('email', $context);
+                }
+            });
 
         $this->refreshTokenRepository->method('findBy')->willReturn([]);
 
@@ -99,25 +96,35 @@ class AccountDeletionServiceTest extends TestCase
         $token1 = $this->createMock(RefreshToken::class);
         $token2 = $this->createMock(RefreshToken::class);
 
+        $connection = $this->createMock(\Doctrine\DBAL\Connection::class);
+        $connection->method('isTransactionActive')->willReturn(false);
+        $this->entityManager->method('getConnection')->willReturn($connection);
+
         $this->refreshTokenRepository->expects($this->once())
             ->method('findBy')
             ->with(['user' => $user])
             ->willReturn([$token1, $token2]);
 
+        $removedTokens = [];
         $this->entityManager->expects($this->exactly(2))
             ->method('remove')
-            ->withConsecutive(
-                [$token1],
-                [$token2]
-            );
+            ->willReturnCallback(function ($token) use (&$removedTokens, $token1, $token2) {
+                $removedTokens[] = $token;
+                $this->assertContains($token, [$token1, $token2]);
+            });
 
-        $this->logger->expects($this->once())
+        // Logger.debug() is called twice: once for refresh tokens, once for user entities
+        $this->logger->expects($this->exactly(2))
             ->method('debug')
-            ->with('Deleted refresh tokens', $this->callback(function ($context) {
-                return $context['count'] === 2;
-            }));
+            ->willReturnCallback(function ($message, $context) {
+                if ($message === 'Deleted refresh tokens') {
+                    $this->assertEquals(2, $context['count']);
+                }
+                return true;
+            });
 
         $this->service->deleteAccount($user);
+        $this->assertCount(2, $removedTokens);
     }
 
     public function testDeleteAccountDeletesUser(): void

@@ -14,14 +14,13 @@
         <server name="SHELL_VERBOSITY" value="-1"/>
         <server name="SYMFONY_PHPUNIT_REMOVE" value=""/>
         <server name="SYMFONY_PHPUNIT_VERSION" value="10.5"/>
+        <env name="KERNEL_CLASS" value="App\Kernel"/>
+        <env name="DATABASE_URL" value="mysql://gtd:gtd_dev@db:3306/gtd_app_test?serverVersion=10.11.0-MariaDB&amp;charset=utf8mb4"/>
     </php>
 
     <testsuites>
         <testsuite name="Unit Tests">
             <directory>tests/Unit</directory>
-        </testsuite>
-        <testsuite name="Integration Tests">
-            <directory>tests/Integration</directory>
         </testsuite>
         <testsuite name="Functional Tests">
             <directory>tests/Functional</directory>

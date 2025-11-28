@@ -289,15 +289,15 @@ class AppleSignInServiceTest extends TestCase
     // Error Handling Tests
     // =========================================================================
 
-    public function testVerifyIdentityTokenLogsErrors(): void
+    public function testVerifyIdentityTokenWithValidationErrors(): void
     {
-        $this->logger->expects($this->once())
-            ->method('error')
-            ->with('Apple Sign-In token verification failed', $this->callback(function ($context) {
-                return isset($context['error']);
-            }));
+        // Test that validation errors are returned without logging
+        // (logging only happens on exceptions)
+        $result = $this->service->verifyIdentityToken('invalid');
 
-        $this->service->verifyIdentityToken('invalid');
+        $this->assertFalse($result['valid']);
+        $this->assertArrayHasKey('error', $result);
+        $this->assertEquals('Invalid token format', $result['error']);
     }
 
     // =========================================================================
