@@ -89,97 +89,169 @@ jobs:
           cache-to: type=gha,mode=max
 
   deploy-staging:
-    name: Deploy to Staging
+    name: Deploy to Staging (Render)
     runs-on: ubuntu-latest
     needs: build-and-push
     if: github.ref == 'refs/heads/001-gtd-todo-app' || github.event.inputs.environment == 'staging'
     environment:
       name: staging
-      url: https://staging.gtd-app.example.com
+      url: https://gtd-web-staging.onrender.com
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy to Staging
+      - name: Deploy API to Render Staging
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID_API_STAGING: ${{ secrets.RENDER_SERVICE_ID_API_STAGING }}
         run: |
-          echo "Deploying to staging environment..."
-          echo "API Image: ${{ needs.build-and-push.outputs.api-image }}"
-          echo "Web Image: ${{ needs.build-and-push.outputs.web-image }}"
-          # TODO: Add actual deployment commands here
-          # Example: kubectl set image deployment/api api=${{ needs.build-and-push.outputs.api-image }}
-          # Example: kubectl set image deployment/web web=${{ needs.build-and-push.outputs.web-image }}
+          echo "Triggering Render deployment for API staging..."
+          if [ -n "$RENDER_API_KEY" ] && [ -n "$RENDER_SERVICE_ID_API_STAGING" ]; then
+            curl -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID_API_STAGING}/deploys" \
+              -H "Authorization: Bearer ${RENDER_API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"clearCache": false}'
+          else
+            echo "Render API key or service ID not configured - Render will auto-deploy from branch"
+          fi
 
-      - name: Run database migrations
+      - name: Deploy Web to Render Staging
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID_WEB_STAGING: ${{ secrets.RENDER_SERVICE_ID_WEB_STAGING }}
         run: |
-          echo "Running database migrations on staging..."
-          # TODO: Add migration command
-          # Example: kubectl exec -it deployment/api -- php bin/console doctrine:migrations:migrate --no-interaction
+          echo "Triggering Render deployment for Web staging..."
+          if [ -n "$RENDER_API_KEY" ] && [ -n "$RENDER_SERVICE_ID_WEB_STAGING" ]; then
+            curl -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID_WEB_STAGING}/deploys" \
+              -H "Authorization: Bearer ${RENDER_API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"clearCache": false}'
+          else
+            echo "Render API key or service ID not configured - Render will auto-deploy from branch"
+          fi
 
-      - name: Health check
+      - name: Wait for deployment
         run: |
-          echo "Performing health check on staging..."
-          # TODO: Add actual health check
-          # Example: curl -f https://staging.gtd-app.example.com/api/health || exit 1
+          echo "Waiting for Render deployment to complete..."
+          sleep 60
+
+      - name: Health check - API
+        run: |
+          echo "Performing health check on staging API..."
+          for i in {1..5}; do
+            if curl -sf https://gtd-api-staging.onrender.com/api/health; then
+              echo "API health check passed"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in 30s..."
+            sleep 30
+          done
+          echo "::warning::API health check failed after 5 attempts"
+        continue-on-error: true
+
+      - name: Health check - Web
+        run: |
+          echo "Performing health check on staging Web..."
+          for i in {1..5}; do
+            if curl -sf https://gtd-web-staging.onrender.com; then
+              echo "Web health check passed"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in 30s..."
+            sleep 30
+          done
+          echo "::warning::Web health check failed after 5 attempts"
+        continue-on-error: true
 
       - name: Notify deployment
         if: success()
         run: |
           echo "Staging deployment successful"
-          # TODO: Add notification (Slack, Discord, etc.)
+          echo "API: https://gtd-api-staging.onrender.com"
+          echo "Web: https://gtd-web-staging.onrender.com"
 
   deploy-production:
-    name: Deploy to Production
+    name: Deploy to Production (Render)
     runs-on: ubuntu-latest
     needs: build-and-push
-    if: startsWith(github.ref, 'refs/tags/v') || github.event.inputs.environment == 'production'
+    if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && github.event.inputs.environment == 'production')
     environment:
       name: production
-      url: https://gtd-app.example.com
+      url: https://gtd-web-prod.onrender.com
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create backup
+      - name: Deploy API to Render Production
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID_API_PROD: ${{ secrets.RENDER_SERVICE_ID_API_PROD }}
         run: |
-          echo "Creating database backup before production deployment..."
-          # TODO: Add backup command
-          # Example: kubectl exec -it deployment/api -- php bin/console app:database:backup
+          echo "Triggering Render deployment for API production..."
+          if [ -n "$RENDER_API_KEY" ] && [ -n "$RENDER_SERVICE_ID_API_PROD" ]; then
+            curl -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID_API_PROD}/deploys" \
+              -H "Authorization: Bearer ${RENDER_API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"clearCache": false}'
+          else
+            echo "Render API key or service ID not configured - Render will auto-deploy from branch"
+          fi
 
-      - name: Deploy to Production
+      - name: Deploy Web to Render Production
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID_WEB_PROD: ${{ secrets.RENDER_SERVICE_ID_WEB_PROD }}
         run: |
-          echo "Deploying to production environment..."
-          echo "API Image: ${{ needs.build-and-push.outputs.api-image }}"
-          echo "Web Image: ${{ needs.build-and-push.outputs.web-image }}"
-          # TODO: Add actual deployment commands here
-          # Example: kubectl set image deployment/api api=${{ needs.build-and-push.outputs.api-image }}
-          # Example: kubectl set image deployment/web web=${{ needs.build-and-push.outputs.web-image }}
+          echo "Triggering Render deployment for Web production..."
+          if [ -n "$RENDER_API_KEY" ] && [ -n "$RENDER_SERVICE_ID_WEB_PROD" ]; then
+            curl -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID_WEB_PROD}/deploys" \
+              -H "Authorization: Bearer ${RENDER_API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"clearCache": false}'
+          else
+            echo "Render API key or service ID not configured - Render will auto-deploy from branch"
+          fi
 
-      - name: Run database migrations
+      - name: Wait for deployment
         run: |
-          echo "Running database migrations on production..."
-          # TODO: Add migration command
-          # Example: kubectl exec -it deployment/api -- php bin/console doctrine:migrations:migrate --no-interaction
+          echo "Waiting for Render deployment to complete..."
+          sleep 90
 
-      - name: Health check
+      - name: Health check - API
         run: |
-          echo "Performing health check on production..."
-          # TODO: Add actual health check
-          # Example: curl -f https://gtd-app.example.com/api/health || exit 1
+          echo "Performing health check on production API..."
+          for i in {1..5}; do
+            if curl -sf https://gtd-api-prod.onrender.com/api/health; then
+              echo "API health check passed"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in 30s..."
+            sleep 30
+          done
+          echo "::error::Production API health check failed"
+          exit 1
 
-      - name: Smoke tests
+      - name: Health check - Web
         run: |
-          echo "Running smoke tests on production..."
-          # TODO: Add smoke tests
-          # Example: npm run test:smoke
+          echo "Performing health check on production Web..."
+          for i in {1..5}; do
+            if curl -sf https://gtd-web-prod.onrender.com; then
+              echo "Web health check passed"
+              exit 0
+            fi
+            echo "Attempt $i failed, retrying in 30s..."
+            sleep 30
+          done
+          echo "::error::Production Web health check failed"
+          exit 1
 
       - name: Notify deployment
         if: success()
         run: |
           echo "Production deployment successful"
-          # TODO: Add notification (Slack, Discord, etc.)
+          echo "API: https://gtd-api-prod.onrender.com"
+          echo "Web: https://gtd-web-prod.onrender.com"
 
       - name: Rollback on failure
         if: failure()
         run: |
-          echo "Deployment failed, rolling back..."
-          # TODO: Add rollback procedure
-          # Example: kubectl rollout undo deployment/api
-          # Example: kubectl rollout undo deployment/web
+          echo "::error::Deployment failed. Manual rollback may be required."
+          echo "Visit Render dashboard to rollback: https://dashboard.render.com"
