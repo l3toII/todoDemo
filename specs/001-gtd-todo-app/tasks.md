@@ -7,12 +7,12 @@
 
 ## Overview
 
-Total tasks: 168
+Total tasks: 201
 - Sprint 0 (Infrastructure + GitHub Issues): 35 tasks ✅ COMPLETE
-- P1 User Account Management: 43 tasks (21 complete, 22 new)
+- P1 User Account Management: 54 tasks (21 complete, 33 remaining) - 39% complete
 - P2 Capture Ideas and Tasks: 14 tasks
 - P3 Clarify and Process: 12 tasks
-- P4 Organize with Contexts: 17 tasks
+- P4 Organize with Contexts: 18 tasks
 - P5 Project Management: 14 tasks
 - P6 Weekly Review: 12 tasks
 - P7 Calendar and Deadlines: 12 tasks
@@ -98,7 +98,7 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 **User Story**: As a user, I want to create an account, log in securely, and manage my preferences so that I can access my data across all my devices.
 
-**Status**: In Progress (21/42 tasks complete)
+**Status**: In Progress (21/54 tasks complete - 39%)
 
 ### Phase 1.1: Backend - User Entity & Repository ✅
 
@@ -126,43 +126,72 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 ### Phase 1.3: Frontend - Auth Pages ✅
 
-- [X] [P1-012] [Story-1] Create auth Redux slice with login/logout/register actions `web/src/features/auth/authSlice.ts`
-- [X] [P1-013] [Story-1] Create LoginPage component with form validation `web/src/pages/LoginPage.tsx`
-- [X] [P1-014] [Story-1] Create RegisterPage component with email verification flow `web/src/pages/RegisterPage.tsx`
-- [X] [P1-015] [Story-1] Implement Apple Sign-In button for web `web/src/components/AppleSignInButton.tsx`
-- [X] [P1-016] [Story-1] Create protected route wrapper with auth guard `web/src/components/ProtectedRoute.tsx`
-- [X] [P1-017] [Story-1] Write E2E tests for auth flows `web/tests/e2e/auth.spec.ts`
+- [X] [P1-012] [Story-1] Create auth Redux slice with login/logout/register actions `web/src/features/auth/authSlice.js`
+- [X] [P1-013] [Story-1] Create LoginPage component with form validation `web/src/pages/LoginPage.jsx`
+- [X] [P1-014] [Story-1] Create RegisterPage component with email verification flow `web/src/pages/RegisterPage.jsx`
+- [X] [P1-015] [Story-1] Implement Apple Sign-In button for web `web/src/components/AppleSignInButton.jsx`
+- [X] [P1-016] [Story-1] Create protected route wrapper with auth guard `web/src/components/ProtectedRoute.jsx`
+- [X] [P1-017] [Story-1] Write E2E tests for auth flows `web/src/tests/e2e/auth.spec.jsx`
 
-- [X] [P1-001] [P1] [Story-1] Create User Doctrine entity with all fields from data-model.md `api/src/Entity/User.php`
-- [X] [P1-002] [P1] [Story-1] Create User repository with CRUD operations `api/src/Repository/UserRepository.php`
-- [X] [P1-003] [P1] [Story-1] Create database migration for users table `api/migrations/Version001CreateUsersTable.php`
-- [X] [P1-004] [P1] [Story-1] Write unit tests for User entity validation `api/tests/Unit/Entity/UserTest.php`
+### Phase 1.4: Critical Fixes & Missing Features ⚠️ HIGH PRIORITY
 
-> Backend endpoints exist (P1-019, P1-020) but frontend pages are missing.
+**Email Service Integration** (BLOCKING)
+- [ ] [P1-021] [Story-1] Install and configure Symfony Mailer `api/config/packages/mailer.yaml`
+- [ ] [P1-022] [Story-1] Create email templates (verification, password reset) `api/templates/email/`
+- [ ] [P1-023] [Story-1] Implement email sending in RegistrationController `api/src/Controller/RegistrationController.php:112-113`
+- [ ] [P1-024] [Story-1] Implement email sending in PasswordResetController `api/src/Controller/PasswordResetController.php:69-70, 228-229`
+- [ ] [P1-025] [Story-1] Write integration tests for email sending `api/tests/Integration/EmailServiceTest.php`
 
-- [X] [P1-005] [P1] [Story-1] Configure LexikJWTAuthenticationBundle with key generation `api/config/packages/lexik_jwt_authentication.yaml`
-- [X] [P1-006] [P1] [Story-1] Create AuthController with login endpoint `api/src/Controller/AuthController.php`
-- [X] [P1-007] [P1] [Story-1] Implement refresh token rotation with RefreshToken entity `api/src/Entity/RefreshToken.php`
-- [X] [P1-007b] [P1] [Story-1] Create database migration for refresh_tokens table `api/migrations/Version008CreateRefreshTokensTable.php`
-- [X] [P1-008] [P1] [Story-1] Implement Apple Sign-In verification service `api/src/Service/AppleSignInService.php`
-- [X] [P1-009] [P1] [Story-1] Create registration endpoint with email verification `api/src/Controller/RegistrationController.php`
-- [X] [P1-010] [P1] [Story-1] Create password reset flow with secure tokens `api/src/Controller/PasswordResetController.php`
-- [X] [P1-011] [P1] [Story-1] Write functional tests for all auth endpoints `api/tests/Functional/AuthTest.php`
+**Apple Sign-In Completion**
+- [ ] [P1-026] [Story-1] Install firebase/php-jwt package `composer.json`
+- [ ] [P1-027] [Story-1] Complete JWK to PEM conversion in AppleSignInService `api/src/Service/AppleSignInService.php:156-159, 187-190`
+- [ ] [P1-028] [Story-1] Add error handling for Apple Sign-In failures `api/src/Service/AppleSignInService.php`
+- [ ] [P1-029] [Story-1] Write integration tests for Apple Sign-In flow `api/tests/Integration/AppleSignInTest.php`
 
-### Phase 1.5: Frontend - Navigation Bar & App Shell (NEW)
+**Preference Management Fix**
+- [ ] [P1-030] [Story-1] Fix preference update to persist to database `api/src/Controller/AccountController.php:158`
+- [ ] [P1-031] [Story-1] Add validation for timezone values `api/src/Controller/AccountController.php`
+- [ ] [P1-032] [Story-1] Write functional tests for preference updates `api/tests/Functional/Account/PreferencesTest.php`
 
-- [X] [P1-018] [P1] [Story-1] Implement session timeout with auto-logout after inactivity `api/src/EventSubscriber/SessionTimeoutSubscriber.php`
-- [X] [P1-019] [P1] [Story-1] Create account deletion endpoint with cascade delete (GDPR) `api/src/Controller/AccountController.php`
-- [X] [P1-020] [P1] [Story-1] Implement hard delete service for all user data `api/src/Service/AccountDeletionService.php`
+### Phase 1.5: Frontend - Account Management Pages
 
-### Phase 1.6: Frontend - WIP Placeholder Pages for P2-P7 (NEW)
+**Account Settings Page**
+- [ ] [P1-033] [Story-1] Create AccountSettingsPage component `web/src/pages/AccountSettingsPage.jsx`
+- [ ] [P1-034] [Story-1] Add profile information display (email, dates) `web/src/pages/AccountSettingsPage.jsx`
+- [ ] [P1-035] [Story-1] Create timezone update form `web/src/components/TimezoneSelector.jsx`
+- [ ] [P1-036] [Story-1] Create notification preferences form `web/src/components/NotificationPreferences.jsx`
+- [ ] [P1-037] [Story-1] Add route /account/settings with auth guard `web/src/App.jsx`
+- [ ] [P1-038] [Story-1] Write unit tests for AccountSettingsPage `web/tests/unit/pages/AccountSettingsPage.test.jsx`
 
-- [X] [P1-012] [P1] [Story-1] Create auth Redux slice with login/logout/register actions `web/src/features/auth/authSlice.js`
-- [X] [P1-013] [P1] [Story-1] Create LoginPage component with form validation `web/src/pages/LoginPage.jsx`
-- [X] [P1-014] [P1] [Story-1] Create RegisterPage component with email verification flow `web/src/pages/RegisterPage.jsx`
-- [X] [P1-015] [P1] [Story-1] Implement Apple Sign-In button for web `web/src/components/AppleSignInButton.jsx`
-- [X] [P1-016] [P1] [Story-1] Create protected route wrapper with auth guard `web/src/components/ProtectedRoute.jsx`
-- [X] [P1-017] [P1] [Story-1] Write E2E tests for auth flows `web/src/tests/e2e/auth.spec.jsx`
+**Account Deletion Page**
+- [ ] [P1-039] [Story-1] Create AccountDeletionPage component `web/src/pages/AccountDeletionPage.jsx`
+- [ ] [P1-040] [Story-1] Display deletion warning and data impact `web/src/pages/AccountDeletionPage.jsx`
+- [ ] [P1-041] [Story-1] Create deletion confirmation form (password + "DELETE" text) `web/src/components/AccountDeletionForm.jsx`
+- [ ] [P1-042] [Story-1] Add GDPR compliance notices `web/src/pages/AccountDeletionPage.jsx`
+- [ ] [P1-043] [Story-1] Implement post-deletion redirect to login `web/src/pages/AccountDeletionPage.jsx`
+- [ ] [P1-044] [Story-1] Add route /account/delete with auth guard `web/src/App.jsx`
+- [ ] [P1-045] [Story-1] Write unit tests for AccountDeletionPage `web/tests/unit/pages/AccountDeletionPage.test.jsx`
+
+**Navigation Updates**
+- [ ] [P1-046] [Story-1] Add user menu with Settings and Logout `web/src/components/Navigation.jsx`
+- [ ] [P1-047] [Story-1] Add link to account settings in navigation `web/src/components/Navigation.jsx`
+
+### Phase 1.6: End-to-End Testing
+
+**Email Flow Tests**
+- [ ] [P1-048] [Story-1] E2E test for complete registration with email verification `web/tests/e2e/registration-email.spec.jsx`
+- [ ] [P1-049] [Story-1] E2E test for password reset with email `web/tests/e2e/password-reset-email.spec.jsx`
+
+**Account Management Tests**
+- [ ] [P1-050] [Story-1] E2E test for updating preferences from UI `web/tests/e2e/account-preferences.spec.jsx`
+- [ ] [P1-051] [Story-1] E2E test for account deletion flow `web/tests/e2e/account-deletion.spec.jsx`
+- [ ] [P1-052] [Story-1] E2E test for verifying data persistence after logout/login `web/tests/e2e/data-persistence.spec.jsx`
+
+### Phase 1.7: UX Polish
+
+**Loading States & Feedback**
+- [ ] [P1-053] [Story-1] Add loading spinners to all action buttons `web/src/components/*`
+- [ ] [P1-054] [Story-1] Improve form validation messages `web/src/pages/*`
 
 ---
 
