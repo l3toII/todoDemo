@@ -7,7 +7,7 @@ services:
     name: gtd-api-prod
     runtime: docker
     dockerfilePath: ./infra/docker/api/Dockerfile
-    dockerContext: ./api
+    dockerContext: .
     region: frankfurt
     plan: free
     branch: main
@@ -31,7 +31,7 @@ services:
     name: gtd-api-staging
     runtime: docker
     dockerfilePath: ./infra/docker/api/Dockerfile
-    dockerContext: ./api
+    dockerContext: .
     region: frankfurt
     plan: free
     branch: 001-gtd-todo-app
@@ -55,7 +55,7 @@ services:
   - type: web
     name: gtd-web-prod
     runtime: static
-    buildCommand: cd web && npm ci && npm run build
+    buildCommand: npm ci --prefix web && npm run build --prefix web
     staticPublishPath: ./web/dist
     branch: main
     envVars:
@@ -82,7 +82,7 @@ services:
   - type: web
     name: gtd-web-staging
     runtime: static
-    buildCommand: cd web && npm ci && npm run build
+    buildCommand: npm ci --prefix web && npm run build --prefix web
     staticPublishPath: ./web/dist
     branch: 001-gtd-todo-app
     envVars:
