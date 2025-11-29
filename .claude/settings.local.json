@@ -3,7 +3,13 @@
     "allow": [
       "Bash(cat:*)",
       "Bash(docker-compose ps:*)",
-      "Bash(docker exec:*)"
+      "Bash(docker exec:*)",
+      "Bash(.specify/scripts/bash/check-prerequisites.sh:*)",
+      "Bash(git rev-parse:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(php -S localhost:8000 -t public:*)",
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []

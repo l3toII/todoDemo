@@ -4,10 +4,13 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -21,6 +24,7 @@ class RegistrationController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly ValidatorInterface $validator,
+        private readonly MailerInterface $mailer,
     ) {
     }
 
@@ -109,8 +113,28 @@ class RegistrationController extends AbstractController
         // Save user
         $this->userRepository->save($user);
 
-        // TODO: Send verification email
-        // $this->emailService->sendVerificationEmail($user->getEmail(), $verificationToken);
+        // Send verification email
+        try {
+            $verificationUrl = sprintf(
+                '%s/verify-email?token=%s',
+                $_ENV['WEB_URL'] ?? 'http://localhost:3000',
+                $verificationToken
+            );
+
+            $email = (new TemplatedEmail())
+                ->to(new Address($user->getEmail()))
+                ->subject('Verify Your Email - GTD Todo App')
+                ->htmlTemplate('email/verification.html.twig')
+                ->context([
+                    'verificationUrl' => $verificationUrl,
+                ]);
+
+            $this->mailer->send($email);
+        } catch (\Exception $e) {
+            // Log error but don't fail registration
+            // User can request resend if email fails
+            error_log(sprintf('Failed to send verification email to %s: %s', $user->getEmail(), $e->getMessage()));
+        }
 
         return $this->json([
             'message' => 'Registration successful. Please check your email to verify your account.',
@@ -225,8 +249,27 @@ class RegistrationController extends AbstractController
 
         $this->userRepository->save($user);
 
-        // TODO: Send verification email
-        // $this->emailService->sendVerificationEmail($user->getEmail(), $verificationToken);
+        // Send verification email
+        try {
+            $verificationUrl = sprintf(
+                '%s/verify-email?token=%s',
+                $_ENV['WEB_URL'] ?? 'http://localhost:3000',
+                $verificationToken
+            );
+
+            $email = (new TemplatedEmail())
+                ->to(new Address($user->getEmail()))
+                ->subject('Verify Your Email - GTD Todo App')
+                ->htmlTemplate('email/verification.html.twig')
+                ->context([
+                    'verificationUrl' => $verificationUrl,
+                ]);
+
+            $this->mailer->send($email);
+        } catch (\Exception $e) {
+            // Log error but don't reveal to user
+            error_log(sprintf('Failed to resend verification email to %s: %s', $user->getEmail(), $e->getMessage()));
+        }
 
         return $this->json([
             'message' => 'If an account exists with this email, a verification email has been sent.',
