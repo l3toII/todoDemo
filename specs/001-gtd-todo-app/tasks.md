@@ -104,12 +104,12 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 ### Phase 1.3: Frontend - Auth Module
 
-- [ ] [P1-012] [P1] [Story-1] Create auth Redux slice with login/logout/register actions `web/src/features/auth/authSlice.ts`
-- [ ] [P1-013] [P1] [Story-1] Create LoginPage component with form validation `web/src/pages/LoginPage.tsx`
-- [ ] [P1-014] [P1] [Story-1] Create RegisterPage component with email verification flow `web/src/pages/RegisterPage.tsx`
-- [ ] [P1-015] [P1] [Story-1] Implement Apple Sign-In button for web `web/src/components/AppleSignInButton.tsx`
-- [ ] [P1-016] [P1] [Story-1] Create protected route wrapper with auth guard `web/src/components/ProtectedRoute.tsx`
-- [ ] [P1-017] [P1] [Story-1] Write E2E tests for auth flows `web/tests/e2e/auth.spec.ts`
+- [X] [P1-012] [P1] [Story-1] Create auth Redux slice with login/logout/register actions `web/src/features/auth/authSlice.js`
+- [X] [P1-013] [P1] [Story-1] Create LoginPage component with form validation `web/src/pages/LoginPage.jsx`
+- [X] [P1-014] [P1] [Story-1] Create RegisterPage component with email verification flow `web/src/pages/RegisterPage.jsx`
+- [X] [P1-015] [P1] [Story-1] Implement Apple Sign-In button for web `web/src/components/AppleSignInButton.jsx`
+- [X] [P1-016] [P1] [Story-1] Create protected route wrapper with auth guard `web/src/components/ProtectedRoute.jsx`
+- [X] [P1-017] [P1] [Story-1] Write E2E tests for auth flows `web/src/tests/e2e/auth.spec.jsx`
 
 ---
 
