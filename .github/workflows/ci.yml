@@ -144,6 +144,14 @@ jobs:
           name: api-coverage
         continue-on-error: true
 
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: api-coverage
+          path: api/coverage.xml
+          retention-days: 1
+
   api-security:
     name: API - Security Audit
     runs-on: ubuntu-latest
@@ -246,6 +254,14 @@ jobs:
           name: web-coverage
         continue-on-error: true
 
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: web-coverage
+          path: web/coverage/
+          retention-days: 1
+
   web-build:
     name: Web - Build Check
     runs-on: ubuntu-latest
@@ -345,6 +361,20 @@ jobs:
       - name: Install Web dependencies
         run: npm ci
         working-directory: ./web
+
+      - name: Download API coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: api-coverage
+          path: api/
+        continue-on-error: true
+
+      - name: Download Web coverage
+        uses: actions/download-artifact@v4
+        with:
+          name: web-coverage
+          path: web/coverage/
+        continue-on-error: true
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
