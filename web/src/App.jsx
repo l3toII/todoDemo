@@ -1,15 +1,39 @@
-import React from 'react'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import PasswordResetRequestPage from './pages/PasswordResetRequestPage';
+import PasswordResetConfirmPage from './pages/PasswordResetConfirmPage';
+import InboxPage from './pages/InboxPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>GTD Todo App</h1>
-      <p>Infrastructure Test - Web Client</p>
-      <p style={{ color: '#666', fontSize: '0.9rem' }}>
-        Version: 0.1.0 | Environment: {import.meta.env.MODE}
-      </p>
-    </div>
-  )
+    <Router>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/password-reset" element={<PasswordResetRequestPage />} />
+        <Route path="/password-reset/confirm" element={<PasswordResetConfirmPage />} />
+
+        {/* Protected routes */}
+        <Route
+          path="/inbox"
+          element={
+            <ProtectedRoute>
+              <InboxPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Default redirect */}
+        <Route path="/" element={<Navigate to="/inbox" replace />} />
+
+        {/* 404 fallback */}
+        <Route path="*" element={<Navigate to="/inbox" replace />} />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
