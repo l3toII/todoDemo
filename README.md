@@ -435,6 +435,18 @@ Examples:
 - `fix(api): Resolve JWT token expiration issue`
 - `docs(readme): Update installation instructions`
 
+## Deployment URLs
+
+### Production
+- **Web App**: https://gtd-web-prod.onrender.com
+- **API**: https://gtd-api-prod.onrender.com
+- **Health Check**: https://gtd-api-prod.onrender.com/api/health
+
+### Staging
+- **Web App**: https://gtd-web-staging.onrender.com
+- **API**: https://gtd-api-staging.onrender.com
+- **Health Check**: https://gtd-api-staging.onrender.com/api/health
+
 ## CI/CD
 
 ### Continuous Integration
@@ -443,11 +455,22 @@ Every push and pull request triggers:
 - **API**: PHP lint, PHPStan, PHPUnit, security audit
 - **Web**: ESLint, Prettier, Jest, build check, security audit
 - **Coverage**: Reports sent to Codecov
+- **SonarCloud**: Code quality and security analysis
 
-### Continuous Deployment
+### Continuous Deployment (Render)
 
-- **Staging**: Automatically deploys from `main` branch
-- **Production**: Deploys from version tags (e.g., `v1.0.0`)
+- **Staging**: Automatically deploys from `001-gtd-todo-app` branch
+- **Production**: Deploys from `main` branch or version tags (e.g., `v1.0.0`)
+
+### Required GitHub Secrets
+
+For Render deployment, configure these secrets in your repository:
+- `SONAR_TOKEN`: SonarCloud authentication token
+- `RENDER_API_KEY`: Render API key for deployments
+- `RENDER_SERVICE_ID_API_PROD`: Render service ID for production API
+- `RENDER_SERVICE_ID_API_STAGING`: Render service ID for staging API
+- `RENDER_SERVICE_ID_WEB_PROD`: Render service ID for production Web
+- `RENDER_SERVICE_ID_WEB_STAGING`: Render service ID for staging Web
 
 ## Contributing
 
@@ -476,12 +499,11 @@ For issues and questions:
 
 ## Roadmap
 
-- [x] **Sprint 0**: Infrastructure setup
-- [x] **P1 Backend**: User account management
-- [ ] **P1 Frontend**: Authentication UI
-- [ ] **P2**: Capture ideas and tasks (Inbox)
-- [ ] **P3**: Clarify and organize
-- [ ] **P4**: Plan and prioritize
-- [ ] **P5**: Execute with focus
-- [ ] **P6**: Review and reflect
-- [ ] **P7**: Context and energy optimization
+- [x] **Sprint 0**: Infrastructure setup (CI/CD, Docker, Render deployment)
+- [x] **P1**: User Account Management (Backend + Frontend)
+- [ ] **P2**: Capture Ideas and Tasks (Inbox)
+- [ ] **P3**: Clarify and Process Tasks
+- [ ] **P4**: Organize with Contextual Lists
+- [ ] **P5**: Project Management
+- [ ] **P6**: Weekly Review
+- [ ] **P7**: Calendar and Deadlines

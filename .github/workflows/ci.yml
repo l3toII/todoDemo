@@ -302,10 +302,70 @@ jobs:
         working-directory: ./web
         continue-on-error: true
 
+  sonarcloud:
+    name: SonarCloud Analysis
+    runs-on: ubuntu-latest
+    needs: [api-tests, web-tests]
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main' || github.ref == 'refs/heads/001-gtd-todo-app'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: pdo_mysql, intl, zip, gd, opcache, mbstring
+          coverage: pcov
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: api/vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('api/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: web/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('web/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+
+      - name: Install API dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+        working-directory: ./api
+
+      - name: Install Web dependencies
+        run: npm ci
+        working-directory: ./web
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=l3toII_todoDemo
+            -Dsonar.organization=l3toii
+            -Dsonar.sources=api/src,web/src
+            -Dsonar.tests=api/tests,web/src
+            -Dsonar.test.inclusions=**/*Test.php,**/*.test.ts,**/*.test.tsx,**/*.spec.ts
+            -Dsonar.php.coverage.reportPaths=api/coverage.xml
+            -Dsonar.javascript.lcov.reportPaths=web/coverage/lcov.info
+            -Dsonar.exclusions=**/vendor/**,**/node_modules/**,**/dist/**,**/build/**
+
   ci-summary:
     name: CI Summary
     runs-on: ubuntu-latest
-    needs: [api-lint, api-tests, api-security, web-lint, web-tests, web-build, web-security]
+    needs: [api-lint, api-tests, api-security, web-lint, web-tests, web-build, web-security, sonarcloud]
     if: always()
     steps:
       - name: Check CI status
@@ -318,3 +378,4 @@ jobs:
           echo "Web Tests: ${{ needs.web-tests.result }}"
           echo "Web Build: ${{ needs.web-build.result }}"
           echo "Web Security: ${{ needs.web-security.result }}"
+          echo "SonarCloud: ${{ needs.sonarcloud.result }}"

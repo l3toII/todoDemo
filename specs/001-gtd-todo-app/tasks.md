@@ -8,7 +8,7 @@
 ## Overview
 
 Total tasks: 168
-- Sprint 0 (Infrastructure + GitHub Issues): 35 tasks (24 complete, 11 new - SonarQube + Render)
+- Sprint 0 (Infrastructure + GitHub Issues): 35 tasks ✅ COMPLETE
 - P1 User Account Management: 43 tasks (21 complete, 22 new)
 - P2 Capture Ideas and Tasks: 14 tasks
 - P3 Clarify and Process: 12 tasks
@@ -31,7 +31,7 @@ Total tasks: 168
 
 ## Sprint 0: Infrastructure Setup (Constitution XV & XVI - BLOCKING)
 
-**Status**: In Progress (24/35 tasks complete - SonarQube + Render pending)
+**Status**: ✅ COMPLETE (35/35 tasks)
 
 **BLOCKING**: No `feat/*` branches until ALL Sprint 0 tasks complete.
 
@@ -65,7 +65,7 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 - [X] [S0-006] Create GitHub Actions CI workflow for API (PHP lint, PHPStan, PHPUnit) `.github/workflows/ci.yml`
 - [X] [S0-007] Add CI steps for Web (ESLint, Prettier, Jest, build) `.github/workflows/ci.yml`
 - [X] [S0-008] Add security scanning (composer audit, npm audit) `.github/workflows/ci.yml`
-- [ ] [S0-008b] **Configure SonarQube/SonarCloud analysis in CI pipeline (Constitution VI)** `.github/workflows/ci.yml`
+- [X] [S0-008b] **Configure SonarQube/SonarCloud analysis in CI pipeline (Constitution VI)** `.github/workflows/ci.yml`
 - [X] [S0-009] Configure code coverage reporting (Codecov or similar) `.github/workflows/ci.yml`
 - [X] [S0-010] Add branch protection rules for main and 001-gtd-todo-app `Repository Settings`
 
@@ -81,16 +81,16 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 > Constitution XV mandates Render as the hosting platform for production and staging.
 
-- [ ] [S0-024] Create Render account and project setup `render.yaml`
-- [ ] [S0-025] Configure Render Web Service for API (production) with accessible URL
-- [ ] [S0-026] Configure Render Web Service for API (staging) with accessible URL
-- [ ] [S0-027] Configure Render Static Site for Web frontend (production)
-- [ ] [S0-028] Configure Render Static Site for Web frontend (staging)
-- [ ] [S0-029] Configure Render PostgreSQL/MariaDB database (or use external)
-- [ ] [S0-030] Update CD pipeline to deploy to Render on merge `.github/workflows/cd.yml`
-- [ ] [S0-031] Verify production URL accessible and health check passes
-- [ ] [S0-032] Verify staging URL accessible and health check passes
-- [ ] [S0-033] Document Render deployment URLs in README.md
+- [X] [S0-024] Create Render account and project setup `render.yaml`
+- [X] [S0-025] Configure Render Web Service for API (production) with accessible URL
+- [X] [S0-026] Configure Render Web Service for API (staging) with accessible URL
+- [X] [S0-027] Configure Render Static Site for Web frontend (production)
+- [X] [S0-028] Configure Render Static Site for Web frontend (staging)
+- [X] [S0-029] Configure Render PostgreSQL/MariaDB database (or use external)
+- [X] [S0-030] Update CD pipeline to deploy to Render on merge `.github/workflows/cd.yml`
+- [X] [S0-031] Verify production URL accessible and health check passes
+- [X] [S0-032] Verify staging URL accessible and health check passes
+- [X] [S0-033] Document Render deployment URLs in README.md
 
 ---
 
