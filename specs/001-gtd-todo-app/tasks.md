@@ -8,8 +8,8 @@
 ## Overview
 
 Total tasks: 127
-- Sprint 0 (Infrastructure + GitHub Issues): 24 tasks
-- P1 User Account Management: 21 tasks
+- Sprint 0 (Infrastructure + GitHub Issues): 24 tasks ✅ COMPLETE
+- P1 User Account Management: 21 tasks ✅ COMPLETE
 - P2 Capture Ideas and Tasks: 10 tasks
 - P3 Clarify and Process: 8 tasks
 - P4 Organize with Contexts: 13 tasks
@@ -17,7 +17,7 @@ Total tasks: 127
 - P6 Weekly Review: 8 tasks
 - P7 Calendar and Deadlines: 8 tasks
 - Cross-Cutting (Sync & Offline): 5 tasks
-- Integration Tests: 6 tasks
+- Integration Tests: 6 tasks (1 complete)
 - Edge Cases: 5 tasks
 - Polish & Finalization: 9 tasks
 
@@ -74,42 +74,44 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 ---
 
-## P1: User Account Management (FR-001 to FR-006b)
+## P1: User Account Management (FR-001 to FR-006b) ✅ COMPLETE
 
 **User Story**: As a user, I want to create an account, log in securely, and manage my preferences so that I can access my data across all my devices.
 
+**Status**: ✅ Complete (2025-11-29)
+
 ### Phase 1.1: Backend - User Entity & Repository
 
-- [ ] [P1-001] [P1] [Story-1] Create User Doctrine entity with all fields from data-model.md `api/src/Entity/User.php`
-- [ ] [P1-002] [P1] [Story-1] Create User repository with CRUD operations `api/src/Repository/UserRepository.php`
-- [ ] [P1-003] [P1] [Story-1] Create database migration for users table `api/migrations/Version001CreateUsersTable.php`
-- [ ] [P1-004] [P1] [Story-1] Write unit tests for User entity validation `api/tests/Unit/Entity/UserTest.php`
+- [X] [P1-001] [P1] [Story-1] Create User Doctrine entity with all fields from data-model.md `api/src/Entity/User.php`
+- [X] [P1-002] [P1] [Story-1] Create User repository with CRUD operations `api/src/Repository/UserRepository.php`
+- [X] [P1-003] [P1] [Story-1] Create database migration for users table `api/migrations/Version001CreateUsersTable.php`
+- [X] [P1-004] [P1] [Story-1] Write unit tests for User entity validation `api/tests/Unit/Entity/UserTest.php`
 
 ### Phase 1.2: Backend - Authentication
 
-- [ ] [P1-005] [P1] [Story-1] Configure LexikJWTAuthenticationBundle with key generation `api/config/packages/lexik_jwt_authentication.yaml`
-- [ ] [P1-006] [P1] [Story-1] Create AuthController with login endpoint `api/src/Controller/AuthController.php`
-- [ ] [P1-007] [P1] [Story-1] Implement refresh token rotation with RefreshToken entity `api/src/Entity/RefreshToken.php`
-- [ ] [P1-007b] [P1] [Story-1] Create database migration for refresh_tokens table `api/migrations/Version008CreateRefreshTokensTable.php`
-- [ ] [P1-008] [P1] [Story-1] Implement Apple Sign-In verification service `api/src/Service/AppleSignInService.php`
-- [ ] [P1-009] [P1] [Story-1] Create registration endpoint with email verification `api/src/Controller/RegistrationController.php`
-- [ ] [P1-010] [P1] [Story-1] Create password reset flow with secure tokens `api/src/Controller/PasswordResetController.php`
-- [ ] [P1-011] [P1] [Story-1] Write functional tests for all auth endpoints `api/tests/Functional/AuthTest.php`
+- [X] [P1-005] [P1] [Story-1] Configure LexikJWTAuthenticationBundle with key generation `api/config/packages/lexik_jwt_authentication.yaml`
+- [X] [P1-006] [P1] [Story-1] Create AuthController with login endpoint `api/src/Controller/AuthController.php`
+- [X] [P1-007] [P1] [Story-1] Implement refresh token rotation with RefreshToken entity `api/src/Entity/RefreshToken.php`
+- [X] [P1-007b] [P1] [Story-1] Create database migration for refresh_tokens table `api/migrations/Version008CreateRefreshTokensTable.php`
+- [X] [P1-008] [P1] [Story-1] Implement Apple Sign-In verification service `api/src/Service/AppleSignInService.php`
+- [X] [P1-009] [P1] [Story-1] Create registration endpoint with email verification `api/src/Controller/RegistrationController.php`
+- [X] [P1-010] [P1] [Story-1] Create password reset flow with secure tokens `api/src/Controller/PasswordResetController.php`
+- [X] [P1-011] [P1] [Story-1] Write functional tests for all auth endpoints `api/tests/Functional/AuthTest.php`
 
 ### Phase 1.2b: Backend - Session & Account Management (FR-006, FR-006b)
 
-- [ ] [P1-018] [P1] [Story-1] Implement session timeout with auto-logout after inactivity `api/src/EventSubscriber/SessionTimeoutSubscriber.php`
-- [ ] [P1-019] [P1] [Story-1] Create account deletion endpoint with cascade delete (GDPR) `api/src/Controller/AccountController.php`
-- [ ] [P1-020] [P1] [Story-1] Implement hard delete service for all user data `api/src/Service/AccountDeletionService.php`
+- [X] [P1-018] [P1] [Story-1] Implement session timeout with auto-logout after inactivity `api/src/EventSubscriber/SessionTimeoutSubscriber.php`
+- [X] [P1-019] [P1] [Story-1] Create account deletion endpoint with cascade delete (GDPR) `api/src/Controller/AccountController.php`
+- [X] [P1-020] [P1] [Story-1] Implement hard delete service for all user data `api/src/Service/AccountDeletionService.php`
 
 ### Phase 1.3: Frontend - Auth Module
 
-- [ ] [P1-012] [P1] [Story-1] Create auth Redux slice with login/logout/register actions `web/src/features/auth/authSlice.ts`
-- [ ] [P1-013] [P1] [Story-1] Create LoginPage component with form validation `web/src/pages/LoginPage.tsx`
-- [ ] [P1-014] [P1] [Story-1] Create RegisterPage component with email verification flow `web/src/pages/RegisterPage.tsx`
-- [ ] [P1-015] [P1] [Story-1] Implement Apple Sign-In button for web `web/src/components/AppleSignInButton.tsx`
-- [ ] [P1-016] [P1] [Story-1] Create protected route wrapper with auth guard `web/src/components/ProtectedRoute.tsx`
-- [ ] [P1-017] [P1] [Story-1] Write E2E tests for auth flows `web/tests/e2e/auth.spec.ts`
+- [X] [P1-012] [P1] [Story-1] Create auth Redux slice with login/logout/register actions `web/src/features/auth/authSlice.ts`
+- [X] [P1-013] [P1] [Story-1] Create LoginPage component with form validation `web/src/pages/LoginPage.tsx`
+- [X] [P1-014] [P1] [Story-1] Create RegisterPage component with email verification flow `web/src/pages/RegisterPage.tsx`
+- [X] [P1-015] [P1] [Story-1] Implement Apple Sign-In button for web `web/src/components/AppleSignInButton.tsx`
+- [X] [P1-016] [P1] [Story-1] Create protected route wrapper with auth guard `web/src/components/ProtectedRoute.tsx`
+- [X] [P1-017] [P1] [Story-1] Write E2E tests for auth flows `web/tests/e2e/auth.spec.ts`
 
 ---
 
@@ -261,7 +263,7 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 Per Constitution II, each component MUST have integration tests.
 
-- [ ] [INT-001] Write integration tests for Auth module (login, register, refresh, Apple Sign-In) `api/tests/Integration/AuthIntegrationTest.php`
+- [X] [INT-001] Write integration tests for Auth module (login, register, refresh, Apple Sign-In) `api/tests/Integration/AuthIntegrationTest.php`
 - [ ] [INT-002] Write integration tests for Task module (CRUD, status transitions) `api/tests/Integration/TaskIntegrationTest.php`
 - [ ] [INT-003] Write integration tests for Project module (CRUD, next action logic) `api/tests/Integration/ProjectIntegrationTest.php`
 - [ ] [INT-004] Write integration tests for Context module (CRUD, task associations) `api/tests/Integration/ContextIntegrationTest.php`
@@ -359,3 +361,10 @@ Before marking each User Story complete:
 - [ ] API endpoints match OpenAPI spec
 - [ ] Code review approved
 - [ ] Documentation updated
+
+### User Story 1 (P1) Verification ✅
+- [X] All unit tests pass (> 80% coverage)
+- [X] All E2E tests for the story pass
+- [X] API endpoints match OpenAPI spec
+- [X] Code review approved
+- [X] Documentation updated

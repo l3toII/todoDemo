@@ -2,14 +2,10 @@
   ============================================================================
   SYNC IMPACT REPORT
   ============================================================================
-  Version change: 1.3.0 → 1.4.0 (MINOR: principles clarified for flexibility)
+  Version change: 1.6.0 → 1.6.1 (PATCH: Specify Render as hosting platform)
 
   Modified principles:
-    - V. Git Flow Discipline: Added feature-branch model support
-    - VI. CI/CD Pipeline: Clarified integration branch flexibility
-    - XV. Infrastructure-First: Updated for integration branch deployment
-    - XVI. GitHub Issues Tracking: Clarified closure on integration branch merge
-    - Development Workflow: Updated PR process and pre-merge checklist
+    - XV. Infrastructure-First (Phase 0): Added Render as hosting platform specification
 
   Added sections: None
 
@@ -20,11 +16,8 @@
     - .specify/templates/spec-template.md: ✅ Compatible
     - .specify/templates/tasks-template.md: ✅ Compatible
     - .specify/templates/checklist-template.md: ✅ Compatible
-    - .specify/templates/agent-file-template.md: ✅ Compatible
 
-  Follow-up TODOs:
-    - Update all project documentation to reference integration branch
-    - Configure CD pipeline for feature-branch deployment to staging
+  Follow-up TODOs: None
   ============================================================================
 -->
 
@@ -135,6 +128,7 @@ The project MUST have a complete CI/CD pipeline:
 - Code coverage analysis
 - Security analysis (SAST)
 - Vulnerable dependency checking
+- **SonarQube analysis** (code quality, code smells, security hotspots)
 
 **Continuous Deployment (CD)** - Mandatory for merges:
 - Integration tests on staging environment
@@ -148,9 +142,10 @@ The project MUST have a complete CI/CD pipeline:
 - All tests MUST pass
 - Code coverage >= 80%
 - No critical vulnerabilities
+- SonarQube quality gate MUST pass
 - Code review approved
 
-**Technology**: CI/CD tool choice is free (GitHub Actions, GitLab CI, Jenkins, etc.) but pipeline MUST be complete and documented.
+**Technology**: CI/CD tool choice is free (GitHub Actions, GitLab CI, Jenkins, etc.) but pipeline MUST be complete and documented. SonarQube (or SonarCloud) is MANDATORY for code quality analysis.
 
 **Rationale**: CI/CD guarantees quality, accelerates deployments, and reduces human errors.
 
@@ -158,10 +153,23 @@ The project MUST have a complete CI/CD pipeline:
 
 Each commit MUST be atomic and follow these rules:
 
-- **One commit = One logical change**: Each commit MUST represent a coherent and complete change
+- **One commit = One micro-task**: Each commit MUST represent exactly ONE logical change corresponding to ONE task
+- **Unit tested before push**: Every commit MUST pass its associated unit tests BEFORE being pushed
+- **Pipeline validation**: Commits MUST pass the full CI/CD pipeline BEFORE moving to the next task
 - **Compilable**: Code MUST compile after each commit
 - **Testable**: Tests MUST pass after each commit
 - **Reversible**: Each commit MUST be independently revertible
+
+**Workflow per micro-task**:
+1. Create or update `implementation.md` (see XVII. Task Implementation Lifecycle)
+2. Write tests FIRST (if applicable)
+3. Implement the change
+4. Run tests locally - MUST pass
+5. Commit with conventional message
+6. Push to remote (may push before local tests if local environment unavailable)
+7. Wait for CI/CD pipeline to pass
+8. Delete `implementation.md` once commit is accepted
+9. ONLY THEN proceed to next task
 
 **Commit message format** (Conventional Commits):
 ```
@@ -182,7 +190,7 @@ Each commit MUST be atomic and follow these rules:
 - `chore`: Maintenance
 - `spec`: Specification changes (.specify/*)
 
-**Rationale**: Atomic commits facilitate debugging, reviews, and rollbacks.
+**Rationale**: Atomic commits facilitate debugging, reviews, and rollbacks. Requiring pipeline validation before proceeding ensures continuous integration in practice, not just in name.
 
 ### VIII. Sprint & Task Organization
 
@@ -230,6 +238,7 @@ Documentation MUST be treated as code:
 - tasks.md: Task list
 - CHANGELOG.md: Change history
 - README.md: Getting started guide
+- **implementation.md**: Task implementation checklist (temporary, see XVII)
 
 **Rationale**: Up-to-date documentation reduces onboarding time and prevents knowledge loss.
 
@@ -319,27 +328,42 @@ APIs MUST follow a clear versioning strategy:
 
 **Rationale**: Clear versioning protects existing clients and enables controlled API evolution.
 
-### XV. Infrastructure-First
+### XV. Infrastructure-First (Phase 0)
 
 **CI/CD infrastructure MUST be operational before any feature development begins.**
 
 This principle establishes a mandatory prerequisite for all feature work:
 
+**Hosting Platform**: **Render** (https://render.com) is the REQUIRED hosting platform for production and staging environments. This ensures consistent deployment infrastructure and accessible URLs.
+
 **Pre-requisites before ANY feature work**:
-- `main` branch MUST be deployed to production environment
-- Integration branch (`develop` or feature branch) MUST be deployed to staging environment
-- CI pipeline MUST be fully operational (build, test, lint, security scan)
-- CD pipeline MUST be fully operational (auto-deploy to staging, manual deploy to production)
+- `main` branch MUST be deployed to **production environment on Render** with accessible URL
+- Integration branch (`develop` or feature branch) MUST be deployed to **staging/dev environment on Render** with accessible URL
+- CI pipeline MUST be fully operational (build, test, lint, security scan, **SonarQube**)
+- CD pipeline MUST be fully operational (auto-deploy to staging on Render, manual deploy to production on Render)
 - Branch protection rules MUST be enforced on `main` and integration branch
 - Quality gates MUST be configured and blocking
 
+**For NEW projects (no existing deployable code)**:
+- A minimal "Hello World" application MUST be created
+- This application MUST be deployed to both production and staging URLs
+- All tests MUST pass (even if minimal)
+- This validates the entire CI/CD pipeline end-to-end
+
+**For EXISTING projects (already has deployable code)**:
+- "Hello World" is NOT required
+- Application MUST be deployable to production, staging/dev, AND local environments
+- All three deployment targets MUST be functional and documented
+
 **Infrastructure checklist** (MUST all pass before feature development):
-- [ ] Production environment provisioned and accessible
-- [ ] Staging environment provisioned and accessible
+- [ ] Production environment provisioned on Render with accessible URL
+- [ ] Staging/dev environment provisioned on Render with accessible URL
+- [ ] Local development environment documented and functional
 - [ ] CI pipeline executes on every push
-- [ ] CD pipeline deploys to staging on develop merge
-- [ ] CD pipeline deploys to production on main merge (manual trigger)
-- [ ] Health checks configured for both environments
+- [ ] SonarQube analysis integrated in CI pipeline
+- [ ] CD pipeline deploys to staging on Render on integration branch merge
+- [ ] CD pipeline deploys to production on Render on main merge (manual trigger)
+- [ ] Health checks configured for both Render environments
 - [ ] Rollback mechanism tested and documented
 - [ ] Monitoring and alerting configured
 - [ ] Branch protection rules active
@@ -380,6 +404,98 @@ This principle establishes a mandatory prerequisite for all feature work:
 
 **Rationale**: GitHub issues provide traceability, enable project management visibility, facilitate team communication, and create an audit trail of all changes. Automatic closure ensures issues stay synchronized with actual code state.
 
+### XVII. Task Implementation Lifecycle
+
+**Each task MAY use an `implementation.md` document at the project root to guide implementation.**
+
+**implementation.md Purpose**:
+- Serves as a checklist for implementing a single task
+- Located ALWAYS at the **project root** (not in subdirectories)
+- Concerns a **single task**, not an entire feature
+- Enforces TDD workflow: write tests FIRST, then implement
+- Deleted when the commit is accepted by CI/CD
+
+**Usage** (developer choice, not mandatory in tasks.md):
+- Developer MAY create `implementation.md` when starting a task
+- If `implementation.md` already exists, continue using it for the current task
+- Follow the checklist items one by one
+- Check off items as completed
+- Verify CI/CD passes
+- Delete `implementation.md` once commit is accepted
+- Optionally commit before local tests pass (to use CI/CD if local environment is unavailable)
+
+**implementation.md Template**:
+```markdown
+# Task: [Task Description]
+
+## Testing Checklist
+
+### Unit Tests (if applicable)
+- [ ] Write unit tests for [component/function]
+- [ ] Verify tests FAIL before implementation (Red)
+
+### Component Tests (if applicable)
+- [ ] Write component/integration tests
+- [ ] Verify tests FAIL before implementation (Red)
+
+### E2E Tests (if applicable)
+- [ ] Write E2E tests for user scenario
+- [ ] Verify tests FAIL before implementation (Red)
+
+## Implementation
+
+- [ ] Implement the feature/fix
+- [ ] Verify all tests PASS (Green)
+- [ ] Refactor if needed (Refactor)
+
+## Verification
+
+- [ ] Run tests locally (or push for CI/CD)
+- [ ] CI/CD pipeline passes
+- [ ] Delete this file and commit
+```
+
+**TDD Enforcement**:
+- Tests MUST be written FIRST when applicable
+- Tests MUST fail before implementation (Red phase)
+- Implementation makes tests pass (Green phase)
+- Refactoring improves code without changing behavior (Refactor phase)
+
+**Lifecycle**:
+1. **Start task**: Create `implementation.md` at project root (or use existing)
+2. **Write tests**: Follow TDD - write failing tests first
+3. **Implement**: Make tests pass
+4. **Verify**: Run locally or push to CI/CD
+5. **Complete**: Delete `implementation.md` when commit is accepted
+6. **Next task**: Create new `implementation.md` or continue to next task
+
+**Rationale**: `implementation.md` provides a structured TDD workflow without polluting repository history. Being task-scoped (not feature-scoped) keeps the document focused and manageable. The file is temporary by design—it guides work but does not persist.
+
+### XVIII. Phase 0 Priority
+
+**Phase 0 (Infrastructure-First) ALWAYS takes precedence over any other work.**
+
+**Priority Rules**:
+- If Phase 0 is incomplete, ALL other work MUST stop until Phase 0 is complete
+- If Phase 0 infrastructure is modified or broken, it becomes immediately blocking
+- No exceptions: feature work, bug fixes (except critical security), refactoring - ALL wait for Phase 0
+
+**When Phase 0 Re-triggers**:
+- CI/CD pipeline failure or degradation
+- Loss of production or staging URL accessibility
+- SonarQube integration failure
+- Quality gates misconfigured or bypassed
+- Branch protection rules disabled
+
+**Resolution Process**:
+1. Immediately stop all feature work
+2. Create `fix/phase0-<issue>` or `chore/phase0-<issue>` branch
+3. Restore Phase 0 compliance
+4. Verify all infrastructure checklist items
+5. Resume feature work
+
+**Rationale**: Infrastructure is the foundation upon which all other work depends. A broken or incomplete CI/CD pipeline undermines every principle in this constitution. Phase 0 priority ensures the team never accumulates infrastructure debt.
+
 ## Development Workflow
 
 ### Pull Request Process
@@ -387,9 +503,27 @@ This principle establishes a mandatory prerequisite for all feature work:
 1. **Creation**: From a branch conforming to Git Flow naming
 2. **Description**: PR template with context, changes, tests
 3. **Target**: PRs target integration branch (`develop` or feature branch) or `main`
-4. **CI**: Pipeline MUST pass (build, tests, linting)
+4. **CI**: Pipeline MUST pass (build, tests, linting, SonarQube)
 5. **Review**: Minimum 1 approval required
 6. **Merge**: Squash merge to integration branch, merge commit to `main`
+
+### Standard Task Workflow
+
+For each task within a feature:
+
+1. **Branch**: Create feature branch (if new feature) or switch to existing feature branch
+2. **Implementation Guide** (optional): Create `implementation.md` at project root if not exists
+3. **TDD Cycle**:
+   - Write tests FIRST (unit/component/E2E as applicable)
+   - Verify tests FAIL
+   - Implement the change
+   - Verify tests PASS
+   - Refactor if needed
+4. **Commit**: Commit with conventional message
+5. **Push**: Push to remote (may push before local tests if local unavailable)
+6. **Verify**: Wait for CI/CD pipeline to pass
+7. **Cleanup**: Delete `implementation.md` once commit accepted
+8. **Continue**: Proceed to next task
 
 ### Code Review Checklist
 
@@ -422,11 +556,13 @@ This principle establishes a mandatory prerequisite for all feature work:
 - Integration tests
 - Coverage analysis (>= 80%)
 - Security analysis
+- SonarQube analysis
 - Complete linting
 
 ### Pre-merge (PR)
 
 - All CI checks pass
+- SonarQube quality gate passes
 - Code review approved
 - No conflicts
 - Branch up-to-date with target (integration branch or `main`)
@@ -457,4 +593,4 @@ This principle establishes a mandatory prerequisite for all feature work:
 
 This constitution SUPERSEDES all other practices. In case of conflict between this constitution and other documents, the constitution prevails.
 
-**Version**: 1.4.0 | **Ratified**: 2025-11-28 | **Last Amended**: 2025-11-28
+**Version**: 1.6.1 | **Ratified**: 2025-11-28 | **Last Amended**: 2025-11-29
