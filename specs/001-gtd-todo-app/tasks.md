@@ -7,19 +7,21 @@
 
 ## Overview
 
-Total tasks: 127
-- Sprint 0 (Infrastructure + GitHub Issues): 24 tasks
-- P1 User Account Management: 21 tasks
-- P2 Capture Ideas and Tasks: 10 tasks
-- P3 Clarify and Process: 8 tasks
-- P4 Organize with Contexts: 13 tasks
-- P5 Project Management: 10 tasks
-- P6 Weekly Review: 8 tasks
-- P7 Calendar and Deadlines: 8 tasks
+Total tasks: 168
+- Sprint 0 (Infrastructure + GitHub Issues): 35 tasks (24 complete, 11 new - SonarQube + Render)
+- P1 User Account Management: 43 tasks (21 complete, 22 new)
+- P2 Capture Ideas and Tasks: 14 tasks
+- P3 Clarify and Process: 12 tasks
+- P4 Organize with Contexts: 17 tasks
+- P5 Project Management: 14 tasks
+- P6 Weekly Review: 12 tasks
+- P7 Calendar and Deadlines: 12 tasks
 - Cross-Cutting (Sync & Offline): 5 tasks
-- Integration Tests: 6 tasks
+- Integration Tests: 6 tasks (1 complete)
 - Edge Cases: 5 tasks
 - Polish & Finalization: 9 tasks
+
+> **Micro-Organization**: Each feature follows the pattern: Backend first → Frontend second → Tests → Next task.
 
 > **Note**: iOS app (FR-027) is descoped to Phase 2. Web MVP delivers all P1-P7 features first. iOS tasks will be added in a separate planning cycle after web MVP completion.
 
@@ -28,6 +30,8 @@ Total tasks: 127
 ---
 
 ## Sprint 0: Infrastructure Setup (Constitution XV & XVI - BLOCKING)
+
+**Status**: In Progress (24/35 tasks complete - SonarQube + Render pending)
 
 **BLOCKING**: No `feat/*` branches until ALL Sprint 0 tasks complete.
 
@@ -61,6 +65,7 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 - [X] [S0-006] Create GitHub Actions CI workflow for API (PHP lint, PHPStan, PHPUnit) `.github/workflows/ci.yml`
 - [X] [S0-007] Add CI steps for Web (ESLint, Prettier, Jest, build) `.github/workflows/ci.yml`
 - [X] [S0-008] Add security scanning (composer audit, npm audit) `.github/workflows/ci.yml`
+- [ ] [S0-008b] **Configure SonarQube/SonarCloud analysis in CI pipeline (Constitution VI)** `.github/workflows/ci.yml`
 - [X] [S0-009] Configure code coverage reporting (Codecov or similar) `.github/workflows/ci.yml`
 - [X] [S0-010] Add branch protection rules for main and 001-gtd-todo-app `Repository Settings`
 
@@ -72,20 +77,68 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 - [X] [S0-014] Document rollback procedures `docs/deployment.md`
 - [X] [S0-015] Verify complete infrastructure checklist passes (Constitution XV)
 
+### Phase 0.4: Render Deployment (Constitution XV - REQUIRED)
+
+> Constitution XV mandates Render as the hosting platform for production and staging.
+
+- [ ] [S0-024] Create Render account and project setup `render.yaml`
+- [ ] [S0-025] Configure Render Web Service for API (production) with accessible URL
+- [ ] [S0-026] Configure Render Web Service for API (staging) with accessible URL
+- [ ] [S0-027] Configure Render Static Site for Web frontend (production)
+- [ ] [S0-028] Configure Render Static Site for Web frontend (staging)
+- [ ] [S0-029] Configure Render PostgreSQL/MariaDB database (or use external)
+- [ ] [S0-030] Update CD pipeline to deploy to Render on merge `.github/workflows/cd.yml`
+- [ ] [S0-031] Verify production URL accessible and health check passes
+- [ ] [S0-032] Verify staging URL accessible and health check passes
+- [ ] [S0-033] Document Render deployment URLs in README.md
+
 ---
 
 ## P1: User Account Management (FR-001 to FR-006b)
 
 **User Story**: As a user, I want to create an account, log in securely, and manage my preferences so that I can access my data across all my devices.
 
-### Phase 1.1: Backend - User Entity & Repository
+**Status**: In Progress (21/42 tasks complete)
+
+### Phase 1.1: Backend - User Entity & Repository ✅
+
+- [X] [P1-001] [Story-1] Create User Doctrine entity with all fields from data-model.md `api/src/Entity/User.php`
+- [X] [P1-002] [Story-1] Create User repository with CRUD operations `api/src/Repository/UserRepository.php`
+- [X] [P1-003] [Story-1] Create database migration for users table `api/migrations/Version001CreateUsersTable.php`
+- [X] [P1-004] [Story-1] Write unit tests for User entity validation `api/tests/Unit/Entity/UserTest.php`
+
+### Phase 1.2: Backend - Authentication ✅
+
+- [X] [P1-005] [Story-1] Configure LexikJWTAuthenticationBundle with key generation `api/config/packages/lexik_jwt_authentication.yaml`
+- [X] [P1-006] [Story-1] Create AuthController with login endpoint `api/src/Controller/AuthController.php`
+- [X] [P1-007] [Story-1] Implement refresh token rotation with RefreshToken entity `api/src/Entity/RefreshToken.php`
+- [X] [P1-007b] [Story-1] Create database migration for refresh_tokens table `api/migrations/Version008CreateRefreshTokensTable.php`
+- [X] [P1-008] [Story-1] Implement Apple Sign-In verification service `api/src/Service/AppleSignInService.php`
+- [X] [P1-009] [Story-1] Create registration endpoint with email verification `api/src/Controller/RegistrationController.php`
+- [X] [P1-010] [Story-1] Create password reset flow with secure tokens `api/src/Controller/PasswordResetController.php`
+- [X] [P1-011] [Story-1] Write functional tests for all auth endpoints `api/tests/Functional/AuthTest.php`
+
+### Phase 1.2b: Backend - Session & Account Management (FR-006, FR-006b) ✅
+
+- [X] [P1-018] [Story-1] Implement session timeout with auto-logout after inactivity `api/src/EventSubscriber/SessionTimeoutSubscriber.php`
+- [X] [P1-019] [Story-1] Create account deletion endpoint with cascade delete (GDPR) `api/src/Controller/AccountController.php`
+- [X] [P1-020] [Story-1] Implement hard delete service for all user data `api/src/Service/AccountDeletionService.php`
+
+### Phase 1.3: Frontend - Auth Pages ✅
+
+- [X] [P1-012] [Story-1] Create auth Redux slice with login/logout/register actions `web/src/features/auth/authSlice.ts`
+- [X] [P1-013] [Story-1] Create LoginPage component with form validation `web/src/pages/LoginPage.tsx`
+- [X] [P1-014] [Story-1] Create RegisterPage component with email verification flow `web/src/pages/RegisterPage.tsx`
+- [X] [P1-015] [Story-1] Implement Apple Sign-In button for web `web/src/components/AppleSignInButton.tsx`
+- [X] [P1-016] [Story-1] Create protected route wrapper with auth guard `web/src/components/ProtectedRoute.tsx`
+- [X] [P1-017] [Story-1] Write E2E tests for auth flows `web/tests/e2e/auth.spec.ts`
 
 - [X] [P1-001] [P1] [Story-1] Create User Doctrine entity with all fields from data-model.md `api/src/Entity/User.php`
 - [X] [P1-002] [P1] [Story-1] Create User repository with CRUD operations `api/src/Repository/UserRepository.php`
 - [X] [P1-003] [P1] [Story-1] Create database migration for users table `api/migrations/Version001CreateUsersTable.php`
 - [X] [P1-004] [P1] [Story-1] Write unit tests for User entity validation `api/tests/Unit/Entity/UserTest.php`
 
-### Phase 1.2: Backend - Authentication
+> Backend endpoints exist (P1-019, P1-020) but frontend pages are missing.
 
 - [X] [P1-005] [P1] [Story-1] Configure LexikJWTAuthenticationBundle with key generation `api/config/packages/lexik_jwt_authentication.yaml`
 - [X] [P1-006] [P1] [Story-1] Create AuthController with login endpoint `api/src/Controller/AuthController.php`
@@ -96,13 +149,13 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 - [X] [P1-010] [P1] [Story-1] Create password reset flow with secure tokens `api/src/Controller/PasswordResetController.php`
 - [X] [P1-011] [P1] [Story-1] Write functional tests for all auth endpoints `api/tests/Functional/AuthTest.php`
 
-### Phase 1.2b: Backend - Session & Account Management (FR-006, FR-006b)
+### Phase 1.5: Frontend - Navigation Bar & App Shell (NEW)
 
 - [X] [P1-018] [P1] [Story-1] Implement session timeout with auto-logout after inactivity `api/src/EventSubscriber/SessionTimeoutSubscriber.php`
 - [X] [P1-019] [P1] [Story-1] Create account deletion endpoint with cascade delete (GDPR) `api/src/Controller/AccountController.php`
 - [X] [P1-020] [P1] [Story-1] Implement hard delete service for all user data `api/src/Service/AccountDeletionService.php`
 
-### Phase 1.3: Frontend - Auth Module
+### Phase 1.6: Frontend - WIP Placeholder Pages for P2-P7 (NEW)
 
 - [X] [P1-012] [P1] [Story-1] Create auth Redux slice with login/logout/register actions `web/src/features/auth/authSlice.js`
 - [X] [P1-013] [P1] [Story-1] Create LoginPage component with form validation `web/src/pages/LoginPage.jsx`
@@ -117,21 +170,28 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 **User Story**: As a user, I want to quickly capture all my ideas, tasks, and information into a centralized "inbox" so that I can free my mind and not forget anything.
 
-### Phase 2.1: Backend - Task Entity & Inbox
+### Phase 2.1: Backend - Task Entity
 
-- [ ] [P2-001] [P2] [Story-2] Create Task Doctrine entity with all GTD statuses `api/src/Entity/Task.php`
-- [ ] [P2-002] [P2] [Story-2] Create Task repository with inbox queries `api/src/Repository/TaskRepository.php`
-- [ ] [P2-003] [P2] [Story-2] Create database migration for tasks table `api/migrations/Version004CreateTasksTable.php`
-- [ ] [P2-004] [P2] [Story-2] Create TaskController with capture endpoint (POST /tasks) `api/src/Controller/TaskController.php`
-- [ ] [P2-005] [P2] [Story-2] Write unit tests for Task entity and status transitions `api/tests/Unit/Entity/TaskTest.php`
+- [ ] [P2-001] [Story-2] Create Task Doctrine entity with all GTD statuses `api/src/Entity/Task.php`
+- [ ] [P2-002] [Story-2] Write unit tests for Task entity `api/tests/Unit/Entity/TaskTest.php`
+- [ ] [P2-003] [Story-2] Create Task repository with inbox queries `api/src/Repository/TaskRepository.php`
+- [ ] [P2-004] [Story-2] Create database migration for tasks table `api/migrations/Version004CreateTasksTable.php`
 
-### Phase 2.2: Frontend - Inbox Module
+### Phase 2.2: Backend - Capture Endpoint
 
-- [ ] [P2-006] [P2] [Story-2] Create inbox Redux slice with optimistic updates `web/src/features/inbox/inboxSlice.ts`
-- [ ] [P2-007] [P2] [Story-2] Create InboxPage with task list and quick capture `web/src/pages/InboxPage.tsx`
-- [ ] [P2-008] [P2] [Story-2] Create QuickCaptureInput component (< 3 interactions) `web/src/components/QuickCaptureInput.tsx`
-- [ ] [P2-009] [P2] [Story-2] Add keyboard shortcut for quick capture (Ctrl+N) `web/src/hooks/useKeyboardShortcuts.ts`
-- [ ] [P2-010] [P2] [Story-2] Write E2E tests for inbox capture flow `web/tests/e2e/inbox.spec.ts`
+- [ ] [P2-005] [Story-2] Create TaskController with POST /api/tasks endpoint `api/src/Controller/TaskController.php`
+- [ ] [P2-006] [Story-2] Create GET /api/tasks/inbox endpoint `api/src/Controller/TaskController.php`
+- [ ] [P2-007] [Story-2] Write functional tests for capture/inbox endpoints `api/tests/Functional/Task/InboxTest.php`
+
+### Phase 2.3: Frontend - Inbox Module
+
+- [ ] [P2-008] [Story-2] Create inbox Redux slice with optimistic updates `web/src/features/inbox/inboxSlice.ts`
+- [ ] [P2-009] [Story-2] Replace InboxPage placeholder with full implementation `web/src/pages/InboxPage.tsx`
+- [ ] [P2-010] [Story-2] Write unit tests for InboxPage `web/tests/unit/pages/InboxPage.test.tsx`
+- [ ] [P2-011] [Story-2] Create QuickCaptureInput component (< 3 interactions) `web/src/components/QuickCaptureInput.tsx`
+- [ ] [P2-012] [Story-2] Write unit tests for QuickCaptureInput `web/tests/unit/components/QuickCaptureInput.test.tsx`
+- [ ] [P2-013] [Story-2] Add keyboard shortcut for quick capture (Ctrl+N) `web/src/hooks/useKeyboardShortcuts.ts`
+- [ ] [P2-014] [Story-2] Write E2E tests for inbox capture flow `web/tests/e2e/inbox.spec.ts`
 
 ---
 
@@ -141,17 +201,21 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 ### Phase 3.1: Backend - Clarification Logic
 
-- [ ] [P3-001] [P3] [Story-3] Create TaskService with clarification workflow `api/src/Service/TaskService.php`
-- [ ] [P3-002] [P3] [Story-3] Add task status transition validation `api/src/EventSubscriber/TaskStatusSubscriber.php`
-- [ ] [P3-003] [P3] [Story-3] Create PATCH endpoint for task clarification `api/src/Controller/TaskController.php`
-- [ ] [P3-004] [P3] [Story-3] Write unit tests for status transitions `api/tests/Unit/Service/TaskServiceTest.php`
+- [ ] [P3-001] [Story-3] Create TaskService with clarification workflow `api/src/Service/TaskService.php`
+- [ ] [P3-002] [Story-3] Write unit tests for TaskService status transitions `api/tests/Unit/Service/TaskServiceTest.php`
+- [ ] [P3-003] [Story-3] Add task status transition validation subscriber `api/src/EventSubscriber/TaskStatusSubscriber.php`
+- [ ] [P3-004] [Story-3] Create PATCH /api/tasks/{id}/clarify endpoint `api/src/Controller/TaskController.php`
+- [ ] [P3-005] [Story-3] Write functional tests for clarification endpoint `api/tests/Functional/Task/ClarifyTest.php`
 
 ### Phase 3.2: Frontend - Clarification UI
 
-- [ ] [P3-005] [P3] [Story-3] Create ClarifyTaskModal with decision flow `web/src/components/ClarifyTaskModal.tsx`
-- [ ] [P3-006] [P3] [Story-3] Add 2-minute rule timer component `web/src/components/TwoMinuteTimer.tsx`
-- [ ] [P3-007] [P3] [Story-3] Create task clarification wizard steps `web/src/features/tasks/ClarifyWizard.tsx`
-- [ ] [P3-008] [P3] [Story-3] Write E2E tests for clarification flow `web/tests/e2e/clarify.spec.ts`
+- [ ] [P3-006] [Story-3] Create tasks Redux slice with clarification actions `web/src/features/tasks/tasksSlice.ts`
+- [ ] [P3-007] [Story-3] Replace ClarifyPage placeholder with full implementation `web/src/pages/ClarifyPage.tsx`
+- [ ] [P3-008] [Story-3] Write unit tests for ClarifyPage `web/tests/unit/pages/ClarifyPage.test.tsx`
+- [ ] [P3-009] [Story-3] Create ClarifyTaskModal with decision flow `web/src/components/ClarifyTaskModal.tsx`
+- [ ] [P3-010] [Story-3] Create TwoMinuteTimer component `web/src/components/TwoMinuteTimer.tsx`
+- [ ] [P3-011] [Story-3] Create ClarifyWizard with guided steps `web/src/features/tasks/ClarifyWizard.tsx`
+- [ ] [P3-012] [Story-3] Write E2E tests for clarification flow `web/tests/e2e/clarify.spec.ts`
 
 ---
 
@@ -161,25 +225,33 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 ### Phase 4.1: Backend - Context Entity
 
-- [ ] [P4-001] [P4] [Story-4] Create Context Doctrine entity `api/src/Entity/Context.php`
-- [ ] [P4-002] [P4] [Story-4] Create TaskContext join entity for M:N relationship `api/src/Entity/TaskContext.php`
-- [ ] [P4-003] [P4] [Story-4] Create database migration for contexts table `api/migrations/Version002CreateContextsTable.php`
-- [ ] [P4-003b] [P4] [Story-4] Create database migration for task_contexts join table `api/migrations/Version005CreateTaskContextsTable.php`
-- [ ] [P4-004] [P4] [Story-4] Create seed command for default contexts `api/src/Command/SeedContextsCommand.php`
-- [ ] [P4-005] [P4] [Story-4] Create ContextController with CRUD endpoints `api/src/Controller/ContextController.php`
+- [ ] [P4-001] [Story-4] Create Context Doctrine entity `api/src/Entity/Context.php`
+- [ ] [P4-002] [Story-4] Write unit tests for Context entity `api/tests/Unit/Entity/ContextTest.php`
+- [ ] [P4-003] [Story-4] Create TaskContext join entity for M:N relationship `api/src/Entity/TaskContext.php`
+- [ ] [P4-004] [Story-4] Create database migration for contexts table `api/migrations/Version002CreateContextsTable.php`
+- [ ] [P4-005] [Story-4] Create database migration for task_contexts join table `api/migrations/Version005CreateTaskContextsTable.php`
 
-### Phase 4.2: Frontend - Context Filtering
+### Phase 4.2: Backend - Context Endpoints
 
-- [ ] [P4-006] [P4] [Story-4] Create contexts Redux slice `web/src/features/contexts/contextsSlice.ts`
-- [ ] [P4-007] [P4] [Story-4] Create ContextFilterSidebar component `web/src/components/ContextFilterSidebar.tsx`
-- [ ] [P4-008] [P4] [Story-4] Write E2E tests for context filtering `web/tests/e2e/contexts.spec.ts`
+- [ ] [P4-006] [Story-4] Create seed command for default contexts `api/src/Command/SeedContextsCommand.php`
+- [ ] [P4-007] [Story-4] Create ContextController with CRUD endpoints `api/src/Controller/ContextController.php`
+- [ ] [P4-008] [Story-4] Write functional tests for context endpoints `api/tests/Functional/Context/ContextTest.php`
 
-### Phase 4.3: Frontend - GTD List Views (FR-016)
+### Phase 4.3: Frontend - Context Module
 
-- [ ] [P4-009] [P4] [Story-4] Create NextActionsPage with filtered task list `web/src/pages/NextActionsPage.tsx`
-- [ ] [P4-010] [P4] [Story-4] Create WaitingForPage with delegated/blocked tasks `web/src/pages/WaitingForPage.tsx`
-- [ ] [P4-011] [P4] [Story-4] Create SomedayMaybePage with deferred tasks `web/src/pages/SomedayMaybePage.tsx`
-- [ ] [P4-012] [P4] [Story-4] Create ReferencePage for non-actionable items `web/src/pages/ReferencePage.tsx`
+- [ ] [P4-009] [Story-4] Create contexts Redux slice `web/src/features/contexts/contextsSlice.ts`
+- [ ] [P4-010] [Story-4] Replace ContextsPage placeholder with full implementation `web/src/pages/ContextsPage.tsx`
+- [ ] [P4-011] [Story-4] Write unit tests for ContextsPage `web/tests/unit/pages/ContextsPage.test.tsx`
+- [ ] [P4-012] [Story-4] Create ContextFilterSidebar component `web/src/components/ContextFilterSidebar.tsx`
+- [ ] [P4-013] [Story-4] Write unit tests for ContextFilterSidebar `web/tests/unit/components/ContextFilterSidebar.test.tsx`
+
+### Phase 4.4: Frontend - GTD List Views (FR-016)
+
+- [ ] [P4-014] [Story-4] Create NextActionsPage with filtered task list `web/src/pages/NextActionsPage.tsx`
+- [ ] [P4-015] [Story-4] Create WaitingForPage with delegated/blocked tasks `web/src/pages/WaitingForPage.tsx`
+- [ ] [P4-016] [Story-4] Create SomedayMaybePage with deferred tasks `web/src/pages/SomedayMaybePage.tsx`
+- [ ] [P4-017] [Story-4] Create ReferencePage for non-actionable items `web/src/pages/ReferencePage.tsx`
+- [ ] [P4-018] [Story-4] Write E2E tests for context filtering and GTD lists `web/tests/e2e/contexts.spec.ts`
 
 ---
 
@@ -189,19 +261,26 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 ### Phase 5.1: Backend - Project Entity
 
-- [ ] [P5-001] [P5] [Story-5] Create Project Doctrine entity `api/src/Entity/Project.php`
-- [ ] [P5-002] [P5] [Story-5] Create Project repository with computed properties `api/src/Repository/ProjectRepository.php`
-- [ ] [P5-003] [P5] [Story-5] Create database migration for projects table `api/migrations/Version003CreateProjectsTable.php`
-- [ ] [P5-004] [P5] [Story-5] Create ProjectService with next action logic `api/src/Service/ProjectService.php`
-- [ ] [P5-005] [P5] [Story-5] Create ProjectController with CRUD endpoints `api/src/Controller/ProjectController.php`
-- [ ] [P5-006] [P5] [Story-5] Write unit tests for next action computation `api/tests/Unit/Service/ProjectServiceTest.php`
+- [ ] [P5-001] [Story-5] Create Project Doctrine entity `api/src/Entity/Project.php`
+- [ ] [P5-002] [Story-5] Write unit tests for Project entity `api/tests/Unit/Entity/ProjectTest.php`
+- [ ] [P5-003] [Story-5] Create Project repository with computed properties `api/src/Repository/ProjectRepository.php`
+- [ ] [P5-004] [Story-5] Create database migration for projects table `api/migrations/Version003CreateProjectsTable.php`
 
-### Phase 5.2: Frontend - Projects Module
+### Phase 5.2: Backend - Project Endpoints
 
-- [ ] [P5-007] [P5] [Story-5] Create projects Redux slice `web/src/features/projects/projectsSlice.ts`
-- [ ] [P5-008] [P5] [Story-5] Create ProjectsPage with project list `web/src/pages/ProjectsPage.tsx`
-- [ ] [P5-009] [P5] [Story-5] Create ProjectDetailPage with task list `web/src/pages/ProjectDetailPage.tsx`
-- [ ] [P5-010] [P5] [Story-5] Write E2E tests for project management `web/tests/e2e/projects.spec.ts`
+- [ ] [P5-005] [Story-5] Create ProjectService with next action logic `api/src/Service/ProjectService.php`
+- [ ] [P5-006] [Story-5] Write unit tests for next action computation `api/tests/Unit/Service/ProjectServiceTest.php`
+- [ ] [P5-007] [Story-5] Create ProjectController with CRUD endpoints `api/src/Controller/ProjectController.php`
+- [ ] [P5-008] [Story-5] Write functional tests for project endpoints `api/tests/Functional/Project/ProjectTest.php`
+
+### Phase 5.3: Frontend - Projects Module
+
+- [ ] [P5-009] [Story-5] Create projects Redux slice `web/src/features/projects/projectsSlice.ts`
+- [ ] [P5-010] [Story-5] Replace ProjectsPage placeholder with full implementation `web/src/pages/ProjectsPage.tsx`
+- [ ] [P5-011] [Story-5] Write unit tests for ProjectsPage `web/tests/unit/pages/ProjectsPage.test.tsx`
+- [ ] [P5-012] [Story-5] Create ProjectDetailPage with task list `web/src/pages/ProjectDetailPage.tsx`
+- [ ] [P5-013] [Story-5] Create ProjectCard component `web/src/components/ProjectCard.tsx`
+- [ ] [P5-014] [Story-5] Write E2E tests for project management `web/tests/e2e/projects.spec.ts`
 
 ---
 
@@ -211,17 +290,24 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 ### Phase 6.1: Backend - Review Entity
 
-- [ ] [P6-001] [P6] [Story-6] Create Review Doctrine entity `api/src/Entity/Review.php`
-- [ ] [P6-002] [P6] [Story-6] Create Review repository `api/src/Repository/ReviewRepository.php`
-- [ ] [P6-003] [P6] [Story-6] Create database migration for reviews table `api/migrations/Version006CreateReviewsTable.php`
-- [ ] [P6-004] [P6] [Story-6] Create ReviewController with start/complete endpoints `api/src/Controller/ReviewController.php`
-- [ ] [P6-005] [P6] [Story-6] Create review reminder notification service `api/src/Service/ReviewReminderService.php`
+- [ ] [P6-001] [Story-6] Create Review Doctrine entity `api/src/Entity/Review.php`
+- [ ] [P6-002] [Story-6] Write unit tests for Review entity `api/tests/Unit/Entity/ReviewTest.php`
+- [ ] [P6-003] [Story-6] Create Review repository `api/src/Repository/ReviewRepository.php`
+- [ ] [P6-004] [Story-6] Create database migration for reviews table `api/migrations/Version006CreateReviewsTable.php`
 
-### Phase 6.2: Frontend - Review Module
+### Phase 6.2: Backend - Review Endpoints
 
-- [ ] [P6-006] [P6] [Story-6] Create review Redux slice `web/src/features/review/reviewSlice.ts`
-- [ ] [P6-007] [P6] [Story-6] Create ReviewWizard with guided steps `web/src/pages/ReviewWizard.tsx`
-- [ ] [P6-008] [P6] [Story-6] Write E2E tests for weekly review flow `web/tests/e2e/review.spec.ts`
+- [ ] [P6-005] [Story-6] Create ReviewController with start/complete endpoints `api/src/Controller/ReviewController.php`
+- [ ] [P6-006] [Story-6] Create review reminder notification service `api/src/Service/ReviewReminderService.php`
+- [ ] [P6-007] [Story-6] Write functional tests for review endpoints `api/tests/Functional/Review/ReviewTest.php`
+
+### Phase 6.3: Frontend - Review Module
+
+- [ ] [P6-008] [Story-6] Create review Redux slice `web/src/features/review/reviewSlice.ts`
+- [ ] [P6-009] [Story-6] Replace ReviewPage placeholder with ReviewWizard `web/src/pages/ReviewWizard.tsx`
+- [ ] [P6-010] [Story-6] Write unit tests for ReviewWizard `web/tests/unit/pages/ReviewWizard.test.tsx`
+- [ ] [P6-011] [Story-6] Create ReviewStepCard component `web/src/components/ReviewStepCard.tsx`
+- [ ] [P6-012] [Story-6] Write E2E tests for weekly review flow `web/tests/e2e/review.spec.ts`
 
 ---
 
@@ -231,17 +317,24 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 ### Phase 7.1: Backend - Calendar Entity
 
-- [ ] [P7-001] [P7] [Story-7] Create CalendarEvent Doctrine entity `api/src/Entity/CalendarEvent.php`
-- [ ] [P7-002] [P7] [Story-7] Create CalendarEvent repository `api/src/Repository/CalendarEventRepository.php`
-- [ ] [P7-003] [P7] [Story-7] Create database migration for calendar_events table `api/migrations/Version007CreateCalendarEventsTable.php`
-- [ ] [P7-004] [P7] [Story-7] Create CalendarController with CRUD endpoints `api/src/Controller/CalendarController.php`
-- [ ] [P7-005] [P7] [Story-7] Create deadline reminder notification service `api/src/Service/DeadlineReminderService.php`
+- [ ] [P7-001] [Story-7] Create CalendarEvent Doctrine entity `api/src/Entity/CalendarEvent.php`
+- [ ] [P7-002] [Story-7] Write unit tests for CalendarEvent entity `api/tests/Unit/Entity/CalendarEventTest.php`
+- [ ] [P7-003] [Story-7] Create CalendarEvent repository `api/src/Repository/CalendarEventRepository.php`
+- [ ] [P7-004] [Story-7] Create database migration for calendar_events table `api/migrations/Version007CreateCalendarEventsTable.php`
 
-### Phase 7.2: Frontend - Calendar Module
+### Phase 7.2: Backend - Calendar Endpoints
 
-- [ ] [P7-006] [P7] [Story-7] Create calendar Redux slice `web/src/features/calendar/calendarSlice.ts`
-- [ ] [P7-007] [P7] [Story-7] Create CalendarPage with month/week views `web/src/pages/CalendarPage.tsx`
-- [ ] [P7-008] [P7] [Story-7] Write E2E tests for calendar features `web/tests/e2e/calendar.spec.ts`
+- [ ] [P7-005] [Story-7] Create CalendarController with CRUD endpoints `api/src/Controller/CalendarController.php`
+- [ ] [P7-006] [Story-7] Create deadline reminder notification service `api/src/Service/DeadlineReminderService.php`
+- [ ] [P7-007] [Story-7] Write functional tests for calendar endpoints `api/tests/Functional/Calendar/CalendarTest.php`
+
+### Phase 7.3: Frontend - Calendar Module
+
+- [ ] [P7-008] [Story-7] Create calendar Redux slice `web/src/features/calendar/calendarSlice.ts`
+- [ ] [P7-009] [Story-7] Replace CalendarPage placeholder with full implementation `web/src/pages/CalendarPage.tsx`
+- [ ] [P7-010] [Story-7] Write unit tests for CalendarPage `web/tests/unit/pages/CalendarPage.test.tsx`
+- [ ] [P7-011] [Story-7] Create CalendarView component (month/week views) `web/src/components/CalendarView.tsx`
+- [ ] [P7-012] [Story-7] Write E2E tests for calendar features `web/tests/e2e/calendar.spec.ts`
 
 ---
 
@@ -261,7 +354,7 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 Per Constitution II, each component MUST have integration tests.
 
-- [ ] [INT-001] Write integration tests for Auth module (login, register, refresh, Apple Sign-In) `api/tests/Integration/AuthIntegrationTest.php`
+- [X] [INT-001] Write integration tests for Auth module (login, register, refresh, Apple Sign-In) `api/tests/Integration/AuthIntegrationTest.php`
 - [ ] [INT-002] Write integration tests for Task module (CRUD, status transitions) `api/tests/Integration/TaskIntegrationTest.php`
 - [ ] [INT-003] Write integration tests for Project module (CRUD, next action logic) `api/tests/Integration/ProjectIntegrationTest.php`
 - [ ] [INT-004] Write integration tests for Context module (CRUD, task associations) `api/tests/Integration/ContextIntegrationTest.php`
@@ -325,9 +418,9 @@ P1-012 → P1-013 → P1-014 → P1-017 (Auth frontend chain)
 P2-001 → P2-002 → P2-003 → P2-004 (Task entity chain)
 P2-006 → P2-007 → P2-010 (Inbox frontend chain)
 
-P4-001 → P4-002 → P4-003 → P4-003b (Context entity chain)
-P4-003b depends on P2-003 (tasks table must exist for join table)
-P4-009 → P4-010 → P4-011 → P4-012 (GTD list views, after P4-006)
+P4-001 → P4-002 → P4-003 → P4-004 → P4-005 (Context entity chain)
+P4-005 depends on P2-004 (tasks table must exist for join table)
+P4-014 → P4-015 → P4-016 → P4-017 → P4-018 (GTD list views, after P4-006)
 
 P5-001 → P5-002 → P5-003 → P5-004 (Project entity chain)
 EDGE-001 depends on P5-005 (project controller must exist)
@@ -358,4 +451,13 @@ Before marking each User Story complete:
 - [ ] All E2E tests for the story pass
 - [ ] API endpoints match OpenAPI spec
 - [ ] Code review approved
+- [ ] Documentation updated
+
+### User Story 1 (P1) Verification (Partial)
+- [X] Backend unit tests pass (> 80% coverage)
+- [X] Backend E2E tests pass
+- [X] API endpoints match OpenAPI spec
+- [ ] Frontend unit tests pass (new pages pending)
+- [ ] Navigation E2E tests pass
+- [ ] Code review approved (new tasks)
 - [ ] Documentation updated
