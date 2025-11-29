@@ -28,6 +28,13 @@ jobs:
         run: composer validate --strict
         working-directory: ./api
 
+      - name: Setup .env file
+        run: |
+          cp .env.example .env
+          echo "APP_ENV=test" >> .env
+          echo "APP_SECRET=test-secret-for-ci" >> .env
+        working-directory: ./api
+
       - name: Cache Composer dependencies
         uses: actions/cache@v4
         with:
@@ -84,6 +91,22 @@ jobs:
           extensions: pdo_mysql, intl, zip, gd, opcache, mbstring
           coverage: pcov
 
+      - name: Setup .env file
+        run: |
+          cp .env.example .env
+          echo "APP_ENV=test" >> .env
+          echo "APP_SECRET=test-secret-for-ci" >> .env
+          echo "DATABASE_URL=mysql://gtd_test:gtd_test@127.0.0.1:3306/gtd?serverVersion=10.11.0-MariaDB" >> .env
+          echo "JWT_PASSPHRASE=test-jwt-passphrase-for-ci" >> .env
+        working-directory: ./api
+
+      - name: Generate JWT keys
+        run: |
+          mkdir -p config/jwt
+          openssl genrsa -out config/jwt/private.pem -passout pass:test-jwt-passphrase-for-ci 4096
+          openssl rsa -pubout -in config/jwt/private.pem -out config/jwt/public.pem -passin pass:test-jwt-passphrase-for-ci
+        working-directory: ./api
+
       - name: Cache Composer dependencies
         uses: actions/cache@v4
         with:
@@ -95,9 +118,14 @@ jobs:
         run: composer install --prefer-dist --no-progress --no-interaction
         working-directory: ./api
 
+      - name: Create database schema
+        run: php bin/console doctrine:migrations:migrate --no-interaction
+        working-directory: ./api
+        env:
+          APP_ENV: test
+
       - name: Run PHPUnit
         env:
-          DATABASE_URL: mysql://gtd_test:gtd_test@127.0.0.1:3306/gtd_test?serverVersion=10.11.0-MariaDB
           APP_ENV: test
         run: |
           if [ -f "vendor/bin/phpunit" ]; then

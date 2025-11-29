@@ -6,7 +6,6 @@
 .phpunit.result.cache
 
 # Composer
-composer.lock
 composer.phar
 
 # Symfony
@@ -33,3 +32,6 @@ composer.phar
 .vscode/
 .idea/
 *.sublime-*
+
+# JWT keys (generated locally, not in version control)
+/config/jwt/*.pem

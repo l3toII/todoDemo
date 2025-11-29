@@ -1,25 +1,9 @@
 <?php
 
-// GTD Todo App API Entry Point
-// This is a minimal entry point for testing the Docker infrastructure
+use App\Kernel;
 
-header('Content-Type: application/json');
+require_once dirname(__DIR__).'/vendor/autoload_runtime.php';
 
-// Simple health check endpoint
-if ($_SERVER['REQUEST_URI'] === '/api/health') {
-    http_response_code(200);
-    echo json_encode([
-        'status' => 'healthy',
-        'timestamp' => date('c'),
-        'environment' => getenv('APP_ENV') ?: 'unknown'
-    ]);
-    exit;
-}
-
-// Default response
-http_response_code(200);
-echo json_encode([
-    'message' => 'GTD Todo App API',
-    'version' => '0.1.0',
-    'status' => 'infrastructure-test'
-]);
+return function (array $context) {
+    return new Kernel($context['APP_ENV'], (bool) $context['APP_DEBUG']);
+};

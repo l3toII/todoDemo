@@ -13,7 +13,7 @@ use Symfony\Component\Uid\Uuid;
 class FeatureFlag
 {
     #[ORM\Id]
-    #[ORM\Column(type: 'uuid', unique: true)]
+    #[ORM\Column(type: 'uuid_string', unique: true)]
     private Uuid $id;
 
     #[ORM\Column(type: Types::STRING, length: 100, unique: true)]
