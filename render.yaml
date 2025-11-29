@@ -57,7 +57,6 @@ services:
     runtime: static
     buildCommand: cd web && npm ci && npm run build
     staticPublishPath: ./web/dist
-    region: frankfurt
     branch: main
     envVars:
       - key: VITE_API_URL
@@ -85,7 +84,6 @@ services:
     runtime: static
     buildCommand: cd web && npm ci && npm run build
     staticPublishPath: ./web/dist
-    region: frankfurt
     branch: 001-gtd-todo-app
     envVars:
       - key: VITE_API_URL
