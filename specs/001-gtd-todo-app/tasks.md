@@ -133,40 +133,36 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 - [X] [P1-016] [Story-1] Create protected route wrapper with auth guard `web/src/components/ProtectedRoute.tsx`
 - [X] [P1-017] [Story-1] Write E2E tests for auth flows `web/tests/e2e/auth.spec.ts`
 
-### Phase 1.4: Frontend - Account Management Pages (NEW)
+- [X] [P1-001] [P1] [Story-1] Create User Doctrine entity with all fields from data-model.md `api/src/Entity/User.php`
+- [X] [P1-002] [P1] [Story-1] Create User repository with CRUD operations `api/src/Repository/UserRepository.php`
+- [X] [P1-003] [P1] [Story-1] Create database migration for users table `api/migrations/Version001CreateUsersTable.php`
+- [X] [P1-004] [P1] [Story-1] Write unit tests for User entity validation `api/tests/Unit/Entity/UserTest.php`
 
 > Backend endpoints exist (P1-019, P1-020) but frontend pages are missing.
 
-- [ ] [P1-021] [Story-1] Create account Redux slice for profile/preferences (FR-005) `web/src/features/account/accountSlice.ts`
-- [ ] [P1-022] [Story-1] Create AccountPage component (Mon Compte / Profile) `web/src/pages/AccountPage.tsx`
-- [ ] [P1-023] [Story-1] Write unit tests for AccountPage `web/tests/unit/pages/AccountPage.test.tsx`
-- [ ] [P1-024] [Story-1] Create SettingsPage component (Préférences / Settings) `web/src/pages/SettingsPage.tsx`
-- [ ] [P1-025] [Story-1] Write unit tests for SettingsPage `web/tests/unit/pages/SettingsPage.test.tsx`
-- [ ] [P1-026] [Story-1] Create DeleteAccountModal with confirmation flow `web/src/components/DeleteAccountModal.tsx`
-- [ ] [P1-027] [Story-1] Write unit tests for DeleteAccountModal `web/tests/unit/components/DeleteAccountModal.test.tsx`
-- [ ] [P1-028] [Story-1] Create ChangePasswordModal component `web/src/components/ChangePasswordModal.tsx`
-- [ ] [P1-029] [Story-1] Write unit tests for ChangePasswordModal `web/tests/unit/components/ChangePasswordModal.test.tsx`
+- [X] [P1-005] [P1] [Story-1] Configure LexikJWTAuthenticationBundle with key generation `api/config/packages/lexik_jwt_authentication.yaml`
+- [X] [P1-006] [P1] [Story-1] Create AuthController with login endpoint `api/src/Controller/AuthController.php`
+- [X] [P1-007] [P1] [Story-1] Implement refresh token rotation with RefreshToken entity `api/src/Entity/RefreshToken.php`
+- [X] [P1-007b] [P1] [Story-1] Create database migration for refresh_tokens table `api/migrations/Version008CreateRefreshTokensTable.php`
+- [X] [P1-008] [P1] [Story-1] Implement Apple Sign-In verification service `api/src/Service/AppleSignInService.php`
+- [X] [P1-009] [P1] [Story-1] Create registration endpoint with email verification `api/src/Controller/RegistrationController.php`
+- [X] [P1-010] [P1] [Story-1] Create password reset flow with secure tokens `api/src/Controller/PasswordResetController.php`
+- [X] [P1-011] [P1] [Story-1] Write functional tests for all auth endpoints `api/tests/Functional/AuthTest.php`
 
 ### Phase 1.5: Frontend - Navigation Bar & App Shell (NEW)
 
-- [ ] [P1-030] [Story-1] Create MainLayout component with navigation structure `web/src/layouts/MainLayout.tsx`
-- [ ] [P1-031] [Story-1] Write unit tests for MainLayout `web/tests/unit/layouts/MainLayout.test.tsx`
-- [ ] [P1-032] [Story-1] Create NavigationBar component with links to all user stories `web/src/components/NavigationBar.tsx`
-- [ ] [P1-033] [Story-1] Write unit tests for NavigationBar `web/tests/unit/components/NavigationBar.test.tsx`
+- [X] [P1-018] [P1] [Story-1] Implement session timeout with auto-logout after inactivity `api/src/EventSubscriber/SessionTimeoutSubscriber.php`
+- [X] [P1-019] [P1] [Story-1] Create account deletion endpoint with cascade delete (GDPR) `api/src/Controller/AccountController.php`
+- [X] [P1-020] [P1] [Story-1] Implement hard delete service for all user data `api/src/Service/AccountDeletionService.php`
 
 ### Phase 1.6: Frontend - WIP Placeholder Pages for P2-P7 (NEW)
 
-> Minimal pages with "Work in Progress" message, linked from NavigationBar.
-
-- [ ] [P1-034] [Story-1] Create WIPPage reusable component `web/src/components/WIPPage.tsx`
-- [ ] [P1-035] [P] [Story-1] Create InboxPage placeholder (P2 - Capture) `web/src/pages/InboxPage.tsx`
-- [ ] [P1-036] [P] [Story-1] Create ClarifyPage placeholder (P3 - Process) `web/src/pages/ClarifyPage.tsx`
-- [ ] [P1-037] [P] [Story-1] Create ContextsPage placeholder (P4 - Organize) `web/src/pages/ContextsPage.tsx`
-- [ ] [P1-038] [P] [Story-1] Create ProjectsPage placeholder (P5 - Projects) `web/src/pages/ProjectsPage.tsx`
-- [ ] [P1-039] [P] [Story-1] Create ReviewPage placeholder (P6 - Weekly Review) `web/src/pages/ReviewPage.tsx`
-- [ ] [P1-040] [P] [Story-1] Create CalendarPage placeholder (P7 - Calendar) `web/src/pages/CalendarPage.tsx`
-- [ ] [P1-041] [Story-1] Configure React Router with all routes `web/src/App.tsx`
-- [ ] [P1-042] [Story-1] Write E2E tests for navigation and WIP pages `web/tests/e2e/navigation.spec.ts`
+- [X] [P1-012] [P1] [Story-1] Create auth Redux slice with login/logout/register actions `web/src/features/auth/authSlice.js`
+- [X] [P1-013] [P1] [Story-1] Create LoginPage component with form validation `web/src/pages/LoginPage.jsx`
+- [X] [P1-014] [P1] [Story-1] Create RegisterPage component with email verification flow `web/src/pages/RegisterPage.jsx`
+- [X] [P1-015] [P1] [Story-1] Implement Apple Sign-In button for web `web/src/components/AppleSignInButton.jsx`
+- [X] [P1-016] [P1] [Story-1] Create protected route wrapper with auth guard `web/src/components/ProtectedRoute.jsx`
+- [X] [P1-017] [P1] [Story-1] Write E2E tests for auth flows `web/src/tests/e2e/auth.spec.jsx`
 
 ---
 
