@@ -56,27 +56,34 @@ A GTD (Getting Things Done) productivity application with web and iOS clients. T
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+*Last updated: 2025-11-29*
 
 | Principle | Status | Notes |
 |-----------|--------|-------|
-| I. Code Quality | ✅ PASS | Linters (ESLint, PHPStan) + formatters (Prettier, PHP-CS-Fixer) planned |
-| II. Testing Standards | ✅ PASS | Unit (PHPUnit, Jest), Integration, E2E (Cypress, XCUITest) planned |
+| I. Code Quality | ✅ PASS | Linters (ESLint, PHPStan) + formatters (Prettier, PHP-CS-Fixer) configured |
+| II. Testing Standards | ✅ PASS | Unit (PHPUnit, Jest), Integration, E2E (Cypress) configured |
 | III. User Experience | ✅ PASS | Mobile-first design, Tailwind for responsive, WCAG 2.1 AA target |
 | IV. Performance | ✅ PASS | Targets defined, monitoring planned |
 | V. Git Flow Discipline | ✅ PASS | Branch naming follows convention |
-| VI. CI/CD Pipeline | ⚠️ PENDING | Must be set up before feature work (Infrastructure-First) |
+| VI. CI/CD Pipeline | ⚠️ PARTIAL | CI configured, **SonarQube pending** (task S0-008b) |
 | VII. Atomic Commits | ✅ PASS | Conventional commits enforced |
-| VIII. Sprint & Task Organization | ✅ PASS | User stories prioritized P1-P7, tasks will be generated |
+| VIII. Sprint & Task Organization | ✅ PASS | User stories prioritized P1-P7, tasks generated |
 | IX. Documentation as Code | ✅ PASS | spec.md, plan.md, tasks.md in Git |
 | X. Security by Design | ✅ PASS | JWT auth, input validation, env secrets |
 | XI. Observability | ✅ PASS | Structured logging (Monolog JSON), metrics planned |
 | XII. Dependency Management | ✅ PASS | composer.lock, package-lock.json |
-| XIII. Feature Flags | ✅ PASS | Will implement for progressive rollout |
+| XIII. Feature Flags | ✅ PASS | FeatureFlag entity created (S0-005b) |
 | XIV. API Versioning | ✅ PASS | URL path versioning: /api/v1/* |
-| XV. Infrastructure-First | ⚠️ BLOCKING | CI/CD MUST be operational before feature development |
+| XV. Infrastructure-First | ⚠️ PARTIAL | CI/CD configured, **Render deployment pending** (tasks S0-024 to S0-033) |
+| XVI. GitHub Issues | ✅ PASS | All P1-P7 issues created (S0-016 to S0-023) |
+| XVII. Task Checklist | ✅ PASS | Checklist system defined, `/speckit.checklist` available |
+| XVIII. Phase 0 Priority | ⚠️ ACTIVE | Sprint 0 in progress, blocking feature work |
 
-**BLOCKING ITEMS**:
-- Infrastructure setup (CI/CD pipeline, staging/production environments) MUST be completed as Phase 0 prerequisite per Constitution XV.
+**REMAINING BLOCKING ITEMS**:
+- [S0-008b] SonarQube/SonarCloud integration in CI pipeline (Constitution VI)
+- [S0-024 to S0-033] Render deployment setup for prod/staging URLs (Constitution XV)
+
+**Hosting Platform**: Render (https://render.com) per Constitution XV
 
 ## Project Structure
 

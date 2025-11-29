@@ -2,22 +2,30 @@
   ============================================================================
   SYNC IMPACT REPORT
   ============================================================================
-  Version change: 1.6.0 → 1.6.1 (PATCH: Specify Render as hosting platform)
+  Version change: 1.6.1 → 1.7.0 (MINOR: Replace implementation.md with checklist system)
 
   Modified principles:
-    - XV. Infrastructure-First (Phase 0): Added Render as hosting platform specification
+    - XVII. Task Implementation Lifecycle → XVII. Task Checklist Requirement
+      - Removed implementation.md entirely
+      - Added checklist system: specs/[feature]/checklists/userStory/taskname.md
+      - /speckit.implement BLOCKED if no corresponding checklist exists
+    - VII. Atomic Commits: Removed implementation.md references
+    - IX. Documentation as Code: Removed implementation.md from mandatory documents
+    - Development Workflow: Updated to reference checklist system
 
   Added sections: None
 
-  Removed sections: None
+  Removed sections: None (XVII renamed/replaced)
 
   Templates requiring updates:
     - .specify/templates/plan-template.md: ✅ Compatible
     - .specify/templates/spec-template.md: ✅ Compatible
     - .specify/templates/tasks-template.md: ✅ Compatible
-    - .specify/templates/checklist-template.md: ✅ Compatible
+    - .specify/templates/checklist-template.md: ⚠️ May need userStory subdirectory structure
+    - .specify/templates/commands/implement.md: ⚠️ Must check for checklist before execution
 
-  Follow-up TODOs: None
+  Follow-up TODOs:
+    - Verify /speckit.implement command checks for checklist existence
   ============================================================================
 -->
 
@@ -161,14 +169,14 @@ Each commit MUST be atomic and follow these rules:
 - **Reversible**: Each commit MUST be independently revertible
 
 **Workflow per micro-task**:
-1. Create or update `implementation.md` (see XVII. Task Implementation Lifecycle)
+1. Ensure task checklist exists (see XVII. Task Checklist Requirement)
 2. Write tests FIRST (if applicable)
 3. Implement the change
 4. Run tests locally - MUST pass
 5. Commit with conventional message
 6. Push to remote (may push before local tests if local environment unavailable)
 7. Wait for CI/CD pipeline to pass
-8. Delete `implementation.md` once commit is accepted
+8. Mark checklist items as complete
 9. ONLY THEN proceed to next task
 
 **Commit message format** (Conventional Commits):
@@ -214,6 +222,7 @@ Work organization MUST follow a sprint/feature/task structure:
 - Estimated duration < 4 hours
 - Single owner
 - Linked to parent feature
+- **MUST have a corresponding checklist** (see XVII)
 
 **tasks.md generation**:
 - Tasks MUST be organized by User Story
@@ -238,7 +247,7 @@ Documentation MUST be treated as code:
 - tasks.md: Task list
 - CHANGELOG.md: Change history
 - README.md: Getting started guide
-- **implementation.md**: Task implementation checklist (temporary, see XVII)
+- **Task checklists**: Located in `specs/[feature]/checklists/` (see XVII)
 
 **Rationale**: Up-to-date documentation reduces onboarding time and prevents knowledge loss.
 
@@ -404,72 +413,60 @@ This principle establishes a mandatory prerequisite for all feature work:
 
 **Rationale**: GitHub issues provide traceability, enable project management visibility, facilitate team communication, and create an audit trail of all changes. Automatic closure ensures issues stay synchronized with actual code state.
 
-### XVII. Task Implementation Lifecycle
+### XVII. Task Checklist Requirement
 
-**Each task MAY use an `implementation.md` document at the project root to guide implementation.**
+**Each task MUST have a corresponding checklist file before implementation can begin.**
 
-**implementation.md Purpose**:
-- Serves as a checklist for implementing a single task
-- Located ALWAYS at the **project root** (not in subdirectories)
-- Concerns a **single task**, not an entire feature
-- Enforces TDD workflow: write tests FIRST, then implement
-- Deleted when the commit is accepted by CI/CD
+**Checklist Location**:
+- Path: `specs/[feature]/checklists/[userStory]/[taskname].md`
+- Example: `specs/001-gtd-todo-app/checklists/P1-UserAccount/create-user-entity.md`
 
-**Usage** (developer choice, not mandatory in tasks.md):
-- Developer MAY create `implementation.md` when starting a task
-- If `implementation.md` already exists, continue using it for the current task
-- Follow the checklist items one by one
-- Check off items as completed
-- Verify CI/CD passes
-- Delete `implementation.md` once commit is accepted
-- Optionally commit before local tests pass (to use CI/CD if local environment is unavailable)
-
-**implementation.md Template**:
-```markdown
-# Task: [Task Description]
-
-## Testing Checklist
-
-### Unit Tests (if applicable)
-- [ ] Write unit tests for [component/function]
-- [ ] Verify tests FAIL before implementation (Red)
-
-### Component Tests (if applicable)
-- [ ] Write component/integration tests
-- [ ] Verify tests FAIL before implementation (Red)
-
-### E2E Tests (if applicable)
-- [ ] Write E2E tests for user scenario
-- [ ] Verify tests FAIL before implementation (Red)
-
-## Implementation
-
-- [ ] Implement the feature/fix
-- [ ] Verify all tests PASS (Green)
-- [ ] Refactor if needed (Refactor)
-
-## Verification
-
-- [ ] Run tests locally (or push for CI/CD)
-- [ ] CI/CD pipeline passes
-- [ ] Delete this file and commit
+**Checklist Structure**:
+```
+specs/
+└── [feature-id]-[feature-name]/
+    └── checklists/
+        ├── [UserStory1]/
+        │   ├── task-001-description.md
+        │   ├── task-002-description.md
+        │   └── ...
+        ├── [UserStory2]/
+        │   └── ...
+        └── requirements.md  # Feature-level checklist (optional)
 ```
 
-**TDD Enforcement**:
-- Tests MUST be written FIRST when applicable
-- Tests MUST fail before implementation (Red phase)
-- Implementation makes tests pass (Green phase)
-- Refactoring improves code without changing behavior (Refactor phase)
+**Checklist Generation**:
+- Checklists are generated via `/speckit.checklist` command
+- Each checklist MUST be created BEFORE implementation starts
+- Checklists enforce TDD workflow and quality gates
+
+**Blocking Rule for /speckit.implement**:
+- `/speckit.implement` MUST check for corresponding checklist existence
+- If NO checklist exists for the task being implemented, `/speckit.implement` MUST:
+  1. STOP execution
+  2. Display error: "No checklist found for task [task-id]. Run /speckit.checklist first."
+  3. Suggest running `/speckit.checklist` to generate the missing checklist
+- Implementation MAY ONLY proceed after checklist is created and verified
+
+**Checklist Content Requirements**:
+Each task checklist MUST include:
+- [ ] Unit tests written (if applicable)
+- [ ] Tests fail before implementation (Red phase)
+- [ ] Component/integration tests written (if applicable)
+- [ ] E2E tests written (if applicable)
+- [ ] Implementation complete
+- [ ] All tests pass (Green phase)
+- [ ] Code refactored if needed (Refactor phase)
+- [ ] CI/CD pipeline passes
+- [ ] Code review approved
 
 **Lifecycle**:
-1. **Start task**: Create `implementation.md` at project root (or use existing)
-2. **Write tests**: Follow TDD - write failing tests first
-3. **Implement**: Make tests pass
-4. **Verify**: Run locally or push to CI/CD
-5. **Complete**: Delete `implementation.md` when commit is accepted
-6. **Next task**: Create new `implementation.md` or continue to next task
+1. **Before task**: Run `/speckit.checklist` to generate checklist
+2. **During task**: Follow checklist items sequentially, check off as complete
+3. **After task**: Checklist remains in repository as documentation/audit trail
+4. **Verification**: `/speckit.implement` verifies checklist exists before each task
 
-**Rationale**: `implementation.md` provides a structured TDD workflow without polluting repository history. Being task-scoped (not feature-scoped) keeps the document focused and manageable. The file is temporary by design—it guides work but does not persist.
+**Rationale**: Checklists ensure consistent quality across all tasks, enforce TDD discipline, and provide an audit trail of implementation decisions. Unlike temporary files, checklists persist in the repository to document what was verified for each task.
 
 ### XVIII. Phase 0 Priority
 
@@ -511,18 +508,20 @@ This principle establishes a mandatory prerequisite for all feature work:
 
 For each task within a feature:
 
-1. **Branch**: Create feature branch (if new feature) or switch to existing feature branch
-2. **Implementation Guide** (optional): Create `implementation.md` at project root if not exists
+1. **Checklist**: Ensure task checklist exists in `specs/[feature]/checklists/[userStory]/`
+   - If not exists, run `/speckit.checklist` first
+   - `/speckit.implement` will BLOCK without checklist
+2. **Branch**: Create feature branch (if new feature) or switch to existing feature branch
 3. **TDD Cycle**:
    - Write tests FIRST (unit/component/E2E as applicable)
-   - Verify tests FAIL
+   - Verify tests FAIL (Red)
    - Implement the change
-   - Verify tests PASS
+   - Verify tests PASS (Green)
    - Refactor if needed
 4. **Commit**: Commit with conventional message
 5. **Push**: Push to remote (may push before local tests if local unavailable)
 6. **Verify**: Wait for CI/CD pipeline to pass
-7. **Cleanup**: Delete `implementation.md` once commit accepted
+7. **Update Checklist**: Mark items complete in checklist file
 8. **Continue**: Proceed to next task
 
 ### Code Review Checklist
@@ -534,6 +533,7 @@ For each task within a feature:
 - [ ] No undocumented technical debt
 - [ ] Performance is acceptable
 - [ ] Security is respected
+- [ ] Task checklist is complete
 
 ## Quality Gates
 
@@ -566,6 +566,7 @@ For each task within a feature:
 - Code review approved
 - No conflicts
 - Branch up-to-date with target (integration branch or `main`)
+- Task checklist complete
 
 ## Governance
 
@@ -593,4 +594,4 @@ For each task within a feature:
 
 This constitution SUPERSEDES all other practices. In case of conflict between this constitution and other documents, the constitution prevails.
 
-**Version**: 1.6.1 | **Ratified**: 2025-11-28 | **Last Amended**: 2025-11-29
+**Version**: 1.7.0 | **Ratified**: 2025-11-28 | **Last Amended**: 2025-11-29
