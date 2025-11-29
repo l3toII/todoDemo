@@ -3,8 +3,7 @@
     "allow": [
       "Bash(cat:*)",
       "Bash(docker-compose ps:*)",
-      "Bash(docker exec:*)",
-      "Bash(npm install:*)"
+      "Bash(docker exec:*)"
     ],
     "deny": [],
     "ask": []
