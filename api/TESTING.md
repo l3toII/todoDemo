@@ -23,17 +23,19 @@ This project uses **MariaDB 10.11** consistently across all environments:
    docker-compose -f infra/docker-compose.yml up -d
    ```
 
-2. **Create test database** (one-time setup):
+2. **Create test database and user** (one-time setup):
    ```bash
-   docker exec gtd_db mysql -u root -proot_password -e "CREATE DATABASE IF NOT EXISTS gtd_app_test_test; GRANT ALL PRIVILEGES ON gtd_app_test_test.* TO 'gtd'@'%'; FLUSH PRIVILEGES;"
+   docker exec gtd_db mysql -u root -proot_password -e "CREATE DATABASE IF NOT EXISTS gtd; CREATE DATABASE IF NOT EXISTS gtd_test; GRANT ALL PRIVILEGES ON gtd.* TO 'gtd_test'@'%' IDENTIFIED BY 'gtd_test'; GRANT ALL PRIVILEGES ON gtd_test.* TO 'gtd_test'@'%'; FLUSH PRIVILEGES;"
    ```
 
-   > **Why `gtd_app_test_test`?** Doctrine automatically adds `_test` suffix to the database name in test environment (see `config/packages/doctrine.yaml`).
+   > **Why `gtd` and `gtd_test`?** Doctrine automatically adds `_test` suffix to the database name in test environment (see `config/packages/doctrine.yaml`), so `gtd` becomes `gtd_test`.
 
 3. **Run migrations** on test database:
    ```bash
-   php bin/console doctrine:migrations:migrate --env=test --no-interaction
+   DATABASE_URL="mysql://gtd_test:gtd_test@127.0.0.1:3306/gtd?serverVersion=10.11.0-MariaDB" php bin/console doctrine:migrations:migrate --env=test --no-interaction
    ```
+
+   > **Note**: We override DATABASE_URL because the default `.env` uses Docker hostname `db` which won't work from the host machine.
 
 ### Running Tests
 
