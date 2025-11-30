@@ -4,13 +4,11 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use App\Service\EmailService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -24,7 +22,7 @@ class RegistrationController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly ValidatorInterface $validator,
-        private readonly MailerInterface $mailer,
+        private readonly EmailService $emailService,
     ) {
     }
 
@@ -121,15 +119,7 @@ class RegistrationController extends AbstractController
                 $verificationToken
             );
 
-            $email = (new TemplatedEmail())
-                ->to(new Address($user->getEmail()))
-                ->subject('Verify Your Email - GTD Todo App')
-                ->htmlTemplate('email/verification.html.twig')
-                ->context([
-                    'verificationUrl' => $verificationUrl,
-                ]);
-
-            $this->mailer->send($email);
+            $this->emailService->sendVerificationEmail($user->getEmail(), $verificationUrl);
         } catch (\Exception $e) {
             // Log error but don't fail registration
             // User can request resend if email fails
@@ -257,15 +247,7 @@ class RegistrationController extends AbstractController
                 $verificationToken
             );
 
-            $email = (new TemplatedEmail())
-                ->to(new Address($user->getEmail()))
-                ->subject('Verify Your Email - GTD Todo App')
-                ->htmlTemplate('email/verification.html.twig')
-                ->context([
-                    'verificationUrl' => $verificationUrl,
-                ]);
-
-            $this->mailer->send($email);
+            $this->emailService->sendVerificationEmail($user->getEmail(), $verificationUrl);
         } catch (\Exception $e) {
             // Log error but don't reveal to user
             error_log(sprintf('Failed to resend verification email to %s: %s', $user->getEmail(), $e->getMessage()));
