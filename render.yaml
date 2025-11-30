@@ -48,9 +48,9 @@ services:
         generateValue: true
       - key: CORS_ALLOW_ORIGIN
         value: https://gtd-web-staging.onrender.com
-      # Email configuration (Resend)
+      # Email configuration (Resend via SMTP)
       - key: MAILER_DSN
-        sync: false  # Set manually in Render dashboard: resend+api://re_YOUR_API_KEY@default
+        sync: false  # Set manually in Render dashboard: smtp://resend:re_YOUR_API_KEY@smtp.resend.com:465
       - key: MAILER_FROM_ADDRESS
         sync: false  # Set manually: noreply@yourdomain.com (must be verified in Resend)
       # URL configuration for email verification links
