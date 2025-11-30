@@ -94,9 +94,11 @@ jobs:
       - name: Setup .env file
         run: |
           cp .env.example .env
+          cp .env.test.example .env.test
           echo "APP_ENV=test" >> .env
           echo "APP_SECRET=test-secret-for-ci" >> .env
-          echo "DATABASE_URL=mysql://gtd_test:gtd_test@127.0.0.1:3306/gtd?serverVersion=10.11.0-MariaDB" >> .env
+          echo "DATABASE_URL=mysql://gtd_test:gtd_test@127.0.0.1:3306/gtd_test?serverVersion=10.11.0-MariaDB" >> .env
+          echo "DATABASE_URL=mysql://gtd_test:gtd_test@127.0.0.1:3306/gtd_test?serverVersion=10.11.0-MariaDB" >> .env.test
           echo "JWT_PASSPHRASE=test-jwt-passphrase-for-ci" >> .env
         working-directory: ./api
 
