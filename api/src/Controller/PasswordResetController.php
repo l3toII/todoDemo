@@ -4,13 +4,11 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
-use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use App\Service\EmailService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Address;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -24,7 +22,7 @@ class PasswordResetController extends AbstractController
         private readonly UserRepository $userRepository,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly ValidatorInterface $validator,
-        private readonly MailerInterface $mailer,
+        private readonly EmailService $emailService,
     ) {
     }
 
@@ -78,15 +76,7 @@ class PasswordResetController extends AbstractController
                 $resetToken
             );
 
-            $email = (new TemplatedEmail())
-                ->to(new Address($user->getEmail()))
-                ->subject('Reset Your Password - GTD Todo App')
-                ->htmlTemplate('email/password_reset.html.twig')
-                ->context([
-                    'resetUrl' => $resetUrl,
-                ]);
-
-            $this->mailer->send($email);
+            $this->emailService->sendPasswordResetEmail($user->getEmail(), $resetUrl);
         } catch (\Exception $e) {
             // Log error but don't reveal to user
             error_log(sprintf('Failed to send password reset email to %s: %s', $user->getEmail(), $e->getMessage()));
