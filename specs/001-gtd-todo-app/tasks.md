@@ -9,7 +9,7 @@
 
 Total tasks: 203
 - Sprint 0 (Infrastructure + GitHub Issues): 35 tasks ✅ COMPLETE
-- P1 User Account Management: 56 tasks (29 complete, 27 remaining) - 52% complete
+- P1 User Account Management: 56 tasks (33 complete, 23 remaining) - 59% complete
 - P2 Capture Ideas and Tasks: 14 tasks
 - P3 Clarify and Process: 12 tasks
 - P4 Organize with Contexts: 18 tasks
@@ -98,7 +98,7 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 **User Story**: As a user, I want to create an account, log in securely, and manage my preferences so that I can access my data across all my devices.
 
-**Status**: In Progress (29/56 tasks complete - 52%)
+**Status**: In Progress (33/56 tasks complete - 59%)
 
 ### Phase 1.1: Backend - User Entity & Repository ✅
 
@@ -145,11 +145,11 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 - [X] [P1-024] [Story-1] Implement email sending in PasswordResetController `api/src/Controller/PasswordResetController.php:69-70, 228-229`
 - [X] [P1-025] [Story-1] Write integration tests for email sending `api/tests/Integration/EmailServiceTest.php`
 
-**Apple Sign-In Completion**
-- [ ] [P1-026] [Story-1] Install firebase/php-jwt package `composer.json`
-- [ ] [P1-027] [Story-1] Complete JWK to PEM conversion in AppleSignInService `api/src/Service/AppleSignInService.php:156-159, 187-190`
-- [ ] [P1-028] [Story-1] Add error handling for Apple Sign-In failures `api/src/Service/AppleSignInService.php`
-- [ ] [P1-029] [Story-1] Write integration tests for Apple Sign-In flow `api/tests/Integration/AppleSignInTest.php`
+**Apple Sign-In Completion** ✅ COMPLETE
+- [X] [P1-026] [Story-1] Install firebase/php-jwt package `composer.json`
+- [X] [P1-027] [Story-1] Complete JWK to PEM conversion in AppleSignInService `api/src/Service/AppleSignInService.php`
+- [X] [P1-028] [Story-1] Add error handling for Apple Sign-In failures `api/src/Service/AppleSignInService.php`
+- [X] [P1-029] [Story-1] Write unit tests for Apple Sign-In service `api/tests/Unit/Service/AppleSignInServiceTest.php`
 
 **Preference Management Fix**
 - [ ] [P1-030] [Story-1] Fix preference update to persist to database `api/src/Controller/AccountController.php:158`
