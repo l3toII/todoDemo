@@ -23,10 +23,15 @@ if [ -n "$JWT_PASSPHRASE" ] && [ ! -f "$JWT_DIR/private.pem" ]; then
 fi
 
 # Clear and warm up Symfony cache
-echo "Warming up Symfony cache..."
+echo "Warming up Symfony cache for APP_ENV=${APP_ENV:-prod}..."
 cd /var/www/html
-php bin/console cache:clear --env=prod --no-debug 2>/dev/null || true
-php bin/console cache:warmup --env=prod --no-debug 2>/dev/null || true
+php bin/console cache:clear --env="${APP_ENV:-prod}" || echo "Cache clear failed, continuing..."
+php bin/console cache:warmup --env="${APP_ENV:-prod}" || echo "Cache warmup failed, continuing..."
+
+# Run database migrations
+echo "Running database migrations..."
+php bin/console doctrine:migrations:migrate --no-interaction --env="${APP_ENV:-prod}" || echo "Migrations failed, continuing..."
+
 chown -R www-data:www-data /var/www/html/var
 
 # Start supervisord (nginx + php-fpm)
