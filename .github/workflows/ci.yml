@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [main, develop, 'feat/**']
+    branches: [main, develop, '001-gtd-todo-app', 'feat/**']
   pull_request:
-    branches: [main, develop]
+    branches: [main, develop, '001-gtd-todo-app']
 
 env:
   PHP_VERSION: '8.2'
