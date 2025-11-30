@@ -5,6 +5,8 @@ import VerifyEmailPage from './pages/VerifyEmailPage';
 import PasswordResetRequestPage from './pages/PasswordResetRequestPage';
 import PasswordResetConfirmPage from './pages/PasswordResetConfirmPage';
 import InboxPage from './pages/InboxPage';
+import AccountSettingsPage from './pages/AccountSettingsPage';
+import AccountDeletionPage from './pages/AccountDeletionPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Navigation from './components/Navigation';
 
@@ -34,6 +36,26 @@ function App() {
             <ProtectedRoute>
               <AuthenticatedLayout>
                 <InboxPage />
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/account/settings"
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
+                <AccountSettingsPage />
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/account/delete"
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
+                <AccountDeletionPage />
               </AuthenticatedLayout>
             </ProtectedRoute>
           }
