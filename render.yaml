@@ -37,7 +37,7 @@ services:
     branch: 001-gtd-todo-app
     envVars:
       - key: APP_ENV
-        value: staging
+        value: prod
       - key: APP_SECRET
         generateValue: true
       - key: DATABASE_URL
@@ -123,9 +123,6 @@ databases:
     region: frankfurt
     plan: free
     ipAllowList: []
-    # Use MySQL/MariaDB instead of PostgreSQL
-    # Note: Render uses MySQL 8.0 by default for compatibility
-    engine: mysql
 
   - name: gtd-db-staging
     databaseName: gtd_staging
@@ -133,5 +130,3 @@ databases:
     region: frankfurt
     plan: free
     ipAllowList: []
-    # Use MySQL/MariaDB instead of PostgreSQL
-    engine: mysql
