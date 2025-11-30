@@ -9,7 +9,7 @@
 
 Total tasks: 203
 - Sprint 0 (Infrastructure + GitHub Issues): 35 tasks ✅ COMPLETE
-- P1 User Account Management: 56 tasks (33 complete, 23 remaining) - 59% complete
+- P1 User Account Management: 56 tasks (35 complete, 21 remaining) - 63% complete
 - P2 Capture Ideas and Tasks: 14 tasks
 - P3 Clarify and Process: 12 tasks
 - P4 Organize with Contexts: 18 tasks
@@ -98,7 +98,7 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 **User Story**: As a user, I want to create an account, log in securely, and manage my preferences so that I can access my data across all my devices.
 
-**Status**: In Progress (33/56 tasks complete - 59%)
+**Status**: In Progress (35/56 tasks complete - 63%)
 
 ### Phase 1.1: Backend - User Entity & Repository ✅
 
@@ -176,8 +176,8 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 - [ ] [P1-045] [Story-1] Write unit tests for AccountDeletionPage `web/tests/unit/pages/AccountDeletionPage.test.jsx`
 
 **Navigation Updates**
-- [ ] [P1-046] [Story-1] Add user menu with Settings and Logout `web/src/components/Navigation.jsx`
-- [ ] [P1-047] [Story-1] Add link to account settings in navigation `web/src/components/Navigation.jsx`
+- [X] [P1-046] [Story-1] Add user menu with Settings and Logout `web/src/components/Navigation.jsx`
+- [X] [P1-047] [Story-1] Add link to account settings in navigation `web/src/components/Navigation.jsx`
 
 ### Phase 1.6: End-to-End Testing
 

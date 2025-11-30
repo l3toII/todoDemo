@@ -6,6 +6,15 @@ import PasswordResetRequestPage from './pages/PasswordResetRequestPage';
 import PasswordResetConfirmPage from './pages/PasswordResetConfirmPage';
 import InboxPage from './pages/InboxPage';
 import ProtectedRoute from './components/ProtectedRoute';
+import Navigation from './components/Navigation';
+
+// Layout component for authenticated pages
+const AuthenticatedLayout = ({ children }) => (
+  <div className="min-h-screen bg-gray-50">
+    <Navigation />
+    <main>{children}</main>
+  </div>
+);
 
 function App() {
   return (
@@ -23,7 +32,9 @@ function App() {
           path="/inbox"
           element={
             <ProtectedRoute>
-              <InboxPage />
+              <AuthenticatedLayout>
+                <InboxPage />
+              </AuthenticatedLayout>
             </ProtectedRoute>
           }
         />
