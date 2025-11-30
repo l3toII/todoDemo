@@ -22,24 +22,31 @@ final class Version008CreateRefreshTokensTable extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // Create refresh_tokens table
+        // Create refresh_tokens table for PostgreSQL
         $this->addSql('
             CREATE TABLE refresh_tokens (
-                id CHAR(36) NOT NULL COMMENT \'(DC2Type:uuid)\',
-                user_id CHAR(36) NOT NULL COMMENT \'(DC2Type:uuid)\',
-                token_hash VARCHAR(255) NOT NULL COMMENT \'Hashed refresh token\',
-                device_info VARCHAR(255) DEFAULT NULL COMMENT \'Device identifier/user agent\',
-                expires_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\',
-                created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\',
-                revoked_at DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\',
-                PRIMARY KEY(id),
-                INDEX idx_refresh_token_user (user_id),
-                INDEX idx_refresh_token_hash (token_hash),
-                CONSTRAINT FK_refresh_tokens_user
-                    FOREIGN KEY (user_id)
-                    REFERENCES users (id)
-                    ON DELETE CASCADE
-            ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
+                id CHAR(36) NOT NULL,
+                user_id CHAR(36) NOT NULL,
+                token_hash VARCHAR(255) NOT NULL,
+                device_info VARCHAR(255) DEFAULT NULL,
+                expires_at TIMESTAMP NOT NULL,
+                created_at TIMESTAMP NOT NULL,
+                revoked_at TIMESTAMP DEFAULT NULL,
+                PRIMARY KEY(id)
+            )
+        ');
+
+        // Create indexes
+        $this->addSql('CREATE INDEX idx_refresh_token_user ON refresh_tokens (user_id)');
+        $this->addSql('CREATE INDEX idx_refresh_token_hash ON refresh_tokens (token_hash)');
+
+        // Add foreign key constraint
+        $this->addSql('
+            ALTER TABLE refresh_tokens
+            ADD CONSTRAINT FK_refresh_tokens_user
+            FOREIGN KEY (user_id)
+            REFERENCES users (id)
+            ON DELETE CASCADE
         ');
     }
 

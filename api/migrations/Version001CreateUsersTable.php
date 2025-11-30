@@ -22,28 +22,30 @@ final class Version001CreateUsersTable extends AbstractMigration
 
     public function up(Schema $schema): void
     {
-        // Create users table
+        // Create users table for PostgreSQL
         $this->addSql('
             CREATE TABLE users (
-                id CHAR(36) NOT NULL COMMENT \'(DC2Type:uuid)\',
+                id CHAR(36) NOT NULL,
                 email VARCHAR(255) NOT NULL,
-                password_hash VARCHAR(255) DEFAULT NULL COMMENT \'Null for Apple Sign-In only users\',
-                apple_id VARCHAR(255) DEFAULT NULL COMMENT \'Apple Sign-In identifier\',
+                password_hash VARCHAR(255) DEFAULT NULL,
+                apple_id VARCHAR(255) DEFAULT NULL,
                 status VARCHAR(30) NOT NULL DEFAULT \'pending_verification\',
-                notification_preferences JSON NOT NULL COMMENT \'User notification settings\',
+                notification_preferences JSON NOT NULL,
                 timezone VARCHAR(50) NOT NULL DEFAULT \'UTC\',
-                created_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\',
-                updated_at DATETIME NOT NULL COMMENT \'(DC2Type:datetime_immutable)\',
-                verified_at DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\',
-                last_login_at DATETIME DEFAULT NULL COMMENT \'(DC2Type:datetime_immutable)\',
-                PRIMARY KEY(id),
-                UNIQUE INDEX UNIQ_1483A5E9E7927C74 (email),
-                UNIQUE INDEX UNIQ_1483A5E9A93CA3B7 (apple_id),
-                INDEX idx_user_email (email),
-                INDEX idx_user_apple_id (apple_id),
-                INDEX idx_user_status (status)
-            ) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB
+                created_at TIMESTAMP NOT NULL,
+                updated_at TIMESTAMP NOT NULL,
+                verified_at TIMESTAMP DEFAULT NULL,
+                last_login_at TIMESTAMP DEFAULT NULL,
+                PRIMARY KEY(id)
+            )
         ');
+
+        // Create indexes
+        $this->addSql('CREATE UNIQUE INDEX UNIQ_1483A5E9E7927C74 ON users (email)');
+        $this->addSql('CREATE UNIQUE INDEX UNIQ_1483A5E9A93CA3B7 ON users (apple_id)');
+        $this->addSql('CREATE INDEX idx_user_email ON users (email)');
+        $this->addSql('CREATE INDEX idx_user_apple_id ON users (apple_id)');
+        $this->addSql('CREATE INDEX idx_user_status ON users (status)');
 
         // Add check constraint for status enum
         $this->addSql('
