@@ -11,7 +11,8 @@ Thumbs.db
 .env*
 !.env.example
 !.env.local.example
-!.env.prod
+!.env.test.example
+!infra/docker/api/.env.docker
 
 # Dependencies
 node_modules/

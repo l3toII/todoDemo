@@ -49,19 +49,18 @@ WORKDIR /var/www/html
 # Copy application files
 COPY api/ /var/www/html/
 
-# Copy production .env template for Symfony bootstrap
+# Copy Docker bootstrap .env for Symfony
 # Actual values are provided via Render environment variables
-COPY api/.env.prod /var/www/html/.env
-
-# Set permissions
-RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html
+COPY infra/docker/api/.env.docker /var/www/html/.env
 
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
-# Clear and warm up cache for production
-RUN php bin/console cache:clear --env=prod --no-debug || true
+# Create var directories, set permissions, and warm up cache
+RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log \
+    && chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html \
+    && chmod -R 777 /var/www/html/var
 
 EXPOSE 80
 

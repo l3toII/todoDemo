@@ -7,8 +7,10 @@
 node_modules/
 vendor/
 
-# Environment files
-.env*
+# Environment files (Docker .env is in infra/docker/api/)
+.env
+.env.*
+!infra/
 
 # Build outputs
 dist/
