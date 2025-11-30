@@ -22,3 +22,4 @@ services:
             $appleClientId: '%env(APPLE_CLIENT_ID)%'
             $appleTeamId: '%env(APPLE_TEAM_ID)%'
             $appleKeyId: '%env(APPLE_KEY_ID)%'
+            $applePrivateKeyPath: '%env(APPLE_PRIVATE_KEY_PATH)%'
