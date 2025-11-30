@@ -2,7 +2,7 @@ name: CI Pipeline
 
 on:
   push:
-    branches: ['**']
+    branches: [main, 001-gtd-todo-app]
   pull_request:
     branches: ['**']
 
