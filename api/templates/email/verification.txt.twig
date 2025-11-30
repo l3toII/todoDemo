@@ -1,5 +1,8 @@
-Welcome to GTD Todo App!
+{% extends 'email/base.txt.twig' %}
 
+{% block title %}Welcome to GTD Todo App!{% endblock %}
+
+{% block content %}
 Hi there,
 
 Thank you for signing up for GTD Todo App. To complete your registration and start organizing your tasks with the Getting Things Done methodology, please verify your email address by clicking the link below:
@@ -7,10 +10,8 @@ Thank you for signing up for GTD Todo App. To complete your registration and sta
 <{{ verificationUrl }}>
 
 This verification link will expire in 24 hours.
+{% endblock %}
 
+{% block footer %}
 If you didn't create an account with GTD Todo App, you can safely ignore this email.
-
-This is an automated message, please do not reply to this email.
-
----
-GTD Todo App
+{% endblock %}

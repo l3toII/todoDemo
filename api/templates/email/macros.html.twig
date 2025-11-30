@@ -1,0 +1,18 @@
+{% macro greeting() %}
+<p>Hi there,</p>
+{% endmacro %}
+
+{% macro action_button(url, label) %}
+<p style="text-align: center;">
+    <a href="{{ url }}" class="button">{{ label }}</a>
+</p>
+{% endmacro %}
+
+{% macro fallback_link(url) %}
+<p>Or copy and paste this link into your browser:</p>
+<p class="link">{{ url }}</p>
+{% endmacro %}
+
+{% macro automated_notice() %}
+<p>This is an automated message, please do not reply to this email.</p>
+{% endmacro %}

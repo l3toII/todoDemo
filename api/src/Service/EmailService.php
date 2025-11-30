@@ -17,34 +17,32 @@ class EmailService
 
     public function sendVerificationEmail(string $recipientEmail, string $verificationUrl): void
     {
-        $html = $this->twig->render('email/verification.html.twig', [
-            'verificationUrl' => $verificationUrl,
-        ]);
-        $text = $this->twig->render('email/verification.txt.twig', [
-            'verificationUrl' => $verificationUrl,
-        ]);
-
-        $email = (new Email())
-            ->to(new Address($recipientEmail))
-            ->subject('Verify Your Email - GTD Todo App')
-            ->text($text)
-            ->html($html);
-
-        $this->mailer->send($email);
+        $this->sendEmail(
+            $recipientEmail,
+            'Verify Your Email - GTD Todo App',
+            'email/verification',
+            ['verificationUrl' => $verificationUrl]
+        );
     }
 
     public function sendPasswordResetEmail(string $recipientEmail, string $resetUrl): void
     {
-        $html = $this->twig->render('email/password_reset.html.twig', [
-            'resetUrl' => $resetUrl,
-        ]);
-        $text = $this->twig->render('email/password_reset.txt.twig', [
-            'resetUrl' => $resetUrl,
-        ]);
+        $this->sendEmail(
+            $recipientEmail,
+            'Reset Your Password - GTD Todo App',
+            'email/password_reset',
+            ['resetUrl' => $resetUrl]
+        );
+    }
+
+    private function sendEmail(string $recipientEmail, string $subject, string $template, array $context): void
+    {
+        $html = $this->twig->render($template . '.html.twig', $context);
+        $text = $this->twig->render($template . '.txt.twig', $context);
 
         $email = (new Email())
             ->to(new Address($recipientEmail))
-            ->subject('Reset Your Password - GTD Todo App')
+            ->subject($subject)
             ->text($text)
             ->html($html);
 
