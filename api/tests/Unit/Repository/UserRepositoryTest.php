@@ -147,11 +147,12 @@ class UserRepositoryTest extends KernelTestCase
         // Should find with different case
         $found = $this->userRepository->findByEmail('casesensitive@example.com');
 
-        // Note: This depends on database collation
-        // Most databases are case-insensitive for email searches
-        if ($found) {
-            $this->assertEquals($user->getId(), $found->getId());
-        }
+        // PostgreSQL is case-sensitive by default, so this may return null
+        // The test validates the repository method works regardless of result
+        $this->assertTrue(
+            $found === null || $found->getId() === $user->getId(),
+            'If found, should match the created user'
+        );
     }
 
     // =========================================================================

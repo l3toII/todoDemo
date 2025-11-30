@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [main, develop, 'feat/**']
+    branches: [main, 001-gtd-todo-app]
   pull_request:
-    branches: [main, develop]
+    branches: ['**']
 
 env:
   PHP_VERSION: '8.2'
@@ -21,7 +21,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
-          extensions: pdo_mysql, intl, zip, gd, opcache, mbstring
+          extensions: pdo_pgsql, intl, zip, gd, opcache, mbstring
           coverage: none
 
       - name: Validate composer.json
@@ -70,16 +70,15 @@ jobs:
     name: API - PHPUnit Tests
     runs-on: ubuntu-latest
     services:
-      mysql:
-        image: mariadb:10.11
+      postgres:
+        image: postgres:16-alpine
         env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: gtd_test
-          MYSQL_USER: gtd_test
-          MYSQL_PASSWORD: gtd_test
+          POSTGRES_DB: gtd_test
+          POSTGRES_USER: gtd_test
+          POSTGRES_PASSWORD: gtd_test
         ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+          - 5432:5432
+        options: --health-cmd="pg_isready -U gtd_test -d gtd_test" --health-interval=10s --health-timeout=5s --health-retries=5
 
     steps:
       - uses: actions/checkout@v4
@@ -88,15 +87,17 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
-          extensions: pdo_mysql, intl, zip, gd, opcache, mbstring
+          extensions: pdo_pgsql, intl, zip, gd, opcache, mbstring
           coverage: pcov
 
       - name: Setup .env file
         run: |
           cp .env.example .env
+          cp .env.test.example .env.test
           echo "APP_ENV=test" >> .env
           echo "APP_SECRET=test-secret-for-ci" >> .env
-          echo "DATABASE_URL=mysql://gtd_test:gtd_test@127.0.0.1:3306/gtd?serverVersion=10.11.0-MariaDB" >> .env
+          echo "DATABASE_URL=pgsql://gtd_test:gtd_test@127.0.0.1:5432/gtd?serverVersion=16&charset=utf8" >> .env
+          echo "DATABASE_URL=pgsql://gtd_test:gtd_test@127.0.0.1:5432/gtd?serverVersion=16&charset=utf8" >> .env.test
           echo "JWT_PASSPHRASE=test-jwt-passphrase-for-ci" >> .env
         working-directory: ./api
 
@@ -162,7 +163,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
-          extensions: pdo_mysql, intl, zip, gd, opcache, mbstring
+          extensions: pdo_pgsql, intl, zip, gd, opcache, mbstring
           coverage: none
 
       - name: Security Check
@@ -332,7 +333,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ env.PHP_VERSION }}
-          extensions: pdo_mysql, intl, zip, gd, opcache, mbstring
+          extensions: pdo_pgsql, intl, zip, gd, opcache, mbstring
           coverage: pcov
 
       - name: Setup Node.js
