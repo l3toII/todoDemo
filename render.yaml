@@ -48,6 +48,16 @@ services:
         generateValue: true
       - key: CORS_ALLOW_ORIGIN
         value: https://gtd-web-staging.onrender.com
+      # Email configuration (Resend)
+      - key: MAILER_DSN
+        sync: false  # Set manually in Render dashboard: resend+api://re_YOUR_API_KEY@default
+      - key: MAILER_FROM_ADDRESS
+        sync: false  # Set manually: noreply@yourdomain.com (must be verified in Resend)
+      # URL configuration for email verification links
+      - key: WEB_URL
+        value: https://gtd-web-staging.onrender.com
+      - key: APP_URL
+        value: https://gtd-api-staging.onrender.com
     healthCheckPath: /api/health
     autoDeploy: true
 
