@@ -58,12 +58,16 @@ COPY infra/docker/api/.env.docker /var/www/html/.env
 # Install dependencies
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
-# Create var directories, set permissions, and warm up cache
-RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log \
+# Create var directories and set permissions
+RUN mkdir -p /var/www/html/var/cache /var/www/html/var/log /var/www/html/config/jwt \
     && chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
     && chmod -R 777 /var/www/html/var
 
+# Copy entrypoint script
+COPY infra/docker/api/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 EXPOSE 80
 
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+ENTRYPOINT ["/docker-entrypoint.sh"]
