@@ -37,7 +37,7 @@ services:
     branch: 001-gtd-todo-app
     envVars:
       - key: APP_ENV
-        value: dev
+        value: prod
       - key: APP_SECRET
         generateValue: true
       - key: DATABASE_URL

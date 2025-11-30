@@ -9,7 +9,7 @@
 
 Total tasks: 203
 - Sprint 0 (Infrastructure + GitHub Issues): 35 tasks ✅ COMPLETE
-- P1 User Account Management: 56 tasks (35 complete, 21 remaining) - 63% complete
+- P1 User Account Management: 56 tasks (48 complete, 8 remaining) - 86% complete
 - P2 Capture Ideas and Tasks: 14 tasks
 - P3 Clarify and Process: 12 tasks
 - P4 Organize with Contexts: 18 tasks
@@ -98,7 +98,7 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 **User Story**: As a user, I want to create an account, log in securely, and manage my preferences so that I can access my data across all my devices.
 
-**Status**: In Progress (35/56 tasks complete - 63%)
+**Status**: In Progress (48/56 tasks complete - 86%)
 
 ### Phase 1.1: Backend - User Entity & Repository ✅
 
@@ -159,21 +159,21 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 ### Phase 1.5: Frontend - Account Management Pages
 
 **Account Settings Page**
-- [ ] [P1-033] [Story-1] Create AccountSettingsPage component `web/src/pages/AccountSettingsPage.jsx`
-- [ ] [P1-034] [Story-1] Add profile information display (email, dates) `web/src/pages/AccountSettingsPage.jsx`
-- [ ] [P1-035] [Story-1] Create timezone update form `web/src/components/TimezoneSelector.jsx`
-- [ ] [P1-036] [Story-1] Create notification preferences form `web/src/components/NotificationPreferences.jsx`
-- [ ] [P1-037] [Story-1] Add route /account/settings with auth guard `web/src/App.jsx`
-- [ ] [P1-038] [Story-1] Write unit tests for AccountSettingsPage `web/tests/unit/pages/AccountSettingsPage.test.jsx`
+- [X] [P1-033] [Story-1] Create AccountSettingsPage component `web/src/pages/AccountSettingsPage.jsx`
+- [X] [P1-034] [Story-1] Add profile information display (email, dates) `web/src/pages/AccountSettingsPage.jsx`
+- [X] [P1-035] [Story-1] Create timezone update form `web/src/components/TimezoneSelector.jsx`
+- [X] [P1-036] [Story-1] Create notification preferences form `web/src/components/NotificationPreferences.jsx`
+- [X] [P1-037] [Story-1] Add route /account/settings with auth guard `web/src/App.jsx`
+- [X] [P1-038] [Story-1] Write unit tests for AccountSettingsPage `web/tests/unit/pages/AccountSettingsPage.test.jsx`
 
 **Account Deletion Page**
-- [ ] [P1-039] [Story-1] Create AccountDeletionPage component `web/src/pages/AccountDeletionPage.jsx`
-- [ ] [P1-040] [Story-1] Display deletion warning and data impact `web/src/pages/AccountDeletionPage.jsx`
-- [ ] [P1-041] [Story-1] Create deletion confirmation form (password + "DELETE" text) `web/src/components/AccountDeletionForm.jsx`
-- [ ] [P1-042] [Story-1] Add GDPR compliance notices `web/src/pages/AccountDeletionPage.jsx`
-- [ ] [P1-043] [Story-1] Implement post-deletion redirect to login `web/src/pages/AccountDeletionPage.jsx`
-- [ ] [P1-044] [Story-1] Add route /account/delete with auth guard `web/src/App.jsx`
-- [ ] [P1-045] [Story-1] Write unit tests for AccountDeletionPage `web/tests/unit/pages/AccountDeletionPage.test.jsx`
+- [X] [P1-039] [Story-1] Create AccountDeletionPage component `web/src/pages/AccountDeletionPage.jsx`
+- [X] [P1-040] [Story-1] Display deletion warning and data impact `web/src/pages/AccountDeletionPage.jsx`
+- [X] [P1-041] [Story-1] Create deletion confirmation form (password + "DELETE" text) `web/src/components/AccountDeletionForm.jsx`
+- [X] [P1-042] [Story-1] Add GDPR compliance notices `web/src/pages/AccountDeletionPage.jsx`
+- [X] [P1-043] [Story-1] Implement post-deletion redirect to login `web/src/pages/AccountDeletionPage.jsx`
+- [X] [P1-044] [Story-1] Add route /account/delete with auth guard `web/src/App.jsx`
+- [X] [P1-045] [Story-1] Write unit tests for AccountDeletionPage `web/tests/unit/pages/AccountDeletionPage.test.jsx`
 
 **Navigation Updates**
 - [X] [P1-046] [Story-1] Add user menu with Settings and Logout `web/src/components/Navigation.jsx`

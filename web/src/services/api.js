@@ -78,11 +78,13 @@ export const authAPI = {
   deleteAccount: () => apiClient.delete('/account'),
 };
 
-// User API endpoints
-export const userAPI = {
-  getProfile: () => apiClient.get('/user/profile'),
-  updateProfile: (data) => apiClient.patch('/user/profile', data),
-  updateNotificationPreferences: (preferences) => apiClient.patch('/user/notification-preferences', preferences),
+// Account API endpoints
+export const accountAPI = {
+  getProfile: () => apiClient.get('/auth/me'),
+  updatePreferences: (data) => apiClient.patch('/account/preferences', data),
+  deleteAccount: (password, confirmText) => apiClient.delete('/account', {
+    data: { password, confirm_text: confirmText }
+  }),
 };
 
 // Health check endpoint

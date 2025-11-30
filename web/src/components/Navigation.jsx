@@ -2,13 +2,25 @@ import { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { logout, selectUser } from '../features/auth/authSlice';
+import { fetchProfile, selectProfile } from '../features/account/accountSlice';
 
 const Navigation = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector(selectUser);
+  const profile = useSelector(selectProfile);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef(null);
+
+  // Load profile if not available (e.g., after HMR)
+  useEffect(() => {
+    if (!user && !profile) {
+      dispatch(fetchProfile());
+    }
+  }, [dispatch, user, profile]);
+
+  // Get email from user (after login) or profile (from API)
+  const email = user?.email || profile?.email;
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -55,8 +67,8 @@ const Navigation = () => {
 
   // Get user initials for avatar
   const getUserInitials = () => {
-    if (!user?.email) return '?';
-    return user.email.charAt(0).toUpperCase();
+    if (!email) return '?';
+    return email.charAt(0).toUpperCase();
   };
 
   return (
@@ -102,7 +114,7 @@ const Navigation = () => {
                     {/* User Info */}
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="text-sm font-medium text-gray-900 truncate">
-                        {user?.email || 'User'}
+                        {email || 'User'}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
                         Signed in
