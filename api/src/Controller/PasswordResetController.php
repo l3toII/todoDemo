@@ -71,7 +71,7 @@ class PasswordResetController extends AbstractController
         // Send password reset email
         try {
             $resetUrl = sprintf(
-                '%s/reset-password?token=%s',
+                '%s/password-reset/confirm?token=%s',
                 $_ENV['WEB_URL'] ?? 'http://localhost:3000',
                 $resetToken
             );
