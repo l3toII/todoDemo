@@ -48,6 +48,15 @@ services:
         generateValue: true
       - key: CORS_ALLOW_ORIGIN
         value: https://gtd-web-staging.onrender.com
+      # Apple Sign-In Configuration (set manually in Render dashboard)
+      - key: APPLE_CLIENT_ID
+        sync: false  # Set to your Apple Service ID (e.g., com.gtd.app.staging)
+      - key: APPLE_TEAM_ID
+        sync: false  # Your Apple Developer Team ID (10 characters)
+      - key: APPLE_KEY_ID
+        sync: false  # Your Sign in with Apple Key ID (10 characters)
+      - key: APPLE_PRIVATE_KEY_PATH
+        sync: false  # Path to .p8 file or use APPLE_PRIVATE_KEY env var
     healthCheckPath: /api/health
     autoDeploy: true
 

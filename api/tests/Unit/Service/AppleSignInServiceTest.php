@@ -253,39 +253,6 @@ class AppleSignInServiceTest extends TestCase
     }
 
     // =========================================================================
-    // Base64 URL Decode Tests
-    // =========================================================================
-
-    public function testBase64UrlDecode(): void
-    {
-        $reflection = new \ReflectionClass($this->service);
-        $method = $reflection->getMethod('base64UrlDecode');
-        $method->setAccessible(true);
-
-        $original = 'Hello, World!';
-        $encoded = rtrim(strtr(base64_encode($original), '+/', '-_'), '=');
-
-        $decoded = $method->invoke($this->service, $encoded);
-
-        $this->assertEquals($original, $decoded);
-    }
-
-    public function testBase64UrlDecodeWithPadding(): void
-    {
-        $reflection = new \ReflectionClass($this->service);
-        $method = $reflection->getMethod('base64UrlDecode');
-        $method->setAccessible(true);
-
-        // Test string that requires padding
-        $original = 'Test';
-        $encoded = rtrim(strtr(base64_encode($original), '+/', '-_'), '=');
-
-        $decoded = $method->invoke($this->service, $encoded);
-
-        $this->assertEquals($original, $decoded);
-    }
-
-    // =========================================================================
     // Error Handling Tests
     // =========================================================================
 
@@ -301,14 +268,89 @@ class AppleSignInServiceTest extends TestCase
     }
 
     // =========================================================================
-    // Library Requirement Tests
+    // Configuration Tests
     // =========================================================================
 
-    public function testGenerateClientSecretThrowsException(): void
+    public function testGenerateClientSecretRequiresPrivateKeyPath(): void
     {
         $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage('Client secret generation requires additional setup');
+        $this->expectExceptionMessage('APPLE_PRIVATE_KEY_PATH is required to generate client secret');
 
         $this->service->generateClientSecret();
+    }
+
+    public function testCheckConfigurationWithValidConfig(): void
+    {
+        $result = $this->service->checkConfiguration();
+
+        $this->assertTrue($result['configured']);
+        $this->assertEmpty($result['missing']);
+        $this->assertArrayHasKey('optional_missing', $result);
+    }
+
+    public function testCheckConfigurationWithMissingClientId(): void
+    {
+        $service = new AppleSignInService(
+            $this->logger,
+            '', // Empty client ID
+            'TEAM_ID',
+            'KEY_ID'
+        );
+
+        $result = $service->checkConfiguration();
+
+        $this->assertFalse($result['configured']);
+        $this->assertContains('APPLE_CLIENT_ID', $result['missing']);
+    }
+
+    public function testClearKeyCache(): void
+    {
+        // Just verify the method exists and doesn't throw
+        $this->service->clearKeyCache();
+        $this->assertTrue(true);
+    }
+
+    // =========================================================================
+    // Boolean Parsing Tests
+    // =========================================================================
+
+    public function testParseBooleanWithBooleanTrue(): void
+    {
+        $reflection = new \ReflectionClass($this->service);
+        $method = $reflection->getMethod('parseBoolean');
+        $method->setAccessible(true);
+
+        $this->assertTrue($method->invoke($this->service, true));
+    }
+
+    public function testParseBooleanWithBooleanFalse(): void
+    {
+        $reflection = new \ReflectionClass($this->service);
+        $method = $reflection->getMethod('parseBoolean');
+        $method->setAccessible(true);
+
+        $this->assertFalse($method->invoke($this->service, false));
+    }
+
+    public function testParseBooleanWithStringTrue(): void
+    {
+        $reflection = new \ReflectionClass($this->service);
+        $method = $reflection->getMethod('parseBoolean');
+        $method->setAccessible(true);
+
+        $this->assertTrue($method->invoke($this->service, 'true'));
+        $this->assertTrue($method->invoke($this->service, 'TRUE'));
+        $this->assertTrue($method->invoke($this->service, 'True'));
+    }
+
+    public function testParseBooleanWithStringFalse(): void
+    {
+        $reflection = new \ReflectionClass($this->service);
+        $method = $reflection->getMethod('parseBoolean');
+        $method->setAccessible(true);
+
+        $this->assertFalse($method->invoke($this->service, 'false'));
+        $this->assertFalse($method->invoke($this->service, 'FALSE'));
+        $this->assertFalse($method->invoke($this->service, ''));
     }
 }
