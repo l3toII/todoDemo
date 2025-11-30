@@ -15,6 +15,42 @@
         <server name="SYMFONY_PHPUNIT_REMOVE" value=""/>
         <server name="SYMFONY_PHPUNIT_VERSION" value="10.5"/>
         <env name="KERNEL_CLASS" value="App\Kernel"/>
+
+        <!-- ###+ symfony/framework-bundle ### -->
+        <env name="APP_ENV" value="test"/>
+        <env name="APP_SECRET" value="test-secret-for-phpunit"/>
+        <!-- ###- symfony/framework-bundle ### -->
+
+        <!-- ###+ symfony/routing ### -->
+        <!-- Configure how to generate URLs in non-HTTP contexts, such as CLI commands. -->
+        <!-- See https://symfony.com/doc/current/routing.html#generating-urls-in-commands -->
+        <env name="DEFAULT_URI" value="http://localhost"/>
+        <!-- ###- symfony/routing ### -->
+
+        <!-- ###+ doctrine/doctrine-bundle ### -->
+        <!-- Format described at https://www.doctrine-project.org/projects/doctrine-dbal/en/latest/reference/configuration.html#connecting-using-a-url -->
+        <!-- IMPORTANT: You MUST configure your server version, either here or in config/packages/doctrine.yaml -->
+        <!--  -->
+        <!-- DATABASE_URL="sqlite:///%kernel.project_dir%/var/data_%kernel.environment%.db" -->
+        <!-- DATABASE_URL="mysql://app:!ChangeMe!@127.0.0.1:3306/app?serverVersion=8.0.32&charset=utf8mb4" -->
+        <!-- Local: mysql://gtd:gtd_dev@127.0.0.1:3306/gtd_app_test (overridden by .env.test) -->
+        <!-- CI: mysql://gtd_test:gtd_test@127.0.0.1:3306/gtd (overridden by CI env vars) -->
+        <env name="DATABASE_URL" value="mysql://gtd_test:gtd_test@127.0.0.1:3306/gtd?serverVersion=10.11.0-MariaDB&amp;charset=utf8mb4"/>
+        <!-- ###- doctrine/doctrine-bundle ### -->
+
+        <!-- ###+ lexik/jwt-authentication-bundle ### -->
+        <env name="JWT_SECRET_KEY" value="%kernel.project_dir%/config/jwt/private.pem"/>
+        <env name="JWT_PUBLIC_KEY" value="%kernel.project_dir%/config/jwt/public.pem"/>
+        <env name="JWT_PASSPHRASE" value="75da0040d3ca49d161b5441da45d7dccaae2f5fdea5b57131fdc68992bd91632"/>
+        <!-- ###- lexik/jwt-authentication-bundle ### -->
+
+        <!-- ###+ nelmio/cors-bundle ### -->
+        <env name="CORS_ALLOW_ORIGIN" value="'^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$'"/>
+        <!-- ###- nelmio/cors-bundle ### -->
+
+        <!-- ###+ symfony/mailer ### -->
+        <env name="MAILER_DSN" value="smtp://127.0.0.1:1025"/>
+        <!-- ###- symfony/mailer ### -->
     </php>
 
     <testsuites>

@@ -7,9 +7,9 @@
 
 ## Overview
 
-Total tasks: 201
+Total tasks: 203
 - Sprint 0 (Infrastructure + GitHub Issues): 35 tasks ✅ COMPLETE
-- P1 User Account Management: 54 tasks (21 complete, 33 remaining) - 39% complete
+- P1 User Account Management: 56 tasks (29 complete, 27 remaining) - 52% complete
 - P2 Capture Ideas and Tasks: 14 tasks
 - P3 Clarify and Process: 12 tasks
 - P4 Organize with Contexts: 18 tasks
@@ -98,7 +98,7 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 **User Story**: As a user, I want to create an account, log in securely, and manage my preferences so that I can access my data across all my devices.
 
-**Status**: In Progress (21/54 tasks complete - 39%)
+**Status**: In Progress (29/56 tasks complete - 52%)
 
 ### Phase 1.1: Backend - User Entity & Repository ✅
 
@@ -129,18 +129,21 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 - [X] [P1-012] [Story-1] Create auth Redux slice with login/logout/register actions `web/src/features/auth/authSlice.js`
 - [X] [P1-013] [Story-1] Create LoginPage component with form validation `web/src/pages/LoginPage.jsx`
 - [X] [P1-014] [Story-1] Create RegisterPage component with email verification flow `web/src/pages/RegisterPage.jsx`
+- [X] [P1-014b] [Story-1] Create VerifyEmailPage component for email verification link `web/src/pages/VerifyEmailPage.jsx`
+- [X] [P1-014c] [Story-1] Add /verify-email route to App router `web/src/App.jsx`
 - [X] [P1-015] [Story-1] Implement Apple Sign-In button for web `web/src/components/AppleSignInButton.jsx`
 - [X] [P1-016] [Story-1] Create protected route wrapper with auth guard `web/src/components/ProtectedRoute.jsx`
 - [X] [P1-017] [Story-1] Write E2E tests for auth flows `web/src/tests/e2e/auth.spec.jsx`
+- [X] [P1-017b] [Story-1] Write E2E tests for email verification flow `web/src/tests/e2e/auth.spec.jsx:439-606`
 
 ### Phase 1.4: Critical Fixes & Missing Features ⚠️ HIGH PRIORITY
 
-**Email Service Integration** (BLOCKING)
-- [ ] [P1-021] [Story-1] Install and configure Symfony Mailer `api/config/packages/mailer.yaml`
-- [ ] [P1-022] [Story-1] Create email templates (verification, password reset) `api/templates/email/`
-- [ ] [P1-023] [Story-1] Implement email sending in RegistrationController `api/src/Controller/RegistrationController.php:112-113`
-- [ ] [P1-024] [Story-1] Implement email sending in PasswordResetController `api/src/Controller/PasswordResetController.php:69-70, 228-229`
-- [ ] [P1-025] [Story-1] Write integration tests for email sending `api/tests/Integration/EmailServiceTest.php`
+**Email Service Integration** ✅ COMPLETE
+- [X] [P1-021] [Story-1] Install and configure Symfony Mailer `api/config/packages/mailer.yaml`
+- [X] [P1-022] [Story-1] Create email templates (verification, password reset) `api/templates/email/`
+- [X] [P1-023] [Story-1] Implement email sending in RegistrationController `api/src/Controller/RegistrationController.php:112-113`
+- [X] [P1-024] [Story-1] Implement email sending in PasswordResetController `api/src/Controller/PasswordResetController.php:69-70, 228-229`
+- [X] [P1-025] [Story-1] Write integration tests for email sending `api/tests/Integration/EmailServiceTest.php`
 
 **Apple Sign-In Completion**
 - [ ] [P1-026] [Story-1] Install firebase/php-jwt package `composer.json`
@@ -191,7 +194,7 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 **Loading States & Feedback**
 - [ ] [P1-053] [Story-1] Add loading spinners to all action buttons `web/src/components/*`
-- [ ] [P1-054] [Story-1] Improve form validation messages `web/src/pages/*`
+- [X] [P1-054] [Story-1] Improve form validation messages `web/src/pages/*`
 
 ---
 

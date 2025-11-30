@@ -113,6 +113,9 @@ databases:
     region: frankfurt
     plan: free
     ipAllowList: []
+    # Use MySQL/MariaDB instead of PostgreSQL
+    # Note: Render uses MySQL 8.0 by default for compatibility
+    engine: mysql
 
   - name: gtd-db-staging
     databaseName: gtd_staging
@@ -120,3 +123,5 @@ databases:
     region: frankfurt
     plan: free
     ipAllowList: []
+    # Use MySQL/MariaDB instead of PostgreSQL
+    engine: mysql

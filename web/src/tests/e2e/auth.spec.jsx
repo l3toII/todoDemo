@@ -2,11 +2,12 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, MemoryRouter } from 'react-router-dom';
 import { configureStore } from '@reduxjs/toolkit';
 import authReducer from '../../features/auth/authSlice';
 import LoginPage from '../../pages/LoginPage';
 import RegisterPage from '../../pages/RegisterPage';
+import VerifyEmailPage from '../../pages/VerifyEmailPage';
 import PasswordResetRequestPage from '../../pages/PasswordResetRequestPage';
 import PasswordResetConfirmPage from '../../pages/PasswordResetConfirmPage';
 import * as api from '../../services/api';
@@ -432,6 +433,174 @@ describe('Authentication E2E Tests', () => {
       await user.click(screen.getByRole('button', { name: /create account/i }));
 
       expect(await screen.findByText(/creating account/i)).toBeInTheDocument();
+    });
+  });
+
+  describe('Email Verification Flow', () => {
+    const renderVerifyEmailPage = (token = '') => {
+      const store = configureStore({
+        reducer: {
+          auth: authReducer,
+        },
+      });
+
+      const initialEntries = token
+        ? [`/verify-email?token=${token}`]
+        : ['/verify-email'];
+
+      return render(
+        <Provider store={store}>
+          <MemoryRouter initialEntries={initialEntries}>
+            <VerifyEmailPage />
+          </MemoryRouter>
+        </Provider>
+      );
+    };
+
+    it('should render loading state initially when verifying email', () => {
+      api.authAPI.verifyEmail.mockImplementationOnce(
+        () => new Promise((resolve) => setTimeout(resolve, 1000))
+      );
+
+      renderVerifyEmailPage('valid-token-123');
+
+      expect(screen.getByText(/verifying your email/i)).toBeInTheDocument();
+      expect(screen.getByText(/please wait while we verify/i)).toBeInTheDocument();
+    });
+
+    it('should verify email successfully with valid token', async () => {
+      const mockResponse = {
+        data: {
+          message: 'Email verified successfully. You can now log in.',
+          user: {
+            id: '123',
+            email: 'test@example.com',
+            status: 'active',
+          },
+        },
+      };
+
+      api.authAPI.verifyEmail.mockResolvedValueOnce(mockResponse);
+
+      renderVerifyEmailPage('valid-token-123');
+
+      await waitFor(() => {
+        expect(api.authAPI.verifyEmail).toHaveBeenCalledWith('valid-token-123');
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText(/email verified successfully/i)).toBeInTheDocument();
+        expect(screen.getByText(/your email has been verified/i)).toBeInTheDocument();
+      });
+
+      expect(screen.getByRole('link', { name: /go to login page/i })).toBeInTheDocument();
+    });
+
+    it('should show error for invalid token', async () => {
+      const mockError = {
+        response: {
+          data: {
+            error: 'Invalid verification token',
+            code: 'INVALID_TOKEN',
+          },
+        },
+      };
+
+      api.authAPI.verifyEmail.mockRejectedValueOnce(mockError);
+
+      renderVerifyEmailPage('invalid-token');
+
+      await waitFor(() => {
+        expect(api.authAPI.verifyEmail).toHaveBeenCalledWith('invalid-token');
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText(/email verification failed/i)).toBeInTheDocument();
+        expect(screen.getByText(/invalid verification token/i)).toBeInTheDocument();
+      });
+
+      expect(screen.getByRole('link', { name: /register again/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /go to login/i })).toBeInTheDocument();
+    });
+
+    it('should show error for expired token', async () => {
+      const mockError = {
+        response: {
+          data: {
+            error: 'Verification token has expired',
+            code: 'TOKEN_EXPIRED',
+          },
+        },
+      };
+
+      api.authAPI.verifyEmail.mockRejectedValueOnce(mockError);
+
+      renderVerifyEmailPage('expired-token');
+
+      await waitFor(() => {
+        expect(screen.getByText(/email verification failed/i)).toBeInTheDocument();
+        expect(screen.getByText(/verification token has expired/i)).toBeInTheDocument();
+      });
+    });
+
+    it('should show error when no token is provided', async () => {
+      renderVerifyEmailPage('');
+
+      await waitFor(() => {
+        expect(screen.getByText(/email verification failed/i)).toBeInTheDocument();
+        expect(screen.getByText(/invalid or has expired/i)).toBeInTheDocument();
+      });
+
+      // Should not call API when no token
+      expect(api.authAPI.verifyEmail).not.toHaveBeenCalled();
+    });
+
+    it('should provide navigation links on error', async () => {
+      renderVerifyEmailPage('');
+
+      await waitFor(() => {
+        expect(screen.getByText(/email verification failed/i)).toBeInTheDocument();
+      });
+
+      const registerLink = screen.getByRole('link', { name: /register again/i });
+      const loginLink = screen.getByRole('link', { name: /go to login/i });
+
+      expect(registerLink).toHaveAttribute('href', '/register');
+      expect(loginLink).toHaveAttribute('href', '/login');
+    });
+
+    it('should show spinner during verification', async () => {
+      api.authAPI.verifyEmail.mockImplementationOnce(
+        () => new Promise((resolve) => setTimeout(resolve, 100))
+      );
+
+      renderVerifyEmailPage('test-token');
+
+      // Just verify the loading state is shown
+      expect(screen.getByText(/verifying your email/i)).toBeInTheDocument();
+      expect(screen.getByText(/please wait while we verify/i)).toBeInTheDocument();
+
+      // Check that the spinner SVG has the animate-spin class
+      const { container } = renderVerifyEmailPage('test-token');
+      const spinnerSvg = container.querySelector('.animate-spin');
+      expect(spinnerSvg).toBeInTheDocument();
+    });
+
+    it('should handle network errors gracefully', async () => {
+      const mockError = {
+        response: undefined,
+        message: 'Network Error',
+      };
+
+      api.authAPI.verifyEmail.mockRejectedValueOnce(mockError);
+
+      renderVerifyEmailPage('test-token');
+
+      await waitFor(() => {
+        // Use getAllByText since the error message appears in multiple places
+        const errorElements = screen.queryAllByText(/email verification failed/i);
+        expect(errorElements.length).toBeGreaterThan(0);
+      }, { timeout: 3000 });
     });
   });
 });

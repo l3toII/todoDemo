@@ -20,7 +20,12 @@ export const login = createAsyncThunk(
       const response = await authAPI.login(credentials);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || { message: 'Login failed' });
+      const errorData = error.response?.data || {};
+      return rejectWithValue({
+        message: errorData.error || errorData.message || 'Login failed',
+        code: errorData.code,
+        status: errorData.status
+      });
     }
   }
 );
@@ -32,7 +37,11 @@ export const register = createAsyncThunk(
       const response = await authAPI.register(userData);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || { message: 'Registration failed' });
+      const errorData = error.response?.data || {};
+      return rejectWithValue({
+        message: errorData.error || errorData.message || 'Registration failed',
+        code: errorData.code
+      });
     }
   }
 );
@@ -57,7 +66,11 @@ export const appleSignIn = createAsyncThunk(
       const response = await authAPI.appleSignIn(identityToken, authorizationCode);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || { message: 'Apple Sign-In failed' });
+      const errorData = error.response?.data || {};
+      return rejectWithValue({
+        message: errorData.error || errorData.message || 'Apple Sign-In failed',
+        code: errorData.code
+      });
     }
   }
 );
@@ -69,7 +82,11 @@ export const verifyEmail = createAsyncThunk(
       const response = await authAPI.verifyEmail(token);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || { message: 'Email verification failed' });
+      const errorData = error.response?.data || {};
+      return rejectWithValue({
+        message: errorData.error || errorData.message || 'Email verification failed',
+        code: errorData.code
+      });
     }
   }
 );
@@ -81,7 +98,11 @@ export const requestPasswordReset = createAsyncThunk(
       const response = await authAPI.requestPasswordReset(email);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || { message: 'Password reset request failed' });
+      const errorData = error.response?.data || {};
+      return rejectWithValue({
+        message: errorData.error || errorData.message || 'Password reset request failed',
+        code: errorData.code
+      });
     }
   }
 );
@@ -93,7 +114,11 @@ export const resetPassword = createAsyncThunk(
       const response = await authAPI.resetPassword(token, newPassword);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || { message: 'Password reset failed' });
+      const errorData = error.response?.data || {};
+      return rejectWithValue({
+        message: errorData.error || errorData.message || 'Password reset failed',
+        code: errorData.code
+      });
     }
   }
 );

@@ -63,7 +63,7 @@ docker-compose exec api php bin/console app:seed:contexts
 | API | http://localhost:8000/api/v1 | Symfony API |
 | API Docs | http://localhost:8000/api/doc | OpenAPI documentation |
 | MariaDB | localhost:3306 | Database (user: gtd, pass: gtd_dev) |
-| Mailhog | http://localhost:8025 | Email testing |
+| Mailpit | http://localhost:8025 | Email testing (replaces Mailhog) |
 
 ## Project Structure
 
@@ -168,7 +168,8 @@ JWT_PUBLIC_KEY=%kernel.project_dir%/config/jwt/public.pem
 JWT_PASSPHRASE=your-passphrase
 
 # Mail
-MAILER_DSN=smtp://mailhog:1025
+MAILER_DSN=smtp://mailer:1025
+MAILER_FROM_ADDRESS=noreply@gtd-app.local
 
 # Apple Sign-In
 APPLE_CLIENT_ID=com.example.gtd
