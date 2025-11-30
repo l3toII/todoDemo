@@ -34,7 +34,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      - DATABASE_URL=postgresql://gtd:gtd_dev@db:5432/gtd_app?serverVersion=16&charset=utf8
+      - DATABASE_URL=pgsql://gtd:gtd_dev@db:5432/gtd_app?serverVersion=16&charset=utf8
       - APP_ENV=dev
       - APP_SECRET=changeme_in_production
     networks:
