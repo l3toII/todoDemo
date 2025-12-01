@@ -23,3 +23,9 @@ services:
             $appleTeamId: '%env(APPLE_TEAM_ID)%'
             $appleKeyId: '%env(APPLE_KEY_ID)%'
             $applePrivateKeyPath: '%env(APPLE_PRIVATE_KEY_PATH)%'
+
+    # Email Service Configuration (Resend HTTP API)
+    App\Service\EmailService:
+        arguments:
+            $resendApiKey: '%env(RESEND_API_KEY)%'
+            $fromEmail: '%env(FROM_EMAIL)%'
