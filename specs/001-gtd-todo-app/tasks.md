@@ -9,7 +9,7 @@
 
 Total tasks: 203
 - Sprint 0 (Infrastructure + GitHub Issues): 35 tasks ✅ COMPLETE
-- P1 User Account Management: 56 tasks (53 complete, 3 remaining) - 95% complete
+- P1 User Account Management: 56 tasks (52 complete, 4 remaining) - 93% complete
 - P2 Capture Ideas and Tasks: 14 tasks
 - P3 Clarify and Process: 12 tasks
 - P4 Organize with Contexts: 18 tasks
@@ -98,7 +98,7 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 **User Story**: As a user, I want to create an account, log in securely, and manage my preferences so that I can access my data across all my devices.
 
-**Status**: In Progress (53/56 tasks complete - 95%)
+**Status**: In Progress (52/56 tasks complete - 93%)
 
 ### Phase 1.1: Backend - User Entity & Repository ✅
 
@@ -151,10 +151,10 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 - [X] [P1-028] [Story-1] Add error handling for Apple Sign-In failures `api/src/Service/AppleSignInService.php`
 - [X] [P1-029] [Story-1] Write unit tests for Apple Sign-In service `api/tests/Unit/Service/AppleSignInServiceTest.php`
 
-**Preference Management Fix**
-- [ ] [P1-030] [Story-1] Fix preference update to persist to database `api/src/Controller/AccountController.php:158`
-- [ ] [P1-031] [Story-1] Add validation for timezone values `api/src/Controller/AccountController.php`
-- [ ] [P1-032] [Story-1] Write functional tests for preference updates `api/tests/Functional/Account/PreferencesTest.php`
+**Preference Management Fix** ✅ COMPLETE
+- [X] [P1-030] [Story-1] Fix preference update to persist to database `api/src/Controller/AccountController.php:168`
+- [X] [P1-031] [Story-1] Add validation for timezone values `api/src/Controller/AccountController.php:184-186`
+- [X] [P1-032] [Story-1] Write unit tests for preference updates `api/tests/Unit/Controller/AccountControllerTest.php`
 
 ### Phase 1.5: Frontend - Account Management Pages
 
@@ -190,10 +190,10 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 - [X] [P1-051] [Story-1] E2E test for account deletion flow `web/src/tests/e2e/account-deletion.spec.jsx`
 - [X] [P1-052] [Story-1] E2E test for verifying data persistence after logout/login `web/src/tests/e2e/data-persistence.spec.jsx`
 
-### Phase 1.7: UX Polish
+### Phase 1.7: UX Polish ✅ COMPLETE
 
 **Loading States & Feedback**
-- [ ] [P1-053] [Story-1] Add loading spinners to all action buttons `web/src/components/*`
+- [X] [P1-053] [Story-1] Add loading spinners to all action buttons `web/src/pages/*`
 - [X] [P1-054] [Story-1] Improve form validation messages `web/src/pages/*`
 
 ---
