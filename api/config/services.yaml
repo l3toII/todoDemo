@@ -1,4 +1,7 @@
 parameters:
+    # Default empty values for optional env vars
+    env(RESEND_API_KEY): ''
+    env(FROM_EMAIL): 'noreply@gtd-app.local'
 
 services:
     _defaults:
@@ -23,3 +26,11 @@ services:
             $appleTeamId: '%env(APPLE_TEAM_ID)%'
             $appleKeyId: '%env(APPLE_KEY_ID)%'
             $applePrivateKeyPath: '%env(APPLE_PRIVATE_KEY_PATH)%'
+
+    # Email Service Configuration (dual mode: Resend HTTP API or SMTP)
+    # - If RESEND_API_KEY is set: uses Resend HTTP API (production)
+    # - Otherwise: uses SMTP via MAILER_DSN (local dev with Mailhog)
+    App\Service\EmailService:
+        arguments:
+            $fromEmail: '%env(FROM_EMAIL)%'
+            $resendApiKey: '%env(RESEND_API_KEY)%'
