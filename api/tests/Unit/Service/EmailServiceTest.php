@@ -4,36 +4,46 @@ namespace App\Tests\Unit\Service;
 
 use App\Service\EmailService;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
+use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Response\MockResponse;
 use Twig\Environment;
 
 /**
- * Unit tests for EmailService
+ * Unit tests for EmailService (Resend HTTP API)
  */
 class EmailServiceTest extends TestCase
 {
-    private MailerInterface $mailer;
     private Environment $twig;
-    private EmailService $service;
+    private const API_KEY = 'test_api_key';
+    private const FROM_EMAIL = 'noreply@test.com';
 
     protected function setUp(): void
     {
-        $this->mailer = $this->createMock(MailerInterface::class);
         $this->twig = $this->createMock(Environment::class);
-        $this->service = new EmailService($this->mailer, $this->twig);
     }
 
-    public function testSendVerificationEmailCallsMailer(): void
+    private function createService(MockHttpClient $httpClient): EmailService
+    {
+        return new EmailService(
+            $this->twig,
+            self::FROM_EMAIL,
+            $httpClient,
+            null,  // No SMTP mailer for HTTP API tests
+            self::API_KEY
+        );
+    }
+
+    public function testSendVerificationEmailCallsResendApi(): void
     {
         $this->twig->method('render')->willReturn('rendered content');
 
-        $this->mailer
-            ->expects($this->once())
-            ->method('send')
-            ->with($this->isInstanceOf(Email::class));
+        $mockResponse = new MockResponse('{"id": "email_123"}', ['http_code' => 200]);
+        $httpClient = new MockHttpClient($mockResponse);
 
-        $this->service->sendVerificationEmail('test@example.com', 'https://example.com/verify?token=abc123');
+        $service = $this->createService($httpClient);
+        $service->sendVerificationEmail('test@example.com', 'https://example.com/verify?token=abc123');
+
+        $this->assertSame(1, $httpClient->getRequestsCount());
     }
 
     public function testSendVerificationEmailRendersCorrectTemplates(): void
@@ -50,46 +60,49 @@ class EmailServiceTest extends TestCase
                 return 'rendered content';
             });
 
-        $this->mailer->method('send');
-        $this->service->sendVerificationEmail('test@example.com', 'https://example.com/verify');
+        $mockResponse = new MockResponse('{"id": "email_123"}', ['http_code' => 200]);
+        $httpClient = new MockHttpClient($mockResponse);
+
+        $service = $this->createService($httpClient);
+        $service->sendVerificationEmail('test@example.com', 'https://example.com/verify');
     }
 
     public function testSendVerificationEmailSetsCorrectRecipient(): void
     {
         $this->twig->method('render')->willReturn('rendered content');
 
-        $capturedEmail = null;
-        $this->mailer
-            ->expects($this->once())
-            ->method('send')
-            ->willReturnCallback(function (Email $email) use (&$capturedEmail) {
-                $capturedEmail = $email;
-            });
+        $capturedRequest = null;
+        $mockResponse = new MockResponse('{"id": "email_123"}', ['http_code' => 200]);
+        $httpClient = new MockHttpClient(function ($method, $url, $options) use (&$capturedRequest, $mockResponse) {
+            $capturedRequest = $options;
+            return $mockResponse;
+        });
 
-        $this->service->sendVerificationEmail('user@example.com', 'https://example.com/verify');
+        $service = $this->createService($httpClient);
+        $service->sendVerificationEmail('user@example.com', 'https://example.com/verify');
 
-        $this->assertNotNull($capturedEmail);
-        $to = $capturedEmail->getTo();
-        $this->assertCount(1, $to);
-        $this->assertEquals('user@example.com', $to[0]->getAddress());
+        $this->assertNotNull($capturedRequest);
+        $body = json_decode($capturedRequest['body'], true);
+        $this->assertEquals(['user@example.com'], $body['to']);
     }
 
     public function testSendVerificationEmailSetsCorrectSubject(): void
     {
         $this->twig->method('render')->willReturn('rendered content');
 
-        $capturedEmail = null;
-        $this->mailer
-            ->expects($this->once())
-            ->method('send')
-            ->willReturnCallback(function (Email $email) use (&$capturedEmail) {
-                $capturedEmail = $email;
-            });
+        $capturedRequest = null;
+        $mockResponse = new MockResponse('{"id": "email_123"}', ['http_code' => 200]);
+        $httpClient = new MockHttpClient(function ($method, $url, $options) use (&$capturedRequest, $mockResponse) {
+            $capturedRequest = $options;
+            return $mockResponse;
+        });
 
-        $this->service->sendVerificationEmail('test@example.com', 'https://example.com/verify');
+        $service = $this->createService($httpClient);
+        $service->sendVerificationEmail('test@example.com', 'https://example.com/verify');
 
-        $this->assertNotNull($capturedEmail);
-        $this->assertEquals('Verify Your Email - GTD Todo App', $capturedEmail->getSubject());
+        $this->assertNotNull($capturedRequest);
+        $body = json_decode($capturedRequest['body'], true);
+        $this->assertEquals('Verify Your Email - GTD Todo App', $body['subject']);
     }
 
     public function testSendVerificationEmailSetsBothHtmlAndText(): void
@@ -97,31 +110,33 @@ class EmailServiceTest extends TestCase
         $this->twig->method('render')
             ->willReturnOnConsecutiveCalls('html content', 'text content');
 
-        $capturedEmail = null;
-        $this->mailer
-            ->expects($this->once())
-            ->method('send')
-            ->willReturnCallback(function (Email $email) use (&$capturedEmail) {
-                $capturedEmail = $email;
-            });
+        $capturedRequest = null;
+        $mockResponse = new MockResponse('{"id": "email_123"}', ['http_code' => 200]);
+        $httpClient = new MockHttpClient(function ($method, $url, $options) use (&$capturedRequest, $mockResponse) {
+            $capturedRequest = $options;
+            return $mockResponse;
+        });
 
-        $this->service->sendVerificationEmail('test@example.com', 'https://example.com/verify');
+        $service = $this->createService($httpClient);
+        $service->sendVerificationEmail('test@example.com', 'https://example.com/verify');
 
-        $this->assertNotNull($capturedEmail);
-        $this->assertEquals('html content', $capturedEmail->getHtmlBody());
-        $this->assertEquals('text content', $capturedEmail->getTextBody());
+        $this->assertNotNull($capturedRequest);
+        $body = json_decode($capturedRequest['body'], true);
+        $this->assertEquals('html content', $body['html']);
+        $this->assertEquals('text content', $body['text']);
     }
 
-    public function testSendPasswordResetEmailCallsMailer(): void
+    public function testSendPasswordResetEmailCallsResendApi(): void
     {
         $this->twig->method('render')->willReturn('rendered content');
 
-        $this->mailer
-            ->expects($this->once())
-            ->method('send')
-            ->with($this->isInstanceOf(Email::class));
+        $mockResponse = new MockResponse('{"id": "email_123"}', ['http_code' => 200]);
+        $httpClient = new MockHttpClient($mockResponse);
 
-        $this->service->sendPasswordResetEmail('test@example.com', 'https://example.com/reset?token=abc123');
+        $service = $this->createService($httpClient);
+        $service->sendPasswordResetEmail('test@example.com', 'https://example.com/reset?token=abc123');
+
+        $this->assertSame(1, $httpClient->getRequestsCount());
     }
 
     public function testSendPasswordResetEmailRendersCorrectTemplates(): void
@@ -138,46 +153,49 @@ class EmailServiceTest extends TestCase
                 return 'rendered content';
             });
 
-        $this->mailer->method('send');
-        $this->service->sendPasswordResetEmail('test@example.com', 'https://example.com/reset');
+        $mockResponse = new MockResponse('{"id": "email_123"}', ['http_code' => 200]);
+        $httpClient = new MockHttpClient($mockResponse);
+
+        $service = $this->createService($httpClient);
+        $service->sendPasswordResetEmail('test@example.com', 'https://example.com/reset');
     }
 
     public function testSendPasswordResetEmailSetsCorrectRecipient(): void
     {
         $this->twig->method('render')->willReturn('rendered content');
 
-        $capturedEmail = null;
-        $this->mailer
-            ->expects($this->once())
-            ->method('send')
-            ->willReturnCallback(function (Email $email) use (&$capturedEmail) {
-                $capturedEmail = $email;
-            });
+        $capturedRequest = null;
+        $mockResponse = new MockResponse('{"id": "email_123"}', ['http_code' => 200]);
+        $httpClient = new MockHttpClient(function ($method, $url, $options) use (&$capturedRequest, $mockResponse) {
+            $capturedRequest = $options;
+            return $mockResponse;
+        });
 
-        $this->service->sendPasswordResetEmail('user@example.com', 'https://example.com/reset');
+        $service = $this->createService($httpClient);
+        $service->sendPasswordResetEmail('user@example.com', 'https://example.com/reset');
 
-        $this->assertNotNull($capturedEmail);
-        $to = $capturedEmail->getTo();
-        $this->assertCount(1, $to);
-        $this->assertEquals('user@example.com', $to[0]->getAddress());
+        $this->assertNotNull($capturedRequest);
+        $body = json_decode($capturedRequest['body'], true);
+        $this->assertEquals(['user@example.com'], $body['to']);
     }
 
     public function testSendPasswordResetEmailSetsCorrectSubject(): void
     {
         $this->twig->method('render')->willReturn('rendered content');
 
-        $capturedEmail = null;
-        $this->mailer
-            ->expects($this->once())
-            ->method('send')
-            ->willReturnCallback(function (Email $email) use (&$capturedEmail) {
-                $capturedEmail = $email;
-            });
+        $capturedRequest = null;
+        $mockResponse = new MockResponse('{"id": "email_123"}', ['http_code' => 200]);
+        $httpClient = new MockHttpClient(function ($method, $url, $options) use (&$capturedRequest, $mockResponse) {
+            $capturedRequest = $options;
+            return $mockResponse;
+        });
 
-        $this->service->sendPasswordResetEmail('test@example.com', 'https://example.com/reset');
+        $service = $this->createService($httpClient);
+        $service->sendPasswordResetEmail('test@example.com', 'https://example.com/reset');
 
-        $this->assertNotNull($capturedEmail);
-        $this->assertEquals('Reset Your Password - GTD Todo App', $capturedEmail->getSubject());
+        $this->assertNotNull($capturedRequest);
+        $body = json_decode($capturedRequest['body'], true);
+        $this->assertEquals('Reset Your Password - GTD Todo App', $body['subject']);
     }
 
     public function testSendPasswordResetEmailSetsBothHtmlAndText(): void
@@ -185,18 +203,72 @@ class EmailServiceTest extends TestCase
         $this->twig->method('render')
             ->willReturnOnConsecutiveCalls('html content', 'text content');
 
-        $capturedEmail = null;
-        $this->mailer
-            ->expects($this->once())
-            ->method('send')
-            ->willReturnCallback(function (Email $email) use (&$capturedEmail) {
-                $capturedEmail = $email;
-            });
+        $capturedRequest = null;
+        $mockResponse = new MockResponse('{"id": "email_123"}', ['http_code' => 200]);
+        $httpClient = new MockHttpClient(function ($method, $url, $options) use (&$capturedRequest, $mockResponse) {
+            $capturedRequest = $options;
+            return $mockResponse;
+        });
 
-        $this->service->sendPasswordResetEmail('test@example.com', 'https://example.com/reset');
+        $service = $this->createService($httpClient);
+        $service->sendPasswordResetEmail('test@example.com', 'https://example.com/reset');
 
-        $this->assertNotNull($capturedEmail);
-        $this->assertEquals('html content', $capturedEmail->getHtmlBody());
-        $this->assertEquals('text content', $capturedEmail->getTextBody());
+        $this->assertNotNull($capturedRequest);
+        $body = json_decode($capturedRequest['body'], true);
+        $this->assertEquals('html content', $body['html']);
+        $this->assertEquals('text content', $body['text']);
+    }
+
+    public function testSendEmailThrowsOnApiError(): void
+    {
+        $this->twig->method('render')->willReturn('rendered content');
+
+        $mockResponse = new MockResponse('{"message": "Invalid API key"}', ['http_code' => 401]);
+        $httpClient = new MockHttpClient($mockResponse);
+
+        $service = $this->createService($httpClient);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Resend API error: Invalid API key');
+
+        $service->sendVerificationEmail('test@example.com', 'https://example.com/verify');
+    }
+
+    public function testSendEmailSetsCorrectAuthorizationHeader(): void
+    {
+        $this->twig->method('render')->willReturn('rendered content');
+
+        $capturedRequest = null;
+        $mockResponse = new MockResponse('{"id": "email_123"}', ['http_code' => 200]);
+        $httpClient = new MockHttpClient(function ($method, $url, $options) use (&$capturedRequest, $mockResponse) {
+            $capturedRequest = $options;
+            return $mockResponse;
+        });
+
+        $service = $this->createService($httpClient);
+        $service->sendVerificationEmail('test@example.com', 'https://example.com/verify');
+
+        $this->assertNotNull($capturedRequest);
+        $this->assertArrayHasKey('headers', $capturedRequest);
+        $this->assertContains('Authorization: Bearer ' . self::API_KEY, $capturedRequest['headers']);
+    }
+
+    public function testSendEmailSetsCorrectFromEmail(): void
+    {
+        $this->twig->method('render')->willReturn('rendered content');
+
+        $capturedRequest = null;
+        $mockResponse = new MockResponse('{"id": "email_123"}', ['http_code' => 200]);
+        $httpClient = new MockHttpClient(function ($method, $url, $options) use (&$capturedRequest, $mockResponse) {
+            $capturedRequest = $options;
+            return $mockResponse;
+        });
+
+        $service = $this->createService($httpClient);
+        $service->sendVerificationEmail('test@example.com', 'https://example.com/verify');
+
+        $this->assertNotNull($capturedRequest);
+        $body = json_decode($capturedRequest['body'], true);
+        $this->assertEquals(self::FROM_EMAIL, $body['from']);
     }
 }
