@@ -192,8 +192,8 @@ describe('Authentication E2E Tests', () => {
       await user.click(screen.getByRole('button', { name: /create account/i }));
 
       await waitFor(() => {
-        // The validation message is "Password must contain at least one uppercase letter"
-        expect(screen.getByText(/must contain at least one uppercase letter/i)).toBeInTheDocument();
+        // The validation message includes "uppercase" requirement
+        expect(screen.getByText(/must contain at least one uppercase/i)).toBeInTheDocument();
       });
     });
 
@@ -591,14 +591,13 @@ describe('Authentication E2E Tests', () => {
         () => new Promise((resolve) => setTimeout(resolve, 100))
       );
 
-      renderVerifyEmailPage('test-token');
+      const { container } = renderVerifyEmailPage('test-token');
 
       // Just verify the loading state is shown
       expect(screen.getByText(/verifying your email/i)).toBeInTheDocument();
       expect(screen.getByText(/please wait while we verify/i)).toBeInTheDocument();
 
       // Check that the spinner SVG has the animate-spin class
-      const { container } = renderVerifyEmailPage('test-token');
       const spinnerSvg = container.querySelector('.animate-spin');
       expect(spinnerSvg).toBeInTheDocument();
     });

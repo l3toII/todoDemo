@@ -9,7 +9,7 @@
 
 Total tasks: 203
 - Sprint 0 (Infrastructure + GitHub Issues): 35 tasks ✅ COMPLETE
-- P1 User Account Management: 56 tasks (48 complete, 8 remaining) - 86% complete
+- P1 User Account Management: 56 tasks (53 complete, 3 remaining) - 95% complete
 - P2 Capture Ideas and Tasks: 14 tasks
 - P3 Clarify and Process: 12 tasks
 - P4 Organize with Contexts: 18 tasks
@@ -98,7 +98,7 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 **User Story**: As a user, I want to create an account, log in securely, and manage my preferences so that I can access my data across all my devices.
 
-**Status**: In Progress (48/56 tasks complete - 86%)
+**Status**: In Progress (53/56 tasks complete - 95%)
 
 ### Phase 1.1: Backend - User Entity & Repository ✅
 
@@ -179,16 +179,16 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 - [X] [P1-046] [Story-1] Add user menu with Settings and Logout `web/src/components/Navigation.jsx`
 - [X] [P1-047] [Story-1] Add link to account settings in navigation `web/src/components/Navigation.jsx`
 
-### Phase 1.6: End-to-End Testing
+### Phase 1.6: End-to-End Testing ✅
 
 **Email Flow Tests**
-- [ ] [P1-048] [Story-1] E2E test for complete registration with email verification `web/tests/e2e/registration-email.spec.jsx`
-- [ ] [P1-049] [Story-1] E2E test for password reset with email `web/tests/e2e/password-reset-email.spec.jsx`
+- [X] [P1-048] [Story-1] E2E test for complete registration with email verification `web/src/tests/e2e/registration-email.spec.jsx`
+- [X] [P1-049] [Story-1] E2E test for password reset with email `web/src/tests/e2e/password-reset-email.spec.jsx`
 
 **Account Management Tests**
-- [ ] [P1-050] [Story-1] E2E test for updating preferences from UI `web/tests/e2e/account-preferences.spec.jsx`
-- [ ] [P1-051] [Story-1] E2E test for account deletion flow `web/tests/e2e/account-deletion.spec.jsx`
-- [ ] [P1-052] [Story-1] E2E test for verifying data persistence after logout/login `web/tests/e2e/data-persistence.spec.jsx`
+- [X] [P1-050] [Story-1] E2E test for updating preferences from UI `web/src/tests/e2e/account-preferences.spec.jsx`
+- [X] [P1-051] [Story-1] E2E test for account deletion flow `web/src/tests/e2e/account-deletion.spec.jsx`
+- [X] [P1-052] [Story-1] E2E test for verifying data persistence after logout/login `web/src/tests/e2e/data-persistence.spec.jsx`
 
 ### Phase 1.7: UX Polish
 
