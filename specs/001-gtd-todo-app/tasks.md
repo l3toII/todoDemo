@@ -179,16 +179,16 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 - [X] [P1-046] [Story-1] Add user menu with Settings and Logout `web/src/components/Navigation.jsx`
 - [X] [P1-047] [Story-1] Add link to account settings in navigation `web/src/components/Navigation.jsx`
 
-### Phase 1.6: End-to-End Testing
+### Phase 1.6: End-to-End Testing ✅
 
 **Email Flow Tests**
-- [ ] [P1-048] [Story-1] E2E test for complete registration with email verification `web/tests/e2e/registration-email.spec.jsx`
-- [ ] [P1-049] [Story-1] E2E test for password reset with email `web/tests/e2e/password-reset-email.spec.jsx`
+- [X] [P1-048] [Story-1] E2E test for complete registration with email verification `web/src/tests/e2e/registration-email.spec.jsx`
+- [X] [P1-049] [Story-1] E2E test for password reset with email `web/src/tests/e2e/password-reset-email.spec.jsx`
 
 **Account Management Tests**
-- [ ] [P1-050] [Story-1] E2E test for updating preferences from UI `web/tests/e2e/account-preferences.spec.jsx`
-- [ ] [P1-051] [Story-1] E2E test for account deletion flow `web/tests/e2e/account-deletion.spec.jsx`
-- [ ] [P1-052] [Story-1] E2E test for verifying data persistence after logout/login `web/tests/e2e/data-persistence.spec.jsx`
+- [X] [P1-050] [Story-1] E2E test for updating preferences from UI `web/src/tests/e2e/account-preferences.spec.jsx`
+- [X] [P1-051] [Story-1] E2E test for account deletion flow `web/src/tests/e2e/account-deletion.spec.jsx`
+- [X] [P1-052] [Story-1] E2E test for verifying data persistence after logout/login `web/src/tests/e2e/data-persistence.spec.jsx`
 
 ### Phase 1.7: UX Polish ✅ COMPLETE
 
