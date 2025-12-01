@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use App\Repository\UserRepository;
 use App\Service\AccountDeletionService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,6 +18,7 @@ class AccountController extends AbstractController
     public function __construct(
         private readonly AccountDeletionService $accountDeletionService,
         private readonly UserPasswordHasherInterface $passwordHasher,
+        private readonly UserRepository $userRepository,
     ) {
     }
 
@@ -144,18 +146,26 @@ class AccountController extends AbstractController
 
         $data = json_decode($request->getContent(), true);
 
+        // Validate timezone if provided
+        if (isset($data['timezone'])) {
+            $timezone = $data['timezone'];
+            if (!$this->isValidTimezone($timezone)) {
+                return $this->json([
+                    'error' => 'Invalid timezone',
+                    'code' => 'INVALID_TIMEZONE',
+                    'message' => 'The provided timezone is not valid. Please use a valid IANA timezone identifier (e.g., "America/New_York", "Europe/Paris").',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+            $user->setTimezone($timezone);
+        }
+
         // Update notification preferences if provided
         if (isset($data['notification_preferences'])) {
             $user->setNotificationPreferences($data['notification_preferences']);
         }
 
-        // Update timezone if provided
-        if (isset($data['timezone'])) {
-            $user->setTimezone($data['timezone']);
-        }
-
-        // In a real implementation, you would save via repository
-        // $this->userRepository->save($user);
+        // Persist changes to database
+        $this->userRepository->save($user);
 
         return $this->json([
             'message' => 'Preferences updated successfully',
@@ -166,5 +176,13 @@ class AccountController extends AbstractController
                 'notification_preferences' => $user->getNotificationPreferences(),
             ],
         ]);
+    }
+
+    /**
+     * Validate that a timezone string is a valid IANA timezone identifier
+     */
+    private function isValidTimezone(string $timezone): bool
+    {
+        return in_array($timezone, \DateTimeZone::listIdentifiers(), true);
     }
 }
