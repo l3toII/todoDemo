@@ -108,32 +108,44 @@ class RegistrationController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        // Save user
-        $this->userRepository->save($user);
-
-        // Send verification email
+        // Save user and handle potential failures with rollback
         try {
-            $verificationUrl = sprintf(
-                '%s/verify-email?token=%s',
-                $_ENV['WEB_URL'] ?? 'http://localhost:3000',
-                $verificationToken
-            );
+            $this->userRepository->save($user);
 
-            $this->emailService->sendVerificationEmail($user->getEmail(), $verificationUrl);
+            // Send verification email
+            try {
+                $verificationUrl = sprintf(
+                    '%s/verify-email?token=%s',
+                    $_ENV['WEB_URL'] ?? 'http://localhost:3000',
+                    $verificationToken
+                );
+
+                $this->emailService->sendVerificationEmail($user->getEmail(), $verificationUrl);
+            } catch (\Exception $e) {
+                // Log error but don't fail registration
+                // User can request resend if email fails
+                error_log(sprintf('Failed to send verification email to %s: %s', $user->getEmail(), $e->getMessage()));
+            }
+
+            return $this->json([
+                'message' => 'Registration successful. Please check your email to verify your account.',
+                'user' => [
+                    'id' => (string) $user->getId(),
+                    'email' => $user->getEmail(),
+                    'status' => $user->getStatus(),
+                ],
+            ], Response::HTTP_CREATED);
         } catch (\Exception $e) {
-            // Log error but don't fail registration
-            // User can request resend if email fails
-            error_log(sprintf('Failed to send verification email to %s: %s', $user->getEmail(), $e->getMessage()));
-        }
+            // Rollback: remove user if it was persisted but something failed after
+            if ($user->getId() !== null) {
+                $this->userRepository->remove($user);
+            }
 
-        return $this->json([
-            'message' => 'Registration successful. Please check your email to verify your account.',
-            'user' => [
-                'id' => (string) $user->getId(),
-                'email' => $user->getEmail(),
-                'status' => $user->getStatus(),
-            ],
-        ], Response::HTTP_CREATED);
+            return $this->json([
+                'error' => 'Registration failed. Please try again.',
+                'code' => 'REGISTRATION_FAILED',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
