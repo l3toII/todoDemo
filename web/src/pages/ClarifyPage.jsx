@@ -60,8 +60,8 @@ const ClarifyPage = () => {
     dispatch(clearError());
   }, [dispatch]);
 
-  // Empty inbox state
-  if (!loading && inboxTasks.length === 0) {
+  // Empty inbox state (but not when there's an error - show error instead)
+  if (!loading && inboxTasks.length === 0 && !error) {
     return (
       <div className="max-w-4xl mx-auto py-12 px-4">
         <div className="text-center">

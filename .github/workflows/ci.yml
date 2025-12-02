@@ -218,7 +218,7 @@ jobs:
         continue-on-error: true
 
   web-tests:
-    name: Web - Jest Tests
+    name: Web - Vitest Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -239,21 +239,15 @@ jobs:
         run: npm ci
         working-directory: ./web
 
-      - name: Run Jest
-        run: |
-          if npm run test --if-present -- --coverage; then
-            echo "Jest tests passed"
-          else
-            echo "Jest tests failed or not configured"
-          fi
+      - name: Run Vitest with coverage
+        run: npm run test:coverage
         working-directory: ./web
-        continue-on-error: true
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         if: success()
         with:
-          files: ./web/coverage/coverage-final.json
+          files: ./web/coverage/lcov.info
           flags: web
           name: web-coverage
         continue-on-error: true

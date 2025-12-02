@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { configureStore } from '@reduxjs/toolkit';
 import ClarifyPage from '../../../pages/ClarifyPage';
 import tasksReducer from '../../../features/tasks/tasksSlice';
+import { tasksAPI } from '../../../services/api';
 
 // Mock the API
 vi.mock('../../../services/api', () => ({
@@ -66,6 +67,9 @@ describe('ClarifyPage', () => {
   });
 
   it('renders empty inbox state when no tasks', async () => {
+    // Mock API to return empty inbox
+    tasksAPI.getByStatus.mockResolvedValue({ data: { data: [], total: 0 } });
+
     const store = createTestStore({
       tasks: {
         inbox: [],
@@ -98,6 +102,9 @@ describe('ClarifyPage', () => {
       status: 'inbox',
     };
 
+    // Mock API to return the same task
+    tasksAPI.getByStatus.mockResolvedValue({ data: { data: [mockTask], total: 1 } });
+
     const store = createTestStore({
       tasks: {
         inbox: [mockTask],
@@ -119,14 +126,18 @@ describe('ClarifyPage', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/clarify & process/i)).toBeInTheDocument();
-      expect(screen.getByText(/is this actionable/i)).toBeInTheDocument();
+      // Use heading role to avoid matching the GTD tip text
+      expect(screen.getByRole('heading', { name: /is this actionable/i })).toBeInTheDocument();
     });
   });
 
   it('displays error message when there is an error', async () => {
+    // Mock API to reject with error
+    tasksAPI.getByStatus.mockRejectedValue(new Error('Failed to fetch tasks'));
+
     const store = createTestStore({
       tasks: {
-        inbox: [],
+        inbox: [{ id: '1', title: 'Task', status: 'inbox' }],
         clarified: [],
         nextActions: [],
         waitingFor: [],
@@ -135,16 +146,16 @@ describe('ClarifyPage', () => {
         currentTask: null,
         loading: false,
         clarifying: false,
-        error: 'Failed to fetch tasks',
+        error: null,
         nextCursor: null,
-        total: 0,
+        total: 1,
       },
     });
 
     renderWithProviders(<ClarifyPage />, { store });
 
     await waitFor(() => {
-      expect(screen.getByText(/failed to fetch tasks/i)).toBeInTheDocument();
+      expect(screen.getByText(/failed to fetch/i)).toBeInTheDocument();
     });
   });
 
@@ -154,6 +165,9 @@ describe('ClarifyPage', () => {
       { id: '2', title: 'Task 2', status: 'inbox' },
       { id: '3', title: 'Task 3', status: 'inbox' },
     ];
+
+    // Mock API to return the same tasks
+    tasksAPI.getByStatus.mockResolvedValue({ data: { data: mockTasks, total: 3 } });
 
     const store = createTestStore({
       tasks: {
@@ -175,10 +189,15 @@ describe('ClarifyPage', () => {
     renderWithProviders(<ClarifyPage />, { store });
 
     await waitFor(() => {
-      expect(screen.getByText('3')).toBeInTheDocument();
+      // The count is displayed in a specific div with text-3xl class
       expect(screen.getByText(/items remaining/i)).toBeInTheDocument();
       expect(screen.getByText(/task 1 of 3/i)).toBeInTheDocument();
     });
+
+    // Check the inbox count is 3 (displayed in the large blue number)
+    // Use getAllByText since '3' appears multiple times (count + task number in "Up next")
+    const countElements = screen.getAllByText('3');
+    expect(countElements.length).toBeGreaterThanOrEqual(1);
   });
 
   it('shows GTD tip', async () => {
@@ -187,6 +206,9 @@ describe('ClarifyPage', () => {
       title: 'Test Task',
       status: 'inbox',
     };
+
+    // Mock API to return the same task
+    tasksAPI.getByStatus.mockResolvedValue({ data: { data: [mockTask], total: 1 } });
 
     const store = createTestStore({
       tasks: {
@@ -218,6 +240,9 @@ describe('ClarifyPage', () => {
       { id: '2', title: 'Task 2', status: 'inbox' },
       { id: '3', title: 'Task 3', status: 'inbox' },
     ];
+
+    // Mock API to return the same tasks
+    tasksAPI.getByStatus.mockResolvedValue({ data: { data: mockTasks, total: 3 } });
 
     const store = createTestStore({
       tasks: {

@@ -79,7 +79,7 @@ describe('ClarifyTaskModal', () => {
     fireEvent.click(screen.getByText(/yes, it's actionable/i));
     fireEvent.click(screen.getByText(/no, it takes longer/i));
 
-    expect(screen.getByText(/single action or project/i)).toBeInTheDocument();
+    expect(screen.getByText(/single action or a project/i)).toBeInTheDocument();
   });
 
   it('shows delegate/defer options for single action', () => {
@@ -87,7 +87,7 @@ describe('ClarifyTaskModal', () => {
 
     fireEvent.click(screen.getByText(/yes, it's actionable/i));
     fireEvent.click(screen.getByText(/no, it takes longer/i));
-    fireEvent.click(screen.getByText(/single action/i));
+    fireEvent.click(screen.getByRole('button', { name: /^single action$/i }));
 
     expect(screen.getByText(/what's the next step/i)).toBeInTheDocument();
     expect(screen.getByText(/do it myself/i)).toBeInTheDocument();
@@ -100,7 +100,7 @@ describe('ClarifyTaskModal', () => {
 
     fireEvent.click(screen.getByText(/yes, it's actionable/i));
     fireEvent.click(screen.getByText(/no, it takes longer/i));
-    fireEvent.click(screen.getByText(/single action/i));
+    fireEvent.click(screen.getByRole('button', { name: /^single action$/i }));
     fireEvent.click(screen.getByText(/do it myself/i));
 
     await waitFor(() => {
@@ -115,7 +115,7 @@ describe('ClarifyTaskModal', () => {
 
     fireEvent.click(screen.getByText(/yes, it's actionable/i));
     fireEvent.click(screen.getByText(/no, it takes longer/i));
-    fireEvent.click(screen.getByText(/project/i));
+    fireEvent.click(screen.getByRole('button', { name: /project \(multiple steps\)/i }));
 
     expect(screen.getByText(/project details/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/what's the desired outcome/i)).toBeInTheDocument();
@@ -135,7 +135,7 @@ describe('ClarifyTaskModal', () => {
 
     fireEvent.click(screen.getByText(/yes, it's actionable/i));
     fireEvent.click(screen.getByText(/no, it takes longer/i));
-    fireEvent.click(screen.getByText(/single action/i));
+    fireEvent.click(screen.getByRole('button', { name: /^single action$/i }));
     fireEvent.click(screen.getByText(/do it myself/i));
 
     await waitFor(() => {
