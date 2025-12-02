@@ -10,7 +10,7 @@
 Total tasks: 203
 - Sprint 0 (Infrastructure + GitHub Issues): 35 tasks ✅ COMPLETE
 - P1 User Account Management: 56 tasks (52 complete, 4 remaining) - 93% complete
-- P2 Capture Ideas and Tasks: 14 tasks
+- P2 Capture Ideas and Tasks: 14 tasks (14 complete) - 100% complete
 - P3 Clarify and Process: 12 tasks
 - P4 Organize with Contexts: 18 tasks
 - P5 Project Management: 14 tasks
@@ -202,28 +202,30 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 **User Story**: As a user, I want to quickly capture all my ideas, tasks, and information into a centralized "inbox" so that I can free my mind and not forget anything.
 
-### Phase 2.1: Backend - Task Entity
+**Status**: ✅ COMPLETE (14/14 tasks)
+
+### Phase 2.1: Backend - Task Entity ✅
 
 - [X] [P2-001] [Story-2] Create Task Doctrine entity with all GTD statuses `api/src/Entity/Task.php`
 - [X] [P2-002] [Story-2] Write unit tests for Task entity `api/tests/Unit/Entity/TaskTest.php`
 - [X] [P2-003] [Story-2] Create Task repository with inbox queries `api/src/Repository/TaskRepository.php`
 - [X] [P2-004] [Story-2] Create database migration for tasks table `api/migrations/Version004CreateTasksTable.php`
 
-### Phase 2.2: Backend - Capture Endpoint
+### Phase 2.2: Backend - Capture Endpoint ✅
 
 - [X] [P2-005] [Story-2] Create TaskController with POST /api/tasks endpoint `api/src/Controller/TaskController.php`
 - [X] [P2-006] [Story-2] Create GET /api/tasks/inbox endpoint `api/src/Controller/TaskController.php`
 - [X] [P2-007] [Story-2] Write functional tests for capture/inbox endpoints `api/tests/Functional/Task/InboxTest.php`
 
-### Phase 2.3: Frontend - Inbox Module
+### Phase 2.3: Frontend - Inbox Module ✅
 
-- [ ] [P2-008] [Story-2] Create inbox Redux slice with optimistic updates `web/src/features/inbox/inboxSlice.ts`
-- [ ] [P2-009] [Story-2] Replace InboxPage placeholder with full implementation `web/src/pages/InboxPage.tsx`
-- [ ] [P2-010] [Story-2] Write unit tests for InboxPage `web/tests/unit/pages/InboxPage.test.tsx`
-- [ ] [P2-011] [Story-2] Create QuickCaptureInput component (< 3 interactions) `web/src/components/QuickCaptureInput.tsx`
-- [ ] [P2-012] [Story-2] Write unit tests for QuickCaptureInput `web/tests/unit/components/QuickCaptureInput.test.tsx`
-- [ ] [P2-013] [Story-2] Add keyboard shortcut for quick capture (Ctrl+N) `web/src/hooks/useKeyboardShortcuts.ts`
-- [ ] [P2-014] [Story-2] Write E2E tests for inbox capture flow `web/tests/e2e/inbox.spec.ts`
+- [X] [P2-008] [Story-2] Create inbox Redux slice with optimistic updates `web/src/features/inbox/inboxSlice.js`
+- [X] [P2-009] [Story-2] Replace InboxPage placeholder with full implementation `web/src/pages/InboxPage.jsx`
+- [X] [P2-010] [Story-2] Write unit tests for InboxPage `web/src/tests/unit/pages/InboxPage.test.jsx`
+- [X] [P2-011] [Story-2] Create QuickCaptureInput component (< 3 interactions) `web/src/components/QuickCaptureInput.jsx`
+- [X] [P2-012] [Story-2] Write unit tests for QuickCaptureInput `web/src/tests/unit/components/QuickCaptureInput.test.jsx`
+- [X] [P2-013] [Story-2] Add keyboard shortcut for quick capture (Ctrl+N) `web/src/hooks/useKeyboardShortcuts.js`
+- [X] [P2-014] [Story-2] Write E2E tests for inbox capture flow `web/src/tests/e2e/inbox.spec.jsx`
 
 ---
 

@@ -79,8 +79,9 @@ const AccountSettingsPage = () => {
         notification_preferences: notificationPreferences,
       })).unwrap();
       setHasChanges(false);
-    } catch {
-      // Error is handled in the slice
+    } catch (err) {
+      // Error is handled in the slice for UI display
+      console.error('Failed to update preferences:', err);
     }
   };
 

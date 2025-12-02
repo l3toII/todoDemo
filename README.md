@@ -4,13 +4,22 @@ A modern Getting Things Done (GTD) application with multi-platform support (Web,
 
 ## Features
 
-- User account management with email/password authentication
+### User Account Management (P1)
+- Email/password authentication with secure JWT tokens
 - Apple Sign-In integration
 - JWT authentication with refresh token rotation
 - Email verification and password reset flows
 - GDPR-compliant account deletion
 - Session timeout protection
 - Feature flags for progressive rollout
+
+### Task Capture & Inbox (P2)
+- Quick capture input (< 3 interactions to capture a thought)
+- Global keyboard shortcut (Ctrl+N / Cmd+N) for instant capture
+- Inbox view with all unclarified tasks
+- Optimistic UI updates for instant feedback
+- Inbox overflow warning (> 100 items)
+- Complete and delete tasks with one click
 - Real-time sync between platforms (< 5s delay)
 
 ## Tech Stack
@@ -317,6 +326,14 @@ All API endpoints are prefixed with `/api/v1`:
 - `PATCH /account` - Update account settings
 - `DELETE /account` - Delete account (GDPR)
 
+### Tasks (Inbox)
+- `POST /tasks` - Create a new task in inbox
+- `GET /tasks/inbox` - Get all inbox tasks
+- `GET /tasks/inbox/count` - Get inbox task count
+- `PATCH /tasks/{id}` - Update a task
+- `DELETE /tasks/{id}` - Delete a task
+- `POST /tasks/{id}/complete` - Mark task as complete
+
 ### Health Check
 - `GET /health` - API health status
 
@@ -468,7 +485,7 @@ For issues and questions:
 
 - [x] **Sprint 0**: Infrastructure setup (CI/CD, Docker, Render deployment)
 - [x] **P1**: User Account Management (Backend + Frontend)
-- [ ] **P2**: Capture Ideas and Tasks (Inbox)
+- [x] **P2**: Capture Ideas and Tasks (Inbox)
 - [ ] **P3**: Clarify and Process Tasks
 - [ ] **P4**: Organize with Contextual Lists
 - [ ] **P5**: Project Management
