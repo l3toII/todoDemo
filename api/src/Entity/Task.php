@@ -9,7 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
-#[ORM\Entity(repositoryClass: 'App\Repository\TaskRepository')]
+#[ORM\Entity(repositoryClass: \App\Repository\TaskRepository::class)]
 #[ORM\Table(name: 'tasks')]
 #[ORM\Index(name: 'idx_task_user_status', columns: ['user_id', 'status'])]
 #[ORM\Index(name: 'idx_task_user_due', columns: ['user_id', 'due_date'])]
