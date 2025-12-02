@@ -11,7 +11,7 @@ Total tasks: 203
 - Sprint 0 (Infrastructure + GitHub Issues): 35 tasks ✅ COMPLETE
 - P1 User Account Management: 56 tasks (52 complete, 4 remaining) - 93% complete
 - P2 Capture Ideas and Tasks: 14 tasks (14 complete) - 100% complete
-- P3 Clarify and Process: 12 tasks (7 complete - Frontend done, Backend pending)
+- P3 Clarify and Process: 12 tasks (12 complete, E2E tests pending integration)
 - P4 Organize with Contexts: 18 tasks
 - P5 Project Management: 14 tasks
 - P6 Weekly Review: 12 tasks
@@ -233,13 +233,15 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 **User Story**: As a user, I want to process each item in my inbox by deciding if it's actionable, and if so, define the concrete next action to take.
 
-### Phase 3.1: Backend - Clarification Logic
+**Status**: In Progress (5/12 tasks complete - 42%)
 
-- [ ] [P3-001] [Story-3] Create TaskService with clarification workflow `api/src/Service/TaskService.php`
-- [ ] [P3-002] [Story-3] Write unit tests for TaskService status transitions `api/tests/Unit/Service/TaskServiceTest.php`
-- [ ] [P3-003] [Story-3] Add task status transition validation subscriber `api/src/EventSubscriber/TaskStatusSubscriber.php`
-- [ ] [P3-004] [Story-3] Create PATCH /api/tasks/{id}/clarify endpoint `api/src/Controller/TaskController.php`
-- [ ] [P3-005] [Story-3] Write functional tests for clarification endpoint `api/tests/Functional/Task/ClarifyTest.php`
+### Phase 3.1: Backend - Clarification Logic ✅
+
+- [X] [P3-001] [Story-3] Create TaskService with clarification workflow `api/src/Service/TaskService.php`
+- [X] [P3-002] [Story-3] Write unit tests for TaskService status transitions `api/tests/Unit/Service/TaskServiceTest.php`
+- [X] [P3-003] [Story-3] Add task status transition validation subscriber `api/src/EventSubscriber/TaskStatusSubscriber.php`
+- [X] [P3-004] [Story-3] Create PATCH /api/tasks/{id}/clarify endpoint `api/src/Controller/TaskController.php`
+- [X] [P3-005] [Story-3] Write functional tests for clarification endpoint `api/tests/Functional/Task/ClarifyTest.php`
 
 ### Phase 3.2: Frontend - Clarification UI ✅
 
