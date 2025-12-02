@@ -239,7 +239,11 @@ const InboxPage = () => {
             <div
               className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
               onClick={() => setQuickCaptureOpen(false)}
-            ></div>
+              onKeyDown={(e) => e.key === 'Escape' && setQuickCaptureOpen(false)}
+              role="button"
+              tabIndex={0}
+              aria-label="Close modal"
+            />
 
             {/* Modal */}
             <div className="relative bg-white rounded-lg shadow-xl max-w-lg w-full p-6 z-10">

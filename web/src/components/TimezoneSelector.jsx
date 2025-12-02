@@ -68,7 +68,9 @@ const formatTimezone = (tz) => {
     const offset = parts.find(p => p.type === 'timeZoneName')?.value || '';
     const cityName = tz.split('/').pop().replace(/_/g, ' ');
     return `${cityName} (${offset})`;
-  } catch {
+  } catch (err) {
+    // Invalid timezone, return raw value as fallback
+    console.warn('Invalid timezone format:', tz, err);
     return tz;
   }
 };
