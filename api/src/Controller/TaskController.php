@@ -7,6 +7,7 @@ namespace App\Controller;
 use App\Entity\Task;
 use App\Entity\User;
 use App\Repository\TaskRepository;
+use App\Service\TaskService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -26,6 +27,7 @@ class TaskController extends AbstractController
     public function __construct(
         private readonly TaskRepository $taskRepository,
         private readonly ValidatorInterface $validator,
+        private readonly TaskService $taskService,
     ) {
     }
 
@@ -167,6 +169,138 @@ class TaskController extends AbstractController
         return $this->json([
             'message' => 'Task restored',
             'task' => $task->toArray(),
+        ]);
+    }
+
+    /**
+     * Clarify a task by changing its status according to GTD workflow.
+     *
+     * Valid target statuses depend on current status (see TaskService).
+     * Options:
+     *   - target_status: required, the new status
+     *   - energy_level: optional (low/medium/high)
+     *   - time_estimate: optional (minutes)
+     *   - due_date: optional (Y-m-d format)
+     *   - notes: optional (additional notes)
+     */
+    #[Route('/tasks/{id}/clarify', name: 'api_tasks_clarify', methods: ['PATCH'], requirements: ['id' => self::UUID_PATTERN])]
+    public function clarify(string $id, Request $request): JsonResponse
+    {
+        $result = $this->getAuthenticatedUserAndTask($id);
+        if ($result instanceof JsonResponse) {
+            return $result;
+        }
+
+        $task = $result['task'];
+        $data = json_decode($request->getContent(), true) ?? [];
+
+        // Validate required field
+        if (!isset($data['target_status']) || !is_string($data['target_status'])) {
+            return $this->errorResponse('target_status is required', 'MISSING_TARGET_STATUS', Response::HTTP_BAD_REQUEST);
+        }
+
+        $targetStatus = $data['target_status'];
+
+        // Validate target status is a valid status
+        if (!in_array($targetStatus, Task::STATUSES, true)) {
+            return $this->json([
+                'error' => 'Invalid target status',
+                'code' => 'INVALID_TARGET_STATUS',
+                'allowed_values' => Task::STATUSES,
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Check if transition is allowed
+        if (!$this->taskService->isValidTransition($task->getStatus(), $targetStatus)) {
+            return $this->json([
+                'error' => sprintf(
+                    'Invalid status transition from "%s" to "%s"',
+                    $task->getStatus(),
+                    $targetStatus
+                ),
+                'code' => 'INVALID_TRANSITION',
+                'current_status' => $task->getStatus(),
+                'target_status' => $targetStatus,
+                'allowed_transitions' => $this->taskService->getAllowedTransitions($task->getStatus()),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        // Build options array
+        $options = [];
+
+        if (isset($data['energy_level'])) {
+            if (!in_array($data['energy_level'], Task::ENERGY_LEVELS, true)) {
+                return $this->json([
+                    'error' => 'Invalid energy level',
+                    'code' => 'INVALID_ENERGY_LEVEL',
+                    'allowed_values' => Task::ENERGY_LEVELS,
+                ], Response::HTTP_BAD_REQUEST);
+            }
+            $options['energy_level'] = $data['energy_level'];
+        }
+
+        if (isset($data['time_estimate'])) {
+            if (!is_int($data['time_estimate']) || $data['time_estimate'] <= 0) {
+                return $this->errorResponse(
+                    'time_estimate must be a positive integer (minutes)',
+                    'INVALID_TIME_ESTIMATE',
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+            $options['time_estimate'] = $data['time_estimate'];
+        }
+
+        if (isset($data['due_date'])) {
+            try {
+                new \DateTimeImmutable($data['due_date']);
+                $options['due_date'] = $data['due_date'];
+            } catch (\Exception) {
+                return $this->errorResponse(
+                    'Invalid due_date format. Use Y-m-d.',
+                    'INVALID_DUE_DATE',
+                    Response::HTTP_BAD_REQUEST
+                );
+            }
+        }
+
+        if (isset($data['notes']) && is_string($data['notes'])) {
+            $options['notes'] = $data['notes'];
+        }
+
+        try {
+            $clarifiedTask = $this->taskService->clarify($task, $targetStatus, $options);
+
+            return $this->json([
+                'message' => 'Task clarified successfully',
+                'task' => $clarifiedTask->toArray(),
+                'transition' => [
+                    'from' => $task->getStatus() === $targetStatus ? $targetStatus : $data['target_status'],
+                    'to' => $clarifiedTask->getStatus(),
+                ],
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return $this->errorResponse($e->getMessage(), 'CLARIFICATION_FAILED', Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    /**
+     * Get allowed status transitions for a task.
+     */
+    #[Route('/tasks/{id}/transitions', name: 'api_tasks_transitions', methods: ['GET'], requirements: ['id' => self::UUID_PATTERN])]
+    public function getTransitions(string $id): JsonResponse
+    {
+        $result = $this->getAuthenticatedUserAndTask($id);
+        if ($result instanceof JsonResponse) {
+            return $result;
+        }
+
+        $task = $result['task'];
+        $currentStatus = $task->getStatus();
+
+        return $this->json([
+            'task_id' => $task->getId()->toRfc4122(),
+            'current_status' => $currentStatus,
+            'allowed_transitions' => $this->taskService->getAllowedTransitions($currentStatus),
         ]);
     }
 
