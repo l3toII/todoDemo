@@ -163,7 +163,8 @@ const inboxSlice = createSlice({
       const { id } = action.payload;
       const pendingTask = state.pendingTasks[id];
       if (pendingTask) {
-        const { action: _, ...taskData } = pendingTask;
+        // eslint-disable-next-line no-unused-vars
+        const { action: pendingAction, ...taskData } = pendingTask;
         state.tasks.push(taskData);
         state.count += 1;
         delete state.pendingTasks[id];
@@ -205,7 +206,7 @@ const inboxSlice = createSlice({
         const { task, tempId } = action.payload;
         // Replace optimistic task with real task
         const index = state.tasks.findIndex((t) => t.id === tempId);
-        if (index !== -1) {
+        if (index >= 0) {
           state.tasks[index] = task;
         } else {
           state.tasks.unshift(task);
