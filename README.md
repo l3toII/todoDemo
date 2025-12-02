@@ -22,6 +22,13 @@ A modern Getting Things Done (GTD) application with multi-platform support (Web,
 - Complete and delete tasks with one click
 - Real-time sync between platforms (< 5s delay)
 
+### Clarify and Process Tasks (P3 - Backend Complete)
+- Task clarification workflow with status transitions
+- GTD decision flow: actionable vs non-actionable items
+- Status transitions: inbox → next_action, waiting_for, someday_maybe, reference, trash
+- Field validation for clarified tasks (title, energy level, time estimate)
+- Automatic status updates based on field changes
+
 ## Tech Stack
 
 ### Backend (API)
@@ -326,11 +333,12 @@ All API endpoints are prefixed with `/api/v1`:
 - `PATCH /account` - Update account settings
 - `DELETE /account` - Delete account (GDPR)
 
-### Tasks (Inbox)
+### Tasks (Inbox & Clarify)
 - `POST /tasks` - Create a new task in inbox
 - `GET /tasks/inbox` - Get all inbox tasks
 - `GET /tasks/inbox/count` - Get inbox task count
 - `PATCH /tasks/{id}` - Update a task
+- `PATCH /tasks/{id}/clarify` - Clarify a task (set status, context, energy, time estimate)
 - `DELETE /tasks/{id}` - Delete a task
 - `POST /tasks/{id}/complete` - Mark task as complete
 
@@ -486,7 +494,7 @@ For issues and questions:
 - [x] **Sprint 0**: Infrastructure setup (CI/CD, Docker, Render deployment)
 - [x] **P1**: User Account Management (Backend + Frontend)
 - [x] **P2**: Capture Ideas and Tasks (Inbox)
-- [ ] **P3**: Clarify and Process Tasks
+- [ ] **P3**: Clarify and Process Tasks (Backend ✅, Frontend pending)
 - [ ] **P4**: Organize with Contextual Lists
 - [ ] **P5**: Project Management
 - [ ] **P6**: Weekly Review
