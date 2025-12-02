@@ -57,9 +57,13 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
   }, []);
 
   // Handle final submission based on outcome
-  const handleSubmit = useCallback(async () => {
+  // Can receive immediateOutcome for cases where we need to submit immediately
+  // without waiting for state update (e.g., timer complete, trash)
+  const handleSubmit = useCallback(async (immediateOutcome = null) => {
+    const finalOutcome = immediateOutcome || outcome;
+
     try {
-      switch (outcome) {
+      switch (finalOutcome) {
         case OUTCOMES.COMPLETE_NOW:
           await dispatch(completeTask(task.id)).unwrap();
           break;
@@ -90,7 +94,7 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
           await dispatch(clarifyTask({
             taskId: task.id,
             clarificationData: {
-              status: statusMap[outcome],
+              status: statusMap[finalOutcome],
               notes: formData.notes,
               energyLevel: formData.energyLevel,
               timeEstimate: formData.timeEstimate,
@@ -211,10 +215,7 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
 
             <TwoMinuteTimer
               autoStart={true}
-              onComplete={() => {
-                setOutcome(OUTCOMES.COMPLETE_NOW);
-                handleSubmit();
-              }}
+              onComplete={() => handleSubmit(OUTCOMES.COMPLETE_NOW)}
               onCancel={() => goToStep(WIZARD_STEPS.SINGLE_OR_PROJECT)}
             />
           </div>
@@ -340,10 +341,7 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
 
             <div className="space-y-3">
               <button
-                onClick={() => {
-                  setOutcome(OUTCOMES.TRASH);
-                  handleSubmit();
-                }}
+                onClick={() => handleSubmit(OUTCOMES.TRASH)}
                 className="w-full p-4 bg-red-50 border-2 border-red-200 rounded-xl hover:border-red-400 hover:bg-red-100 transition-all text-left"
               >
                 <div className="flex items-center">
