@@ -96,8 +96,8 @@ jobs:
           cp .env.test.example .env.test
           echo "APP_ENV=test" >> .env
           echo "APP_SECRET=test-secret-for-ci" >> .env
-          echo "DATABASE_URL=pgsql://gtd_test:gtd_test@127.0.0.1:5432/gtd?serverVersion=16&charset=utf8" >> .env
-          echo "DATABASE_URL=pgsql://gtd_test:gtd_test@127.0.0.1:5432/gtd?serverVersion=16&charset=utf8" >> .env.test
+          echo "DATABASE_URL=pgsql://gtd_test:gtd_test@127.0.0.1:5432/gtd_test?serverVersion=16&charset=utf8" >> .env
+          echo "DATABASE_URL=pgsql://gtd_test:gtd_test@127.0.0.1:5432/gtd_test?serverVersion=16&charset=utf8" >> .env.test
           echo "JWT_PASSPHRASE=test-jwt-passphrase-for-ci" >> .env
         working-directory: ./api
 

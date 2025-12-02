@@ -54,11 +54,9 @@
         <testsuite name="Unit Tests">
             <directory>tests/Unit</directory>
         </testsuite>
-        <!-- Functional tests disabled until framework.test config issue is resolved
         <testsuite name="Functional Tests">
             <directory>tests/Functional</directory>
         </testsuite>
-        -->
     </testsuites>
 
     <coverage processUncoveredFiles="true">
