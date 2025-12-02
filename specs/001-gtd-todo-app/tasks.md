@@ -204,16 +204,16 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 ### Phase 2.1: Backend - Task Entity
 
-- [ ] [P2-001] [Story-2] Create Task Doctrine entity with all GTD statuses `api/src/Entity/Task.php`
-- [ ] [P2-002] [Story-2] Write unit tests for Task entity `api/tests/Unit/Entity/TaskTest.php`
-- [ ] [P2-003] [Story-2] Create Task repository with inbox queries `api/src/Repository/TaskRepository.php`
-- [ ] [P2-004] [Story-2] Create database migration for tasks table `api/migrations/Version004CreateTasksTable.php`
+- [X] [P2-001] [Story-2] Create Task Doctrine entity with all GTD statuses `api/src/Entity/Task.php`
+- [X] [P2-002] [Story-2] Write unit tests for Task entity `api/tests/Unit/Entity/TaskTest.php`
+- [X] [P2-003] [Story-2] Create Task repository with inbox queries `api/src/Repository/TaskRepository.php`
+- [X] [P2-004] [Story-2] Create database migration for tasks table `api/migrations/Version004CreateTasksTable.php`
 
 ### Phase 2.2: Backend - Capture Endpoint
 
-- [ ] [P2-005] [Story-2] Create TaskController with POST /api/tasks endpoint `api/src/Controller/TaskController.php`
-- [ ] [P2-006] [Story-2] Create GET /api/tasks/inbox endpoint `api/src/Controller/TaskController.php`
-- [ ] [P2-007] [Story-2] Write functional tests for capture/inbox endpoints `api/tests/Functional/Task/InboxTest.php`
+- [X] [P2-005] [Story-2] Create TaskController with POST /api/tasks endpoint `api/src/Controller/TaskController.php`
+- [X] [P2-006] [Story-2] Create GET /api/tasks/inbox endpoint `api/src/Controller/TaskController.php`
+- [X] [P2-007] [Story-2] Write functional tests for capture/inbox endpoints `api/tests/Functional/Task/InboxTest.php`
 
 ### Phase 2.3: Frontend - Inbox Module
 

@@ -79,6 +79,8 @@ jobs:
         ports:
           - 5432:5432
         options: --health-cmd="pg_isready -U gtd_test -d gtd_test" --health-interval=10s --health-timeout=5s --health-retries=5
+        # Note: Doctrine adds '_test' suffix in test env, so we use 'gtd' in DATABASE_URL
+        # which becomes 'gtd_test' after the suffix is applied
 
     steps:
       - uses: actions/checkout@v4
@@ -96,6 +98,7 @@ jobs:
           cp .env.test.example .env.test
           echo "APP_ENV=test" >> .env
           echo "APP_SECRET=test-secret-for-ci" >> .env
+          # Use 'gtd' as DB name - Doctrine adds '_test' suffix in test env -> 'gtd_test'
           echo "DATABASE_URL=pgsql://gtd_test:gtd_test@127.0.0.1:5432/gtd?serverVersion=16&charset=utf8" >> .env
           echo "DATABASE_URL=pgsql://gtd_test:gtd_test@127.0.0.1:5432/gtd?serverVersion=16&charset=utf8" >> .env.test
           echo "JWT_PASSPHRASE=test-jwt-passphrase-for-ci" >> .env
