@@ -252,8 +252,8 @@ class TaskController extends AbstractController
 
         if (isset($data['due_date'])) {
             try {
-                new \DateTimeImmutable($data['due_date']);
-                $options['due_date'] = $data['due_date'];
+                $dueDate = new \DateTimeImmutable($data['due_date']);
+                $options['due_date'] = $dueDate->format('Y-m-d');
             } catch (\Exception) {
                 return $this->errorResponse(
                     'Invalid due_date format. Use Y-m-d.',
