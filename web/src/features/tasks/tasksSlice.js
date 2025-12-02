@@ -169,9 +169,9 @@ const tasksSlice = createSlice({
       })
       .addCase(fetchInboxTasks.fulfilled, (state, action) => {
         state.loading = false;
-        state.inbox = action.payload.data || [];
+        state.inbox = action.payload.tasks || [];
         state.nextCursor = action.payload.next_cursor;
-        state.total = action.payload.total || state.inbox.length;
+        state.total = action.payload.count || state.inbox.length;
       })
       .addCase(fetchInboxTasks.rejected, (state, action) => {
         state.loading = false;

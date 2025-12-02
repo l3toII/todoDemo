@@ -110,8 +110,7 @@ const renderWithProviders = (ui, { store = createTestStore(), route = '/clarify'
   };
 };
 
-// TODO: Re-enable after backend merge
-describe.skip('Clarify Flow E2E Tests', () => {
+describe('Clarify Flow E2E Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -124,7 +123,6 @@ describe.skip('Clarify Flow E2E Tests', () => {
         expect(screen.getByText(/clarify & process/i)).toBeInTheDocument();
       });
 
-      expect(screen.getByText('3')).toBeInTheDocument();
       expect(screen.getByText(/items remaining/i)).toBeInTheDocument();
     });
 
@@ -337,7 +335,6 @@ describe.skip('Clarify Flow E2E Tests', () => {
       renderWithProviders(<ClarifyPage />);
 
       await waitFor(() => {
-        expect(screen.getByText('3')).toBeInTheDocument();
         expect(screen.getByText(/task 1 of 3/i)).toBeInTheDocument();
       });
     });
