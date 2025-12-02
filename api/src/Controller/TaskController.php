@@ -18,6 +18,8 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 #[Route('/api/v1')]
 class TaskController extends AbstractController
 {
+    private const UUID_PATTERN = '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}';
+
     public function __construct(
         private readonly TaskRepository $taskRepository,
         private readonly ValidatorInterface $validator,
@@ -28,57 +30,34 @@ class TaskController extends AbstractController
     // Capture Endpoints (FR-007)
     // =========================================================================
 
-    /**
-     * Create a new task (quick capture)
-     *
-     * POST /api/v1/tasks
-     */
     #[Route('/tasks', name: 'api_tasks_create', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {
-        $user = $this->getUser();
-
-        if (!$user instanceof User) {
-            return $this->json([
-                'error' => 'Not authenticated',
-                'code' => 'NOT_AUTHENTICATED',
-            ], Response::HTTP_UNAUTHORIZED);
+        $user = $this->getAuthenticatedUser();
+        if ($user instanceof JsonResponse) {
+            return $user;
         }
 
         $data = json_decode($request->getContent(), true);
 
         if (!isset($data['title']) || trim($data['title']) === '') {
-            return $this->json([
-                'error' => 'Title is required',
-                'code' => 'MISSING_TITLE',
-            ], Response::HTTP_BAD_REQUEST);
+            return $this->errorResponse('Title is required', 'MISSING_TITLE', Response::HTTP_BAD_REQUEST);
         }
 
         $task = new Task();
         $task->setUser($user);
         $task->setTitle(trim($data['title']));
 
-        // Optional fields
         if (isset($data['notes'])) {
             $task->setNotes($data['notes']);
         }
 
-        // Set position to end of inbox
         $maxPosition = $this->taskRepository->getMaxPositionByUserAndStatus($user, Task::STATUS_INBOX);
         $task->setPosition($maxPosition + 1);
 
-        // Validate entity
-        $errors = $this->validator->validate($task);
-        if (count($errors) > 0) {
-            $errorMessages = [];
-            foreach ($errors as $error) {
-                $errorMessages[$error->getPropertyPath()] = $error->getMessage();
-            }
-            return $this->json([
-                'error' => 'Validation failed',
-                'code' => 'VALIDATION_ERROR',
-                'details' => $errorMessages,
-            ], Response::HTTP_BAD_REQUEST);
+        $validationError = $this->validateAndReturnError($task);
+        if ($validationError !== null) {
+            return $validationError;
         }
 
         $this->taskRepository->save($task);
@@ -93,21 +72,12 @@ class TaskController extends AbstractController
     // Inbox Endpoints (FR-008)
     // =========================================================================
 
-    /**
-     * Get all inbox tasks for the current user
-     *
-     * GET /api/v1/tasks/inbox
-     */
     #[Route('/tasks/inbox', name: 'api_tasks_inbox', methods: ['GET'])]
     public function inbox(): JsonResponse
     {
-        $user = $this->getUser();
-
-        if (!$user instanceof User) {
-            return $this->json([
-                'error' => 'Not authenticated',
-                'code' => 'NOT_AUTHENTICATED',
-            ], Response::HTTP_UNAUTHORIZED);
+        $user = $this->getAuthenticatedUser();
+        if ($user instanceof JsonResponse) {
+            return $user;
         }
 
         $tasks = $this->taskRepository->findInboxByUser($user);
@@ -120,21 +90,12 @@ class TaskController extends AbstractController
         ]);
     }
 
-    /**
-     * Get inbox count for the current user
-     *
-     * GET /api/v1/tasks/inbox/count
-     */
     #[Route('/tasks/inbox/count', name: 'api_tasks_inbox_count', methods: ['GET'])]
     public function inboxCount(): JsonResponse
     {
-        $user = $this->getUser();
-
-        if (!$user instanceof User) {
-            return $this->json([
-                'error' => 'Not authenticated',
-                'code' => 'NOT_AUTHENTICATED',
-            ], Response::HTTP_UNAUTHORIZED);
+        $user = $this->getAuthenticatedUser();
+        if ($user instanceof JsonResponse) {
+            return $user;
         }
 
         $count = $this->taskRepository->countInboxByUser($user);
@@ -149,196 +110,36 @@ class TaskController extends AbstractController
     // Task CRUD Endpoints
     // =========================================================================
 
-    /**
-     * Get a single task by ID
-     *
-     * GET /api/v1/tasks/{id}
-     */
-    #[Route('/tasks/{id}', name: 'api_tasks_get', methods: ['GET'], requirements: ['id' => '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'])]
+    #[Route('/tasks/{id}', name: 'api_tasks_get', methods: ['GET'], requirements: ['id' => self::UUID_PATTERN])]
     public function get(string $id): JsonResponse
     {
-        $user = $this->getUser();
-
-        if (!$user instanceof User) {
-            return $this->json([
-                'error' => 'Not authenticated',
-                'code' => 'NOT_AUTHENTICATED',
-            ], Response::HTTP_UNAUTHORIZED);
+        $result = $this->getAuthenticatedUserAndTask($id);
+        if ($result instanceof JsonResponse) {
+            return $result;
         }
 
-        if (!Uuid::isValid($id)) {
-            return $this->json([
-                'error' => 'Invalid task ID',
-                'code' => 'INVALID_ID',
-            ], Response::HTTP_BAD_REQUEST);
-        }
-
-        $task = $this->taskRepository->findById(Uuid::fromString($id));
-
-        if (!$task) {
-            return $this->json([
-                'error' => 'Task not found',
-                'code' => 'NOT_FOUND',
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        // Ensure task belongs to current user
-        if ($task->getUser()->getId()->toRfc4122() !== $user->getId()->toRfc4122()) {
-            return $this->json([
-                'error' => 'Task not found',
-                'code' => 'NOT_FOUND',
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        return $this->json([
-            'task' => $task->toArray(),
-        ]);
+        return $this->json(['task' => $result['task']->toArray()]);
     }
 
-    /**
-     * Update a task
-     *
-     * PATCH /api/v1/tasks/{id}
-     */
-    #[Route('/tasks/{id}', name: 'api_tasks_update', methods: ['PATCH'], requirements: ['id' => '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'])]
+    #[Route('/tasks/{id}', name: 'api_tasks_update', methods: ['PATCH'], requirements: ['id' => self::UUID_PATTERN])]
     public function update(string $id, Request $request): JsonResponse
     {
-        $user = $this->getUser();
-
-        if (!$user instanceof User) {
-            return $this->json([
-                'error' => 'Not authenticated',
-                'code' => 'NOT_AUTHENTICATED',
-            ], Response::HTTP_UNAUTHORIZED);
+        $result = $this->getAuthenticatedUserAndTask($id);
+        if ($result instanceof JsonResponse) {
+            return $result;
         }
 
-        if (!Uuid::isValid($id)) {
-            return $this->json([
-                'error' => 'Invalid task ID',
-                'code' => 'INVALID_ID',
-            ], Response::HTTP_BAD_REQUEST);
-        }
-
-        $task = $this->taskRepository->findById(Uuid::fromString($id));
-
-        if (!$task) {
-            return $this->json([
-                'error' => 'Task not found',
-                'code' => 'NOT_FOUND',
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        // Ensure task belongs to current user
-        if ($task->getUser()->getId()->toRfc4122() !== $user->getId()->toRfc4122()) {
-            return $this->json([
-                'error' => 'Task not found',
-                'code' => 'NOT_FOUND',
-            ], Response::HTTP_NOT_FOUND);
-        }
-
+        $task = $result['task'];
         $data = json_decode($request->getContent(), true);
 
-        // Update allowed fields
-        if (isset($data['title'])) {
-            if (trim($data['title']) === '') {
-                return $this->json([
-                    'error' => 'Title cannot be empty',
-                    'code' => 'INVALID_TITLE',
-                ], Response::HTTP_BAD_REQUEST);
-            }
-            $task->setTitle(trim($data['title']));
+        $updateError = $this->applyTaskUpdates($task, $data);
+        if ($updateError !== null) {
+            return $updateError;
         }
 
-        if (array_key_exists('notes', $data)) {
-            $task->setNotes($data['notes']);
-        }
-
-        if (isset($data['status'])) {
-            if (!in_array($data['status'], Task::STATUSES, true)) {
-                return $this->json([
-                    'error' => 'Invalid status',
-                    'code' => 'INVALID_STATUS',
-                    'allowed_values' => Task::STATUSES,
-                ], Response::HTTP_BAD_REQUEST);
-            }
-            $task->setStatus($data['status']);
-        }
-
-        if (array_key_exists('energy_level', $data)) {
-            if ($data['energy_level'] !== null && !in_array($data['energy_level'], Task::ENERGY_LEVELS, true)) {
-                return $this->json([
-                    'error' => 'Invalid energy level',
-                    'code' => 'INVALID_ENERGY_LEVEL',
-                    'allowed_values' => Task::ENERGY_LEVELS,
-                ], Response::HTTP_BAD_REQUEST);
-            }
-            $task->setEnergyLevel($data['energy_level']);
-        }
-
-        if (array_key_exists('time_estimate', $data)) {
-            if ($data['time_estimate'] !== null && (!is_int($data['time_estimate']) || $data['time_estimate'] <= 0)) {
-                return $this->json([
-                    'error' => 'Time estimate must be a positive integer',
-                    'code' => 'INVALID_TIME_ESTIMATE',
-                ], Response::HTTP_BAD_REQUEST);
-            }
-            $task->setTimeEstimate($data['time_estimate']);
-        }
-
-        if (array_key_exists('due_date', $data)) {
-            if ($data['due_date'] !== null) {
-                try {
-                    $dueDate = new \DateTimeImmutable($data['due_date']);
-                    $task->setDueDate($dueDate);
-                } catch (\Exception $e) {
-                    return $this->json([
-                        'error' => 'Invalid due date format',
-                        'code' => 'INVALID_DUE_DATE',
-                    ], Response::HTTP_BAD_REQUEST);
-                }
-            } else {
-                $task->setDueDate(null);
-            }
-        }
-
-        if (array_key_exists('due_time', $data)) {
-            if ($data['due_time'] !== null) {
-                try {
-                    $dueTime = new \DateTimeImmutable($data['due_time']);
-                    $task->setDueTime($dueTime);
-                } catch (\Exception $e) {
-                    return $this->json([
-                        'error' => 'Invalid due time format',
-                        'code' => 'INVALID_DUE_TIME',
-                    ], Response::HTTP_BAD_REQUEST);
-                }
-            } else {
-                $task->setDueTime(null);
-            }
-        }
-
-        if (isset($data['position'])) {
-            if (!is_int($data['position']) || $data['position'] < 0) {
-                return $this->json([
-                    'error' => 'Position must be a non-negative integer',
-                    'code' => 'INVALID_POSITION',
-                ], Response::HTTP_BAD_REQUEST);
-            }
-            $task->setPosition($data['position']);
-        }
-
-        // Validate entity
-        $errors = $this->validator->validate($task);
-        if (count($errors) > 0) {
-            $errorMessages = [];
-            foreach ($errors as $error) {
-                $errorMessages[$error->getPropertyPath()] = $error->getMessage();
-            }
-            return $this->json([
-                'error' => 'Validation failed',
-                'code' => 'VALIDATION_ERROR',
-                'details' => $errorMessages,
-            ], Response::HTTP_BAD_REQUEST);
+        $validationError = $this->validateAndReturnError($task);
+        if ($validationError !== null) {
+            return $validationError;
         }
 
         $this->taskRepository->save($task);
@@ -349,156 +150,53 @@ class TaskController extends AbstractController
         ]);
     }
 
-    /**
-     * Delete a task (soft delete)
-     *
-     * DELETE /api/v1/tasks/{id}
-     */
-    #[Route('/tasks/{id}', name: 'api_tasks_delete', methods: ['DELETE'], requirements: ['id' => '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'])]
+    #[Route('/tasks/{id}', name: 'api_tasks_delete', methods: ['DELETE'], requirements: ['id' => self::UUID_PATTERN])]
     public function delete(string $id): JsonResponse
     {
-        $user = $this->getUser();
-
-        if (!$user instanceof User) {
-            return $this->json([
-                'error' => 'Not authenticated',
-                'code' => 'NOT_AUTHENTICATED',
-            ], Response::HTTP_UNAUTHORIZED);
+        $result = $this->getAuthenticatedUserAndTask($id);
+        if ($result instanceof JsonResponse) {
+            return $result;
         }
 
-        if (!Uuid::isValid($id)) {
-            return $this->json([
-                'error' => 'Invalid task ID',
-                'code' => 'INVALID_ID',
-            ], Response::HTTP_BAD_REQUEST);
-        }
+        $result['task']->markAsDeleted();
+        $this->taskRepository->save($result['task']);
 
-        $task = $this->taskRepository->findById(Uuid::fromString($id));
-
-        if (!$task) {
-            return $this->json([
-                'error' => 'Task not found',
-                'code' => 'NOT_FOUND',
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        // Ensure task belongs to current user
-        if ($task->getUser()->getId()->toRfc4122() !== $user->getId()->toRfc4122()) {
-            return $this->json([
-                'error' => 'Task not found',
-                'code' => 'NOT_FOUND',
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        // Soft delete
-        $task->markAsDeleted();
-        $this->taskRepository->save($task);
-
-        return $this->json([
-            'message' => 'Task deleted successfully',
-        ]);
+        return $this->json(['message' => 'Task deleted successfully']);
     }
 
     // =========================================================================
     // Quick Actions
     // =========================================================================
 
-    /**
-     * Mark a task as completed
-     *
-     * POST /api/v1/tasks/{id}/complete
-     */
-    #[Route('/tasks/{id}/complete', name: 'api_tasks_complete', methods: ['POST'], requirements: ['id' => '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'])]
+    #[Route('/tasks/{id}/complete', name: 'api_tasks_complete', methods: ['POST'], requirements: ['id' => self::UUID_PATTERN])]
     public function complete(string $id): JsonResponse
     {
-        $user = $this->getUser();
-
-        if (!$user instanceof User) {
-            return $this->json([
-                'error' => 'Not authenticated',
-                'code' => 'NOT_AUTHENTICATED',
-            ], Response::HTTP_UNAUTHORIZED);
+        $result = $this->getAuthenticatedUserAndTask($id);
+        if ($result instanceof JsonResponse) {
+            return $result;
         }
 
-        if (!Uuid::isValid($id)) {
-            return $this->json([
-                'error' => 'Invalid task ID',
-                'code' => 'INVALID_ID',
-            ], Response::HTTP_BAD_REQUEST);
-        }
-
-        $task = $this->taskRepository->findById(Uuid::fromString($id));
-
-        if (!$task) {
-            return $this->json([
-                'error' => 'Task not found',
-                'code' => 'NOT_FOUND',
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        // Ensure task belongs to current user
-        if ($task->getUser()->getId()->toRfc4122() !== $user->getId()->toRfc4122()) {
-            return $this->json([
-                'error' => 'Task not found',
-                'code' => 'NOT_FOUND',
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        $task->markAsCompleted();
-        $this->taskRepository->save($task);
+        $result['task']->markAsCompleted();
+        $this->taskRepository->save($result['task']);
 
         return $this->json([
             'message' => 'Task completed',
-            'task' => $task->toArray(),
+            'task' => $result['task']->toArray(),
         ]);
     }
 
-    /**
-     * Restore a deleted task
-     *
-     * POST /api/v1/tasks/{id}/restore
-     */
-    #[Route('/tasks/{id}/restore', name: 'api_tasks_restore', methods: ['POST'], requirements: ['id' => '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'])]
+    #[Route('/tasks/{id}/restore', name: 'api_tasks_restore', methods: ['POST'], requirements: ['id' => self::UUID_PATTERN])]
     public function restore(string $id): JsonResponse
     {
-        $user = $this->getUser();
-
-        if (!$user instanceof User) {
-            return $this->json([
-                'error' => 'Not authenticated',
-                'code' => 'NOT_AUTHENTICATED',
-            ], Response::HTTP_UNAUTHORIZED);
+        $result = $this->getAuthenticatedUserAndTask($id);
+        if ($result instanceof JsonResponse) {
+            return $result;
         }
 
-        if (!Uuid::isValid($id)) {
-            return $this->json([
-                'error' => 'Invalid task ID',
-                'code' => 'INVALID_ID',
-            ], Response::HTTP_BAD_REQUEST);
-        }
-
-        $task = $this->taskRepository->findById(Uuid::fromString($id));
-
-        if (!$task) {
-            return $this->json([
-                'error' => 'Task not found',
-                'code' => 'NOT_FOUND',
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        // Ensure task belongs to current user
-        if ($task->getUser()->getId()->toRfc4122() !== $user->getId()->toRfc4122()) {
-            return $this->json([
-                'error' => 'Task not found',
-                'code' => 'NOT_FOUND',
-            ], Response::HTTP_NOT_FOUND);
-        }
+        $task = $result['task'];
 
         if (!$task->isDeleted()) {
-            return $this->json([
-                'error' => 'Task is not deleted',
-                'code' => 'NOT_DELETED',
-            ], Response::HTTP_BAD_REQUEST);
+            return $this->errorResponse('Task is not deleted', 'NOT_DELETED', Response::HTTP_BAD_REQUEST);
         }
 
         $task->restore();
@@ -514,46 +212,27 @@ class TaskController extends AbstractController
     // List Endpoints
     // =========================================================================
 
-    /**
-     * Get all tasks for the current user (with optional filters)
-     *
-     * GET /api/v1/tasks
-     */
     #[Route('/tasks', name: 'api_tasks_list', methods: ['GET'])]
     public function list(Request $request): JsonResponse
     {
-        $user = $this->getUser();
-
-        if (!$user instanceof User) {
-            return $this->json([
-                'error' => 'Not authenticated',
-                'code' => 'NOT_AUTHENTICATED',
-            ], Response::HTTP_UNAUTHORIZED);
+        $user = $this->getAuthenticatedUser();
+        if ($user instanceof JsonResponse) {
+            return $user;
         }
 
         $status = $request->query->get('status');
 
-        if ($status !== null) {
-            if (!in_array($status, Task::STATUSES, true)) {
-                return $this->json([
-                    'error' => 'Invalid status filter',
-                    'code' => 'INVALID_STATUS',
-                    'allowed_values' => Task::STATUSES,
-                ], Response::HTTP_BAD_REQUEST);
-            }
-            $tasks = $this->taskRepository->findByUserAndStatus($user, $status);
-        } else {
-            // Return all non-deleted tasks by default
-            $tasks = $this->taskRepository->createQueryBuilder('t')
-                ->where('t.user = :user')
-                ->andWhere('t.status != :deleted')
-                ->setParameter('user', $user)
-                ->setParameter('deleted', Task::STATUS_DELETED)
-                ->orderBy('t.position', 'ASC')
-                ->addOrderBy('t.createdAt', 'DESC')
-                ->getQuery()
-                ->getResult();
+        if ($status !== null && !in_array($status, Task::STATUSES, true)) {
+            return $this->json([
+                'error' => 'Invalid status filter',
+                'code' => 'INVALID_STATUS',
+                'allowed_values' => Task::STATUSES,
+            ], Response::HTTP_BAD_REQUEST);
         }
+
+        $tasks = $status !== null
+            ? $this->taskRepository->findByUserAndStatus($user, $status)
+            : $this->taskRepository->findAllActiveByUser($user);
 
         return $this->json([
             'tasks' => array_map(fn(Task $task) => $task->toArray(), $tasks),
@@ -561,21 +240,12 @@ class TaskController extends AbstractController
         ]);
     }
 
-    /**
-     * Get task statistics for the current user
-     *
-     * GET /api/v1/tasks/stats
-     */
     #[Route('/tasks/stats', name: 'api_tasks_stats', methods: ['GET'])]
     public function stats(): JsonResponse
     {
-        $user = $this->getUser();
-
-        if (!$user instanceof User) {
-            return $this->json([
-                'error' => 'Not authenticated',
-                'code' => 'NOT_AUTHENTICATED',
-            ], Response::HTTP_UNAUTHORIZED);
+        $user = $this->getAuthenticatedUser();
+        if ($user instanceof JsonResponse) {
+            return $user;
         }
 
         $countsByStatus = $this->taskRepository->countByStatusForUser($user);
@@ -589,5 +259,221 @@ class TaskController extends AbstractController
             'inbox_count' => $countsByStatus[Task::STATUS_INBOX] ?? 0,
             'next_actions_count' => $countsByStatus[Task::STATUS_NEXT_ACTION] ?? 0,
         ]);
+    }
+
+    // =========================================================================
+    // Private Helper Methods
+    // =========================================================================
+
+    private function getAuthenticatedUser(): User|JsonResponse
+    {
+        $user = $this->getUser();
+
+        if (!$user instanceof User) {
+            return $this->errorResponse('Not authenticated', 'NOT_AUTHENTICATED', Response::HTTP_UNAUTHORIZED);
+        }
+
+        return $user;
+    }
+
+    /**
+     * @return array{user: User, task: Task}|JsonResponse
+     */
+    private function getAuthenticatedUserAndTask(string $id): array|JsonResponse
+    {
+        $user = $this->getAuthenticatedUser();
+        if ($user instanceof JsonResponse) {
+            return $user;
+        }
+
+        if (!Uuid::isValid($id)) {
+            return $this->errorResponse('Invalid task ID', 'INVALID_ID', Response::HTTP_BAD_REQUEST);
+        }
+
+        $task = $this->taskRepository->findById(Uuid::fromString($id));
+
+        if (!$task || $task->getUser()->getId()->toRfc4122() !== $user->getId()->toRfc4122()) {
+            return $this->errorResponse('Task not found', 'NOT_FOUND', Response::HTTP_NOT_FOUND);
+        }
+
+        return ['user' => $user, 'task' => $task];
+    }
+
+    private function errorResponse(string $message, string $code, int $status): JsonResponse
+    {
+        return $this->json(['error' => $message, 'code' => $code], $status);
+    }
+
+    private function validateAndReturnError(Task $task): ?JsonResponse
+    {
+        $errors = $this->validator->validate($task);
+
+        if (count($errors) === 0) {
+            return null;
+        }
+
+        $errorMessages = [];
+        foreach ($errors as $error) {
+            $errorMessages[$error->getPropertyPath()] = $error->getMessage();
+        }
+
+        return $this->json([
+            'error' => 'Validation failed',
+            'code' => 'VALIDATION_ERROR',
+            'details' => $errorMessages,
+        ], Response::HTTP_BAD_REQUEST);
+    }
+
+    private function applyTaskUpdates(Task $task, ?array $data): ?JsonResponse
+    {
+        if ($data === null) {
+            return null;
+        }
+
+        if (isset($data['title'])) {
+            $error = $this->updateTitle($task, $data['title']);
+            if ($error !== null) {
+                return $error;
+            }
+        }
+
+        if (array_key_exists('notes', $data)) {
+            $task->setNotes($data['notes']);
+        }
+
+        if (isset($data['status'])) {
+            $error = $this->updateStatus($task, $data['status']);
+            if ($error !== null) {
+                return $error;
+            }
+        }
+
+        if (array_key_exists('energy_level', $data)) {
+            $error = $this->updateEnergyLevel($task, $data['energy_level']);
+            if ($error !== null) {
+                return $error;
+            }
+        }
+
+        if (array_key_exists('time_estimate', $data)) {
+            $error = $this->updateTimeEstimate($task, $data['time_estimate']);
+            if ($error !== null) {
+                return $error;
+            }
+        }
+
+        if (array_key_exists('due_date', $data)) {
+            $error = $this->updateDueDate($task, $data['due_date']);
+            if ($error !== null) {
+                return $error;
+            }
+        }
+
+        if (array_key_exists('due_time', $data)) {
+            $error = $this->updateDueTime($task, $data['due_time']);
+            if ($error !== null) {
+                return $error;
+            }
+        }
+
+        if (isset($data['position'])) {
+            $error = $this->updatePosition($task, $data['position']);
+            if ($error !== null) {
+                return $error;
+            }
+        }
+
+        return null;
+    }
+
+    private function updateTitle(Task $task, mixed $title): ?JsonResponse
+    {
+        if (!is_string($title) || trim($title) === '') {
+            return $this->errorResponse('Title cannot be empty', 'INVALID_TITLE', Response::HTTP_BAD_REQUEST);
+        }
+        $task->setTitle(trim($title));
+        return null;
+    }
+
+    private function updateStatus(Task $task, mixed $status): ?JsonResponse
+    {
+        if (!in_array($status, Task::STATUSES, true)) {
+            return $this->json([
+                'error' => 'Invalid status',
+                'code' => 'INVALID_STATUS',
+                'allowed_values' => Task::STATUSES,
+            ], Response::HTTP_BAD_REQUEST);
+        }
+        $task->setStatus($status);
+        return null;
+    }
+
+    private function updateEnergyLevel(Task $task, mixed $energyLevel): ?JsonResponse
+    {
+        if ($energyLevel !== null && !in_array($energyLevel, Task::ENERGY_LEVELS, true)) {
+            return $this->json([
+                'error' => 'Invalid energy level',
+                'code' => 'INVALID_ENERGY_LEVEL',
+                'allowed_values' => Task::ENERGY_LEVELS,
+            ], Response::HTTP_BAD_REQUEST);
+        }
+        $task->setEnergyLevel($energyLevel);
+        return null;
+    }
+
+    private function updateTimeEstimate(Task $task, mixed $timeEstimate): ?JsonResponse
+    {
+        if ($timeEstimate !== null && (!is_int($timeEstimate) || $timeEstimate <= 0)) {
+            return $this->errorResponse(
+                'Time estimate must be a positive integer',
+                'INVALID_TIME_ESTIMATE',
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+        $task->setTimeEstimate($timeEstimate);
+        return null;
+    }
+
+    private function updateDueDate(Task $task, mixed $dueDate): ?JsonResponse
+    {
+        if ($dueDate === null) {
+            $task->setDueDate(null);
+            return null;
+        }
+
+        try {
+            $task->setDueDate(new \DateTimeImmutable($dueDate));
+            return null;
+        } catch (\Exception) {
+            return $this->errorResponse('Invalid due date format', 'INVALID_DUE_DATE', Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    private function updateDueTime(Task $task, mixed $dueTime): ?JsonResponse
+    {
+        if ($dueTime === null) {
+            $task->setDueTime(null);
+            return null;
+        }
+
+        try {
+            $task->setDueTime(new \DateTimeImmutable($dueTime));
+            return null;
+        } catch (\Exception) {
+            return $this->errorResponse('Invalid due time format', 'INVALID_DUE_TIME', Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    private function updatePosition(Task $task, mixed $position): ?JsonResponse
+    {
+        if (!is_int($position) || $position < 0) {
+            return $this->errorResponse(
+                'Position must be a non-negative integer',
+                'INVALID_POSITION',
+                Response::HTTP_BAD_REQUEST
+            );
+        }
+        $task->setPosition($position);
+        return null;
     }
 }

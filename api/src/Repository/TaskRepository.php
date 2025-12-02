@@ -7,6 +7,7 @@ namespace App\Repository;
 use App\Entity\Task;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
 
@@ -15,6 +16,8 @@ use Symfony\Component\Uid\Uuid;
  */
 class TaskRepository extends ServiceEntityRepository
 {
+    private const EXCLUDED_STATUSES = [Task::STATUS_COMPLETED, Task::STATUS_DELETED];
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Task::class);
@@ -44,25 +47,17 @@ class TaskRepository extends ServiceEntityRepository
     }
 
     // =========================================================================
-    // Inbox Queries (FR-007)
+    // Core Query Methods
     // =========================================================================
 
     /**
-     * Find all inbox tasks for a user, ordered by position then creation date
+     * Find all inbox tasks for a user
      *
      * @return Task[]
      */
     public function findInboxByUser(User $user): array
     {
-        return $this->createQueryBuilder('t')
-            ->where('t.user = :user')
-            ->andWhere('t.status = :status')
-            ->setParameter('user', $user)
-            ->setParameter('status', Task::STATUS_INBOX)
-            ->orderBy('t.position', 'ASC')
-            ->addOrderBy('t.createdAt', 'DESC')
-            ->getQuery()
-            ->getResult();
+        return $this->findByUserAndStatus($user, Task::STATUS_INBOX);
     }
 
     /**
@@ -70,19 +65,13 @@ class TaskRepository extends ServiceEntityRepository
      */
     public function countInboxByUser(User $user): int
     {
-        return (int) $this->createQueryBuilder('t')
+        return (int) $this->createUserQueryBuilder($user)
             ->select('COUNT(t.id)')
-            ->where('t.user = :user')
             ->andWhere('t.status = :status')
-            ->setParameter('user', $user)
             ->setParameter('status', Task::STATUS_INBOX)
             ->getQuery()
             ->getSingleScalarResult();
     }
-
-    // =========================================================================
-    // Status-based Queries
-    // =========================================================================
 
     /**
      * Find tasks by user and status
@@ -91,10 +80,8 @@ class TaskRepository extends ServiceEntityRepository
      */
     public function findByUserAndStatus(User $user, string $status): array
     {
-        return $this->createQueryBuilder('t')
-            ->where('t.user = :user')
+        return $this->createUserQueryBuilder($user)
             ->andWhere('t.status = :status')
-            ->setParameter('user', $user)
             ->setParameter('status', $status)
             ->orderBy('t.position', 'ASC')
             ->addOrderBy('t.createdAt', 'DESC')
@@ -103,43 +90,19 @@ class TaskRepository extends ServiceEntityRepository
     }
 
     /**
-     * Find all next actions for a user
+     * Find all non-deleted tasks for a user
      *
      * @return Task[]
      */
-    public function findNextActionsByUser(User $user): array
+    public function findAllActiveByUser(User $user): array
     {
-        return $this->findByUserAndStatus($user, Task::STATUS_NEXT_ACTION);
-    }
-
-    /**
-     * Find all waiting for tasks for a user
-     *
-     * @return Task[]
-     */
-    public function findWaitingForByUser(User $user): array
-    {
-        return $this->findByUserAndStatus($user, Task::STATUS_WAITING_FOR);
-    }
-
-    /**
-     * Find all someday/maybe tasks for a user
-     *
-     * @return Task[]
-     */
-    public function findSomedayMaybeByUser(User $user): array
-    {
-        return $this->findByUserAndStatus($user, Task::STATUS_SOMEDAY_MAYBE);
-    }
-
-    /**
-     * Find all reference items for a user
-     *
-     * @return Task[]
-     */
-    public function findReferenceByUser(User $user): array
-    {
-        return $this->findByUserAndStatus($user, Task::STATUS_REFERENCE);
+        return $this->createUserQueryBuilder($user)
+            ->andWhere('t.status != :deleted')
+            ->setParameter('deleted', Task::STATUS_DELETED)
+            ->orderBy('t.position', 'ASC')
+            ->addOrderBy('t.createdAt', 'DESC')
+            ->getQuery()
+            ->getResult();
     }
 
     /**
@@ -149,10 +112,8 @@ class TaskRepository extends ServiceEntityRepository
      */
     public function findCompletedByUser(User $user, ?int $limit = null): array
     {
-        $qb = $this->createQueryBuilder('t')
-            ->where('t.user = :user')
+        $qb = $this->createUserQueryBuilder($user)
             ->andWhere('t.status = :status')
-            ->setParameter('user', $user)
             ->setParameter('status', Task::STATUS_COMPLETED)
             ->orderBy('t.completedAt', 'DESC');
 
@@ -161,16 +122,6 @@ class TaskRepository extends ServiceEntityRepository
         }
 
         return $qb->getQuery()->getResult();
-    }
-
-    /**
-     * Find all deleted (soft-deleted) tasks for a user
-     *
-     * @return Task[]
-     */
-    public function findDeletedByUser(User $user): array
-    {
-        return $this->findByUserAndStatus($user, Task::STATUS_DELETED);
     }
 
     // =========================================================================
@@ -184,15 +135,9 @@ class TaskRepository extends ServiceEntityRepository
      */
     public function findOverdueByUser(User $user): array
     {
-        $today = new \DateTimeImmutable('today');
-
-        return $this->createQueryBuilder('t')
-            ->where('t.user = :user')
+        return $this->createActiveTasksQueryBuilder($user)
             ->andWhere('t.dueDate < :today')
-            ->andWhere('t.status NOT IN (:excludedStatuses)')
-            ->setParameter('user', $user)
-            ->setParameter('today', $today)
-            ->setParameter('excludedStatuses', [Task::STATUS_COMPLETED, Task::STATUS_DELETED])
+            ->setParameter('today', new \DateTimeImmutable('today'))
             ->orderBy('t.dueDate', 'ASC')
             ->getQuery()
             ->getResult();
@@ -205,15 +150,9 @@ class TaskRepository extends ServiceEntityRepository
      */
     public function findDueTodayByUser(User $user): array
     {
-        $today = new \DateTimeImmutable('today');
-
-        return $this->createQueryBuilder('t')
-            ->where('t.user = :user')
+        return $this->createActiveTasksQueryBuilder($user)
             ->andWhere('t.dueDate = :today')
-            ->andWhere('t.status NOT IN (:excludedStatuses)')
-            ->setParameter('user', $user)
-            ->setParameter('today', $today)
-            ->setParameter('excludedStatuses', [Task::STATUS_COMPLETED, Task::STATUS_DELETED])
+            ->setParameter('today', new \DateTimeImmutable('today'))
             ->orderBy('t.dueTime', 'ASC')
             ->addOrderBy('t.position', 'ASC')
             ->getQuery()
@@ -230,15 +169,11 @@ class TaskRepository extends ServiceEntityRepository
         \DateTimeImmutable $startDate,
         \DateTimeImmutable $endDate
     ): array {
-        return $this->createQueryBuilder('t')
-            ->where('t.user = :user')
+        return $this->createActiveTasksQueryBuilder($user)
             ->andWhere('t.dueDate >= :startDate')
             ->andWhere('t.dueDate <= :endDate')
-            ->andWhere('t.status NOT IN (:excludedStatuses)')
-            ->setParameter('user', $user)
             ->setParameter('startDate', $startDate)
             ->setParameter('endDate', $endDate)
-            ->setParameter('excludedStatuses', [Task::STATUS_COMPLETED, Task::STATUS_DELETED])
             ->orderBy('t.dueDate', 'ASC')
             ->addOrderBy('t.dueTime', 'ASC')
             ->getQuery()
@@ -250,7 +185,7 @@ class TaskRepository extends ServiceEntityRepository
     // =========================================================================
 
     /**
-     * Find tasks by project
+     * Find tasks by project (excludes deleted)
      *
      * @return Task[]
      */
@@ -258,16 +193,16 @@ class TaskRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('t')
             ->where('t.project = :project')
-            ->andWhere('t.status NOT IN (:excludedStatuses)')
+            ->andWhere('t.status != :deleted')
             ->setParameter('project', $project)
-            ->setParameter('excludedStatuses', [Task::STATUS_DELETED])
+            ->setParameter('deleted', Task::STATUS_DELETED)
             ->orderBy('t.position', 'ASC')
             ->getQuery()
             ->getResult();
     }
 
     /**
-     * Find next action for a project (first task with next_action status)
+     * Find next action for a project
      */
     public function findNextActionByProject(object $project): ?Task
     {
@@ -283,28 +218,7 @@ class TaskRepository extends ServiceEntityRepository
     }
 
     // =========================================================================
-    // Actionable Tasks Queries
-    // =========================================================================
-
-    /**
-     * Find all actionable tasks for a user (next_action + waiting_for)
-     *
-     * @return Task[]
-     */
-    public function findActionableByUser(User $user): array
-    {
-        return $this->createQueryBuilder('t')
-            ->where('t.user = :user')
-            ->andWhere('t.status IN (:statuses)')
-            ->setParameter('user', $user)
-            ->setParameter('statuses', [Task::STATUS_NEXT_ACTION, Task::STATUS_WAITING_FOR])
-            ->orderBy('t.position', 'ASC')
-            ->getQuery()
-            ->getResult();
-    }
-
-    // =========================================================================
-    // Sync Queries
+    // Sync & Statistics
     // =========================================================================
 
     /**
@@ -314,19 +228,13 @@ class TaskRepository extends ServiceEntityRepository
      */
     public function findModifiedSince(User $user, \DateTimeImmutable $since): array
     {
-        return $this->createQueryBuilder('t')
-            ->where('t.user = :user')
+        return $this->createUserQueryBuilder($user)
             ->andWhere('t.updatedAt > :since')
-            ->setParameter('user', $user)
             ->setParameter('since', $since)
             ->orderBy('t.updatedAt', 'ASC')
             ->getQuery()
             ->getResult();
     }
-
-    // =========================================================================
-    // Statistics Queries
-    // =========================================================================
 
     /**
      * Count tasks by status for a user
@@ -335,10 +243,8 @@ class TaskRepository extends ServiceEntityRepository
      */
     public function countByStatusForUser(User $user): array
     {
-        $results = $this->createQueryBuilder('t')
+        $results = $this->createUserQueryBuilder($user)
             ->select('t.status, COUNT(t.id) as count')
-            ->where('t.user = :user')
-            ->setParameter('user', $user)
             ->groupBy('t.status')
             ->getQuery()
             ->getResult();
@@ -359,13 +265,11 @@ class TaskRepository extends ServiceEntityRepository
         \DateTimeImmutable $startDate,
         \DateTimeImmutable $endDate
     ): int {
-        return (int) $this->createQueryBuilder('t')
+        return (int) $this->createUserQueryBuilder($user)
             ->select('COUNT(t.id)')
-            ->where('t.user = :user')
             ->andWhere('t.status = :status')
             ->andWhere('t.completedAt >= :startDate')
             ->andWhere('t.completedAt <= :endDate')
-            ->setParameter('user', $user)
             ->setParameter('status', Task::STATUS_COMPLETED)
             ->setParameter('startDate', $startDate)
             ->setParameter('endDate', $endDate)
@@ -373,24 +277,36 @@ class TaskRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
-    // =========================================================================
-    // Position Management
-    // =========================================================================
-
     /**
      * Get the maximum position for a user's tasks in a given status
      */
     public function getMaxPositionByUserAndStatus(User $user, string $status): int
     {
-        $result = $this->createQueryBuilder('t')
+        $result = $this->createUserQueryBuilder($user)
             ->select('MAX(t.position)')
-            ->where('t.user = :user')
             ->andWhere('t.status = :status')
-            ->setParameter('user', $user)
             ->setParameter('status', $status)
             ->getQuery()
             ->getSingleScalarResult();
 
         return $result !== null ? (int) $result : 0;
+    }
+
+    // =========================================================================
+    // Private Query Builder Helpers
+    // =========================================================================
+
+    private function createUserQueryBuilder(User $user): QueryBuilder
+    {
+        return $this->createQueryBuilder('t')
+            ->where('t.user = :user')
+            ->setParameter('user', $user);
+    }
+
+    private function createActiveTasksQueryBuilder(User $user): QueryBuilder
+    {
+        return $this->createUserQueryBuilder($user)
+            ->andWhere('t.status NOT IN (:excludedStatuses)')
+            ->setParameter('excludedStatuses', self::EXCLUDED_STATUSES);
     }
 }
