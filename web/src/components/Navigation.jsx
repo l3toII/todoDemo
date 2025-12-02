@@ -80,6 +80,22 @@ const Navigation = () => {
             <Link to="/inbox" className="flex items-center">
               <h1 className="text-xl font-bold text-gray-900">GTD Todo App</h1>
             </Link>
+
+            {/* Main Navigation Links */}
+            <div className="hidden sm:flex sm:ml-8 sm:space-x-4">
+              <Link
+                to="/inbox"
+                className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+              >
+                Inbox
+              </Link>
+              <Link
+                to="/clarify"
+                className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+              >
+                Clarify
+              </Link>
+            </div>
           </div>
 
           {/* User Menu */}

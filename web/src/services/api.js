@@ -92,6 +92,7 @@ export const tasksAPI = {
   getInbox: () => apiClient.get('/tasks/inbox'),
   getInboxCount: () => apiClient.get('/tasks/inbox/count'),
   getAll: (status) => apiClient.get('/tasks', { params: status ? { status } : {} }),
+  getByStatus: (status) => apiClient.get('/tasks', { params: { status } }),
   getById: (id) => apiClient.get(`/tasks/${id}`),
   create: (data) => apiClient.post('/tasks', data),
   update: (id, data) => apiClient.patch(`/tasks/${id}`, data),
@@ -99,6 +100,33 @@ export const tasksAPI = {
   complete: (id) => apiClient.post(`/tasks/${id}/complete`),
   restore: (id) => apiClient.post(`/tasks/${id}/restore`),
   getStats: () => apiClient.get('/tasks/stats'),
+  // Clarification helpers
+  clarify: (id, clarificationData) => apiClient.patch(`/tasks/${id}`, {
+    status: clarificationData.status,
+    notes: clarificationData.notes,
+    energy_level: clarificationData.energyLevel,
+    time_estimate: clarificationData.timeEstimate,
+    due_date: clarificationData.dueDate,
+    project_id: clarificationData.projectId,
+  }),
+  setContexts: (id, contextIds) => apiClient.put(`/tasks/${id}/contexts`, { context_ids: contextIds }),
+};
+
+// Projects API endpoints
+export const projectsAPI = {
+  getAll: (params = {}) => apiClient.get('/projects', { params }),
+  getById: (id) => apiClient.get(`/projects/${id}`),
+  create: (data) => apiClient.post('/projects', data),
+  update: (id, data) => apiClient.patch(`/projects/${id}`, data),
+  delete: (id) => apiClient.delete(`/projects/${id}`),
+};
+
+// Contexts API endpoints
+export const contextsAPI = {
+  getAll: () => apiClient.get('/contexts'),
+  create: (data) => apiClient.post('/contexts', data),
+  update: (id, data) => apiClient.patch(`/contexts/${id}`, data),
+  delete: (id) => apiClient.delete(`/contexts/${id}`),
 };
 
 // Health check endpoint
