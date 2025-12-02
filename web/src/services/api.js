@@ -87,6 +87,20 @@ export const accountAPI = {
   }),
 };
 
+// Tasks API endpoints
+export const tasksAPI = {
+  getInbox: () => apiClient.get('/tasks/inbox'),
+  getInboxCount: () => apiClient.get('/tasks/inbox/count'),
+  getAll: (status) => apiClient.get('/tasks', { params: status ? { status } : {} }),
+  getById: (id) => apiClient.get(`/tasks/${id}`),
+  create: (data) => apiClient.post('/tasks', data),
+  update: (id, data) => apiClient.patch(`/tasks/${id}`, data),
+  delete: (id) => apiClient.delete(`/tasks/${id}`),
+  complete: (id) => apiClient.post(`/tasks/${id}/complete`),
+  restore: (id) => apiClient.post(`/tasks/${id}/restore`),
+  getStats: () => apiClient.get('/tasks/stats'),
+};
+
 // Health check endpoint
 export const healthAPI = {
   check: () => apiClient.get('/health'),
