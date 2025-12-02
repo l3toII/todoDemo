@@ -10,7 +10,8 @@
       "Bash(npm run test:e2e:*)",
       "Bash(php bin/phpunit:*)",
       "Bash(docker exec:*)",
-      "Bash(gh api:*)"
+      "Bash(gh api:*)",
+      "WebFetch(domain:sonarcloud.io)"
     ],
     "deny": [],
     "ask": []

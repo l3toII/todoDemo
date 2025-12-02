@@ -267,6 +267,9 @@ class TaskController extends AbstractController
             $options['notes'] = $data['notes'];
         }
 
+        // Capture original status before clarification modifies the task
+        $originalStatus = $task->getStatus();
+
         try {
             $clarifiedTask = $this->taskService->clarify($task, $targetStatus, $options);
 
@@ -274,7 +277,7 @@ class TaskController extends AbstractController
                 'message' => 'Task clarified successfully',
                 'task' => $clarifiedTask->toArray(),
                 'transition' => [
-                    'from' => $task->getStatus() === $targetStatus ? $targetStatus : $data['target_status'],
+                    'from' => $originalStatus,
                     'to' => $clarifiedTask->getStatus(),
                 ],
             ]);
