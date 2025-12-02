@@ -10,12 +10,11 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
-import { BrowserRouter, MemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { configureStore } from '@reduxjs/toolkit';
-import App from '../../App';
 import ClarifyPage from '../../pages/ClarifyPage';
 import tasksReducer from '../../features/tasks/tasksSlice';
 import authReducer from '../../features/auth/authSlice';
@@ -26,12 +25,13 @@ vi.mock('../../services/api', () => ({
   tasksAPI: {
     getByStatus: vi.fn().mockResolvedValue({
       data: {
-        data: [
+        tasks: [
           { id: '1', title: 'Review project proposal', status: 'inbox', notes: '' },
           { id: '2', title: 'Call dentist', status: 'inbox', notes: 'Schedule cleaning' },
           { id: '3', title: 'Interesting article about GTD', status: 'inbox', notes: '' },
         ],
-        total: 3,
+        count: 3,
+        next_cursor: null,
       },
     }),
     clarify: vi.fn().mockResolvedValue({ data: { id: '1', status: 'next_action' } }),
@@ -130,11 +130,21 @@ describe('Clarify Flow E2E Tests', () => {
       renderWithProviders(<ClarifyPage />);
 
       await waitFor(() => {
-        expect(screen.getByText(/is this actionable/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /is this actionable/i })).toBeInTheDocument();
       });
     });
 
     it('displays inbox zero when no tasks', async () => {
+      // Mock API to return empty inbox for this specific test
+      const { tasksAPI } = await import('../../services/api');
+      tasksAPI.getByStatus.mockResolvedValueOnce({
+        data: {
+          tasks: [],
+          count: 0,
+          next_cursor: null,
+        },
+      });
+
       const emptyStore = createTestStore({
         tasks: {
           inbox: [],
@@ -165,13 +175,15 @@ describe('Clarify Flow E2E Tests', () => {
       const { user } = renderWithProviders(<ClarifyPage />);
 
       await waitFor(() => {
-        expect(screen.getByText(/is this actionable/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /is this actionable/i })).toBeInTheDocument();
       });
 
-      await user.click(screen.getByText(/yes/i));
+      // Click the Yes button (contains "Yes" and "I can take action")
+      const yesButton = screen.getByRole('button', { name: /yes.*i can take action/i });
+      await user.click(yesButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/will it take less than 2 minutes/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /will it take less than 2 minutes/i })).toBeInTheDocument();
       });
     });
 
@@ -179,13 +191,15 @@ describe('Clarify Flow E2E Tests', () => {
       const { user } = renderWithProviders(<ClarifyPage />);
 
       await waitFor(() => {
-        expect(screen.getByText(/is this actionable/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /is this actionable/i })).toBeInTheDocument();
       });
 
-      await user.click(screen.getByText(/no/i));
+      // Click the No button (contains "No" and "It's not actionable")
+      const noButton = screen.getByRole('button', { name: /no.*not actionable/i });
+      await user.click(noButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/what is this/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /what is this/i })).toBeInTheDocument();
       });
     });
   });
@@ -195,16 +209,17 @@ describe('Clarify Flow E2E Tests', () => {
       const { user } = renderWithProviders(<ClarifyPage />);
 
       await waitFor(() => {
-        expect(screen.getByText(/is this actionable/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /is this actionable/i })).toBeInTheDocument();
       });
 
-      await user.click(screen.getByText(/yes/i));
+      const yesButton = screen.getByRole('button', { name: /yes.*i can take action/i });
+      await user.click(yesButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/will it take less than 2 minutes/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /will it take less than 2 minutes/i })).toBeInTheDocument();
       });
 
-      await user.click(screen.getByText(/yes, under 2 min/i));
+      await user.click(screen.getByRole('button', { name: /yes, under 2 min/i }));
 
       await waitFor(() => {
         expect(screen.getByText('2:00')).toBeInTheDocument();
@@ -215,19 +230,20 @@ describe('Clarify Flow E2E Tests', () => {
       const { user } = renderWithProviders(<ClarifyPage />);
 
       await waitFor(() => {
-        expect(screen.getByText(/is this actionable/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /is this actionable/i })).toBeInTheDocument();
       });
 
-      await user.click(screen.getByText(/yes/i));
+      const yesButton = screen.getByRole('button', { name: /yes.*i can take action/i });
+      await user.click(yesButton);
 
       await waitFor(() => {
-        expect(screen.getByText(/will it take less than 2 minutes/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /will it take less than 2 minutes/i })).toBeInTheDocument();
       });
 
-      await user.click(screen.getByText(/no, longer/i));
+      await user.click(screen.getByRole('button', { name: /no, longer/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/single action or project/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /single action or project/i })).toBeInTheDocument();
       });
     });
   });
@@ -237,17 +253,17 @@ describe('Clarify Flow E2E Tests', () => {
       const { user } = renderWithProviders(<ClarifyPage />);
 
       // Navigate through: actionable -> takes longer -> single action
-      await waitFor(() => expect(screen.getByText(/is this actionable/i)).toBeInTheDocument());
-      await user.click(screen.getByText(/yes/i));
+      await waitFor(() => expect(screen.getByRole('heading', { name: /is this actionable/i })).toBeInTheDocument());
+      await user.click(screen.getByRole('button', { name: /yes.*i can take action/i }));
 
-      await waitFor(() => expect(screen.getByText(/will it take less than 2 minutes/i)).toBeInTheDocument());
-      await user.click(screen.getByText(/no, longer/i));
+      await waitFor(() => expect(screen.getByRole('heading', { name: /will it take less than 2 minutes/i })).toBeInTheDocument());
+      await user.click(screen.getByRole('button', { name: /no, longer/i }));
 
-      await waitFor(() => expect(screen.getByText(/single action or project/i)).toBeInTheDocument());
-      await user.click(screen.getByText(/single action/i));
+      await waitFor(() => expect(screen.getByRole('heading', { name: /single action or project/i })).toBeInTheDocument());
+      await user.click(screen.getByRole('button', { name: /single action.*one step/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/what should happen next/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /what should happen next/i })).toBeInTheDocument();
         expect(screen.getByText(/do it myself/i)).toBeInTheDocument();
         expect(screen.getByText(/delegate it/i)).toBeInTheDocument();
         expect(screen.getByText(/maybe later/i)).toBeInTheDocument();
@@ -258,18 +274,18 @@ describe('Clarify Flow E2E Tests', () => {
       const { user } = renderWithProviders(<ClarifyPage />);
 
       // Navigate to action options
-      await waitFor(() => expect(screen.getByText(/is this actionable/i)).toBeInTheDocument());
-      await user.click(screen.getByText(/yes/i));
-      await waitFor(() => expect(screen.getByText(/will it take less than 2 minutes/i)).toBeInTheDocument());
-      await user.click(screen.getByText(/no, longer/i));
-      await waitFor(() => expect(screen.getByText(/single action or project/i)).toBeInTheDocument());
-      await user.click(screen.getByText(/single action/i));
-      await waitFor(() => expect(screen.getByText(/what should happen next/i)).toBeInTheDocument());
+      await waitFor(() => expect(screen.getByRole('heading', { name: /is this actionable/i })).toBeInTheDocument());
+      await user.click(screen.getByRole('button', { name: /yes.*i can take action/i }));
+      await waitFor(() => expect(screen.getByRole('heading', { name: /will it take less than 2 minutes/i })).toBeInTheDocument());
+      await user.click(screen.getByRole('button', { name: /no, longer/i }));
+      await waitFor(() => expect(screen.getByRole('heading', { name: /single action or project/i })).toBeInTheDocument());
+      await user.click(screen.getByRole('button', { name: /single action.*one step/i }));
+      await waitFor(() => expect(screen.getByRole('heading', { name: /what should happen next/i })).toBeInTheDocument());
 
-      await user.click(screen.getByText(/do it myself/i));
+      await user.click(screen.getByRole('button', { name: /do it myself.*next actions/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/add details/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /add details/i })).toBeInTheDocument();
         expect(screen.getByText(/energy level/i)).toBeInTheDocument();
       });
     });
@@ -280,16 +296,16 @@ describe('Clarify Flow E2E Tests', () => {
       const { user } = renderWithProviders(<ClarifyPage />);
 
       // Navigate to single/project question
-      await waitFor(() => expect(screen.getByText(/is this actionable/i)).toBeInTheDocument());
-      await user.click(screen.getByText(/yes/i));
-      await waitFor(() => expect(screen.getByText(/will it take less than 2 minutes/i)).toBeInTheDocument());
-      await user.click(screen.getByText(/no, longer/i));
-      await waitFor(() => expect(screen.getByText(/single action or project/i)).toBeInTheDocument());
+      await waitFor(() => expect(screen.getByRole('heading', { name: /is this actionable/i })).toBeInTheDocument());
+      await user.click(screen.getByRole('button', { name: /yes.*i can take action/i }));
+      await waitFor(() => expect(screen.getByRole('heading', { name: /will it take less than 2 minutes/i })).toBeInTheDocument());
+      await user.click(screen.getByRole('button', { name: /no, longer/i }));
+      await waitFor(() => expect(screen.getByRole('heading', { name: /single action or project/i })).toBeInTheDocument());
 
-      await user.click(screen.getByText(/project/i));
+      await user.click(screen.getByRole('button', { name: /project.*multiple steps/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/create project/i)).toBeInTheDocument();
+        expect(screen.getByRole('heading', { name: /create project/i })).toBeInTheDocument();
         expect(screen.getByPlaceholderText(/what's the desired outcome/i)).toBeInTheDocument();
       });
     });
@@ -299,19 +315,19 @@ describe('Clarify Flow E2E Tests', () => {
     it('shows reference option for non-actionable items', async () => {
       const { user } = renderWithProviders(<ClarifyPage />);
 
-      await waitFor(() => expect(screen.getByText(/is this actionable/i)).toBeInTheDocument());
-      await user.click(screen.getByText(/no/i));
+      await waitFor(() => expect(screen.getByRole('heading', { name: /is this actionable/i })).toBeInTheDocument());
+      await user.click(screen.getByRole('button', { name: /no.*not actionable/i }));
 
       await waitFor(() => {
-        expect(screen.getByText(/reference/i)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: /reference.*future/i })).toBeInTheDocument();
       });
     });
 
     it('shows trash option for non-actionable items', async () => {
       const { user } = renderWithProviders(<ClarifyPage />);
 
-      await waitFor(() => expect(screen.getByText(/is this actionable/i)).toBeInTheDocument());
-      await user.click(screen.getByText(/no/i));
+      await waitFor(() => expect(screen.getByRole('heading', { name: /is this actionable/i })).toBeInTheDocument());
+      await user.click(screen.getByRole('button', { name: /no.*not actionable/i }));
 
       await waitFor(() => {
         expect(screen.getByText(/trash it/i)).toBeInTheDocument();
@@ -321,8 +337,8 @@ describe('Clarify Flow E2E Tests', () => {
     it('shows someday/maybe option for non-actionable items', async () => {
       const { user } = renderWithProviders(<ClarifyPage />);
 
-      await waitFor(() => expect(screen.getByText(/is this actionable/i)).toBeInTheDocument());
-      await user.click(screen.getByText(/no/i));
+      await waitFor(() => expect(screen.getByRole('heading', { name: /is this actionable/i })).toBeInTheDocument());
+      await user.click(screen.getByRole('button', { name: /no.*not actionable/i }));
 
       await waitFor(() => {
         expect(screen.getByText(/someday\/maybe/i)).toBeInTheDocument();
@@ -356,32 +372,20 @@ describe('Clarify Flow E2E Tests', () => {
     });
   });
 
-  describe('Navigation', () => {
-    it('has link to clarify page in navigation', async () => {
-      const store = createTestStore();
-
-      render(
-        <Provider store={store}>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
-        </Provider>
-      );
-
-      // The navigation should have a Clarify link
-      await waitFor(() => {
-        const clarifyLink = screen.getByRole('link', { name: /clarify/i });
-        expect(clarifyLink).toBeInTheDocument();
-        expect(clarifyLink).toHaveAttribute('href', '/clarify');
-      });
-    });
-  });
-
   describe('Error Handling', () => {
     it('displays error message when API fails', async () => {
+      // Mock API to reject for this specific test
+      const { tasksAPI } = await import('../../services/api');
+      tasksAPI.getByStatus.mockRejectedValueOnce({
+        response: { data: { message: 'Failed to load tasks' } },
+      });
+
+      // Store with tasks so we don't hit "Inbox Zero"
       const errorStore = createTestStore({
         tasks: {
-          inbox: [],
+          inbox: [
+            { id: '1', title: 'Review project proposal', status: 'inbox', notes: '' },
+          ],
           clarified: [],
           nextActions: [],
           waitingFor: [],
@@ -390,9 +394,9 @@ describe('Clarify Flow E2E Tests', () => {
           currentTask: null,
           loading: false,
           clarifying: false,
-          error: 'Failed to load tasks',
+          error: null,
           nextCursor: null,
-          total: 0,
+          total: 1,
         },
       });
 

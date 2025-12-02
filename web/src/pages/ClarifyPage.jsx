@@ -22,28 +22,40 @@ const ClarifyPage = () => {
 
   const [currentTaskIndex, setCurrentTaskIndex] = useState(0);
   const [clarifiedCount, setClarifiedCount] = useState(0);
+  const [initialCount, setInitialCount] = useState(0);
 
   // Fetch inbox tasks on mount
   useEffect(() => {
     dispatch(fetchInboxTasks());
   }, [dispatch]);
 
+  // Store initial count when tasks are first loaded
+  useEffect(() => {
+    if (inboxTasks.length > 0 && initialCount === 0) {
+      setInitialCount(inboxTasks.length);
+    }
+  }, [inboxTasks.length, initialCount]);
+
+  // Reset index if it's out of bounds after task removal
+  useEffect(() => {
+    if (inboxTasks.length > 0 && currentTaskIndex >= inboxTasks.length) {
+      setCurrentTaskIndex(0);
+    }
+  }, [inboxTasks.length, currentTaskIndex]);
+
   // Current task to clarify
   const currentTask = inboxTasks[currentTaskIndex];
 
   // Handle task clarification complete
+  // Note: The task is already removed from inbox by Redux reducer
+  // So we just increment clarified count, the index stays the same
+  // because the array has shifted
   const handleTaskComplete = useCallback(() => {
     setClarifiedCount(prev => prev + 1);
-
-    // Move to next task or show completion
-    if (currentTaskIndex < inboxTasks.length - 1) {
-      setCurrentTaskIndex(prev => prev + 1);
-    } else {
-      // Refresh inbox to get updated list
-      dispatch(fetchInboxTasks());
-      setCurrentTaskIndex(0);
-    }
-  }, [currentTaskIndex, inboxTasks.length, dispatch]);
+    // No need to increment index - the task was removed from the array
+    // so the next task is now at the current index
+    // If we were at the last task, the useEffect above will reset to 0
+  }, []);
 
   // Skip current task
   const handleSkip = useCallback(() => {
@@ -125,20 +137,20 @@ const ClarifyPage = () => {
         </div>
 
         {/* Progress bar */}
-        {inboxTasks.length > 0 && (
+        {(inboxTasks.length > 0 || clarifiedCount > 0) && (
           <div className="relative">
             <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-500"
                 style={{
-                  width: `${((currentTaskIndex + clarifiedCount) / (inboxTasks.length + clarifiedCount)) * 100}%`,
+                  width: initialCount > 0 ? `${(clarifiedCount / initialCount) * 100}%` : '0%',
                 }}
               />
             </div>
             <div className="flex justify-between text-xs text-gray-500 mt-1">
               <span>{clarifiedCount} clarified</span>
               <span>
-                Task {currentTaskIndex + 1} of {inboxTasks.length}
+                Task {currentTaskIndex + 1} of {inboxCount}
               </span>
             </div>
           </div>
