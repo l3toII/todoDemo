@@ -391,7 +391,7 @@ jobs:
             -Dsonar.organization=l3toii
             -Dsonar.sources=api/src,web/src
             -Dsonar.tests=api/tests,web/src
-            -Dsonar.test.inclusions=**/*Test.php,**/*.test.ts,**/*.test.tsx,**/*.spec.ts
+            -Dsonar.test.inclusions=**/*Test.php,**/*.test.js,**/*.test.jsx,**/*.test.ts,**/*.test.tsx,**/*.spec.js,**/*.spec.jsx,**/*.spec.ts,**/*.spec.tsx
             -Dsonar.php.coverage.reportPaths=api/coverage.xml
             -Dsonar.javascript.lcov.reportPaths=web/coverage/lcov.info
             -Dsonar.exclusions=**/vendor/**,**/node_modules/**,**/dist/**,**/build/**
