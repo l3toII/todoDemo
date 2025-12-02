@@ -193,30 +193,30 @@ class TaskController extends AbstractController
 
         $task = $result['task'];
         $data = json_decode($request->getContent(), true) ?? [];
+        $originalStatus = $task->getStatus();
 
-        // Validate and extract clarification data
         $validationResult = $this->validateClarifyRequest($task, $data);
         if ($validationResult instanceof JsonResponse) {
             return $validationResult;
         }
 
-        // Capture original status before clarification modifies the task
-        $originalStatus = $task->getStatus();
+        return $this->executeClarification($task, $validationResult, $originalStatus);
+    }
 
+    /**
+     * Execute the clarification and return response.
+     *
+     * @param array{target_status: string, options: array<string, mixed>} $validationResult
+     */
+    private function executeClarification(Task $task, array $validationResult, string $originalStatus): JsonResponse
+    {
         try {
-            $clarifiedTask = $this->taskService->clarify(
-                $task,
-                $validationResult['target_status'],
-                $validationResult['options']
-            );
+            $clarifiedTask = $this->taskService->clarify($task, $validationResult['target_status'], $validationResult['options']);
 
             return $this->json([
                 'message' => 'Task clarified successfully',
                 'task' => $clarifiedTask->toArray(),
-                'transition' => [
-                    'from' => $originalStatus,
-                    'to' => $clarifiedTask->getStatus(),
-                ],
+                'transition' => ['from' => $originalStatus, 'to' => $clarifiedTask->getStatus()],
             ]);
         } catch (\InvalidArgumentException $e) {
             return $this->errorResponse($e->getMessage(), 'CLARIFICATION_FAILED', Response::HTTP_BAD_REQUEST);
@@ -231,14 +231,33 @@ class TaskController extends AbstractController
      */
     private function validateClarifyRequest(Task $task, array $data): array|JsonResponse
     {
-        // Validate required field
+        $statusValidation = $this->validateTargetStatus($task, $data);
+        if ($statusValidation instanceof JsonResponse) {
+            return $statusValidation;
+        }
+
+        $optionsResult = $this->buildClarifyOptions($data);
+        if ($optionsResult instanceof JsonResponse) {
+            return $optionsResult;
+        }
+
+        return ['target_status' => $statusValidation, 'options' => $optionsResult];
+    }
+
+    /**
+     * Validate target status field.
+     *
+     * @param array<string, mixed> $data
+     * @return string|JsonResponse The validated target status or error response
+     */
+    private function validateTargetStatus(Task $task, array $data): string|JsonResponse
+    {
         if (!isset($data['target_status']) || !is_string($data['target_status'])) {
             return $this->errorResponse('target_status is required', 'MISSING_TARGET_STATUS', Response::HTTP_BAD_REQUEST);
         }
 
         $targetStatus = $data['target_status'];
 
-        // Validate target status is a valid status
         if (!in_array($targetStatus, Task::STATUSES, true)) {
             return $this->json([
                 'error' => 'Invalid target status',
@@ -247,7 +266,6 @@ class TaskController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        // Check if transition is allowed
         if (!$this->taskService->isValidTransition($task->getStatus(), $targetStatus)) {
             return $this->json([
                 'error' => sprintf('Invalid status transition from "%s" to "%s"', $task->getStatus(), $targetStatus),
@@ -258,13 +276,7 @@ class TaskController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        // Build and validate options
-        $optionsResult = $this->buildClarifyOptions($data);
-        if ($optionsResult instanceof JsonResponse) {
-            return $optionsResult;
-        }
-
-        return ['target_status' => $targetStatus, 'options' => $optionsResult];
+        return $targetStatus;
     }
 
     /**
@@ -277,31 +289,19 @@ class TaskController extends AbstractController
     {
         $options = [];
 
-        if (isset($data['energy_level'])) {
-            if (!in_array($data['energy_level'], Task::ENERGY_LEVELS, true)) {
-                return $this->json([
-                    'error' => 'Invalid energy level',
-                    'code' => 'INVALID_ENERGY_LEVEL',
-                    'allowed_values' => Task::ENERGY_LEVELS,
-                ], Response::HTTP_BAD_REQUEST);
-            }
-            $options['energy_level'] = $data['energy_level'];
+        $energyError = $this->validateAndSetEnergyLevel($data, $options);
+        if ($energyError !== null) {
+            return $energyError;
         }
 
-        if (isset($data['time_estimate'])) {
-            if (!is_int($data['time_estimate']) || $data['time_estimate'] <= 0) {
-                return $this->errorResponse('time_estimate must be a positive integer (minutes)', 'INVALID_TIME_ESTIMATE', Response::HTTP_BAD_REQUEST);
-            }
-            $options['time_estimate'] = $data['time_estimate'];
+        $timeError = $this->validateAndSetClarifyTimeEstimate($data, $options);
+        if ($timeError !== null) {
+            return $timeError;
         }
 
-        if (isset($data['due_date'])) {
-            try {
-                $dueDate = new \DateTimeImmutable($data['due_date']);
-                $options['due_date'] = $dueDate->format('Y-m-d');
-            } catch (\Exception) {
-                return $this->errorResponse('Invalid due_date format. Use Y-m-d.', 'INVALID_DUE_DATE', Response::HTTP_BAD_REQUEST);
-            }
+        $dateError = $this->validateAndSetClarifyDueDate($data, $options);
+        if ($dateError !== null) {
+            return $dateError;
         }
 
         if (isset($data['notes']) && is_string($data['notes'])) {
@@ -309,6 +309,68 @@ class TaskController extends AbstractController
         }
 
         return $options;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @param array<string, mixed> $options
+     */
+    private function validateAndSetEnergyLevel(array $data, array &$options): ?JsonResponse
+    {
+        if (!isset($data['energy_level'])) {
+            return null;
+        }
+
+        if (!in_array($data['energy_level'], Task::ENERGY_LEVELS, true)) {
+            return $this->json([
+                'error' => 'Invalid energy level',
+                'code' => 'INVALID_ENERGY_LEVEL',
+                'allowed_values' => Task::ENERGY_LEVELS,
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $options['energy_level'] = $data['energy_level'];
+
+        return null;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @param array<string, mixed> $options
+     */
+    private function validateAndSetClarifyTimeEstimate(array $data, array &$options): ?JsonResponse
+    {
+        if (!isset($data['time_estimate'])) {
+            return null;
+        }
+
+        if (!is_int($data['time_estimate']) || $data['time_estimate'] <= 0) {
+            return $this->errorResponse('time_estimate must be a positive integer (minutes)', 'INVALID_TIME_ESTIMATE', Response::HTTP_BAD_REQUEST);
+        }
+
+        $options['time_estimate'] = $data['time_estimate'];
+
+        return null;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @param array<string, mixed> $options
+     */
+    private function validateAndSetClarifyDueDate(array $data, array &$options): ?JsonResponse
+    {
+        if (!isset($data['due_date'])) {
+            return null;
+        }
+
+        try {
+            $dueDate = new \DateTimeImmutable($data['due_date']);
+            $options['due_date'] = $dueDate->format('Y-m-d');
+
+            return null;
+        } catch (\Exception) {
+            return $this->errorResponse('Invalid due_date format. Use Y-m-d.', 'INVALID_DUE_DATE', Response::HTTP_BAD_REQUEST);
+        }
     }
 
     /**
