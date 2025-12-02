@@ -59,6 +59,14 @@ final class Version004CreateTasksTable extends AbstractMigration
             ON DELETE CASCADE
         ');
 
+        // Add foreign key constraint to projects table (optional relation)
+        $this->addSql('
+            ALTER TABLE tasks
+            ADD CONSTRAINT fk_task_project
+            FOREIGN KEY (project_id) REFERENCES projects(id)
+            ON DELETE SET NULL
+        ');
+
         // Add check constraint for status enum
         $this->addSql('
             ALTER TABLE tasks

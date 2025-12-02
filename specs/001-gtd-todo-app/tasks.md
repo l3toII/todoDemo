@@ -211,9 +211,9 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 ### Phase 2.2: Backend - Capture Endpoint
 
-- [ ] [P2-005] [Story-2] Create TaskController with POST /api/tasks endpoint `api/src/Controller/TaskController.php`
-- [ ] [P2-006] [Story-2] Create GET /api/tasks/inbox endpoint `api/src/Controller/TaskController.php`
-- [ ] [P2-007] [Story-2] Write functional tests for capture/inbox endpoints `api/tests/Functional/Task/InboxTest.php`
+- [X] [P2-005] [Story-2] Create TaskController with POST /api/tasks endpoint `api/src/Controller/TaskController.php`
+- [X] [P2-006] [Story-2] Create GET /api/tasks/inbox endpoint `api/src/Controller/TaskController.php`
+- [X] [P2-007] [Story-2] Write functional tests for capture/inbox endpoints `api/tests/Functional/Task/InboxTest.php`
 
 ### Phase 2.3: Frontend - Inbox Module
 
