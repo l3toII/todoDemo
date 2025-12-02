@@ -31,7 +31,8 @@ A modern Getting Things Done (GTD) application with multi-platform support (Web,
 - **Docker** & Docker Compose for local development
 - **GitHub Actions** for CI/CD
 - **Nginx** as reverse proxy
-- **MailHog** for email testing
+- **MailHog** for email testing (local)
+- **Resend** for email delivery (staging/production)
 
 ## Prerequisites
 
@@ -39,7 +40,7 @@ A modern Getting Things Done (GTD) application with multi-platform support (Web,
 - Git
 - Make (optional, for convenience commands)
 
-## Installation
+## Quick Start (Local Development)
 
 ### 1. Clone the Repository
 
@@ -48,9 +49,61 @@ git clone https://github.com/l3toII/todoDemo.git
 cd todoDemo
 ```
 
-### 2. Configure Environment Variables
+### 2. Start All Services with Docker
 
-#### API Configuration
+The easiest way to run the entire application locally is using Docker Compose:
+
+```bash
+# Build and start all containers (API, Web, Database, MailHog)
+docker compose -f infra/docker-compose.yml up -d --build
+```
+
+This starts:
+| Service | URL | Description |
+|---------|-----|-------------|
+| **API** | http://localhost:8000 | Symfony backend |
+| **Web** | http://localhost:3000 | React frontend |
+| **MariaDB** | localhost:3306 | Database |
+| **MailHog** | http://localhost:8025 | Email testing UI |
+
+### 3. Install Dependencies (first time only)
+
+```bash
+# API dependencies
+docker compose -f infra/docker-compose.yml exec api composer install
+
+# Web dependencies
+docker compose -f infra/docker-compose.yml exec web npm install
+```
+
+### 4. Run Database Migrations
+
+```bash
+docker compose -f infra/docker-compose.yml exec api php bin/console doctrine:migrations:migrate --no-interaction
+```
+
+### 5. Verify Installation
+
+```bash
+# Check all services are running
+docker compose -f infra/docker-compose.yml ps
+
+# Test API health
+curl http://localhost:8000/api/health
+```
+
+Expected response:
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-11-28T12:00:00+00:00",
+  "environment": "dev"
+}
+```
+
+## Environment Configuration
+
+### API Configuration
 
 ```bash
 cd api
@@ -62,10 +115,10 @@ Edit `api/.env` and configure:
 - `DATABASE_URL`: Default should work for Docker setup
 - `JWT_PASSPHRASE`: Generate with `openssl rand -base64 32`
 
-#### Web Configuration
+### Web Configuration
 
 ```bash
-cd ../web
+cd web
 cp .env.example .env
 ```
 
@@ -73,9 +126,7 @@ Edit `web/.env` and configure:
 - `VITE_API_URL`: Default `http://localhost:8000/api/v1` for local development
 - `VITE_APPLE_CLIENT_ID`: Your Apple Sign-In client ID (if using Apple Sign-In)
 
-### 3. Generate JWT Keys
-
-The application uses RSA keys for JWT token signing. Generate them with:
+### Generate JWT Keys
 
 ```bash
 cd api
@@ -89,87 +140,29 @@ openssl genpkey -algorithm RSA -out config/jwt/private.pem -pkeyopt rsa_keygen_b
 # Generate public key
 openssl rsa -pubout -in config/jwt/private.pem -out config/jwt/public.pem
 
-# Set proper permissions (important for security)
+# Set proper permissions
 chmod 600 config/jwt/private.pem
 chmod 644 config/jwt/public.pem
 ```
 
-### 4. Build and Start Docker Containers
+## Docker Commands Reference
 
-From the project root:
-
-```bash
-docker compose -f infra/docker-compose.yml up -d --build
-```
-
-This will start:
-- **API** on http://localhost:8000
-- **Web** on http://localhost:3000
-- **MariaDB** on localhost:3306
-- **MailHog UI** on http://localhost:8025
-
-### 5. Install Dependencies
-
-#### API Dependencies
-
-```bash
-docker compose -f infra/docker-compose.yml exec api composer install
-```
-
-#### Web Dependencies
-
-```bash
-docker compose -f infra/docker-compose.yml exec web npm install
-```
-
-### 6. Run Database Migrations
-
-```bash
-docker compose -f infra/docker-compose.yml exec api php bin/console doctrine:migrations:migrate --no-interaction
-```
-
-### 7. Verify Installation
-
-Check that all services are healthy:
-
-```bash
-docker compose -f infra/docker-compose.yml ps
-```
-
-Test the API health endpoint:
-
-```bash
-curl http://localhost:8000/api/health
-```
-
-Expected response:
-```json
-{
-  "status": "healthy",
-  "timestamp": "2025-11-28T12:00:00+00:00",
-  "environment": "dev"
-}
-```
-
-## Usage
-
-### Starting the Application
+### Starting and Stopping
 
 ```bash
 # Start all services
 docker compose -f infra/docker-compose.yml up -d
 
-# View logs
+# Start with rebuild
+docker compose -f infra/docker-compose.yml up -d --build
+
+# View logs (all services)
 docker compose -f infra/docker-compose.yml logs -f
 
-# View specific service logs
+# View logs (specific service)
 docker compose -f infra/docker-compose.yml logs -f api
 docker compose -f infra/docker-compose.yml logs -f web
-```
 
-### Stopping the Application
-
-```bash
 # Stop all services
 docker compose -f infra/docker-compose.yml down
 
@@ -179,58 +172,27 @@ docker compose -f infra/docker-compose.yml down -v
 
 ### Running Tests
 
-#### API Tests
-
 ```bash
-# Run all tests
+# API tests
 docker compose -f infra/docker-compose.yml exec api composer test
-
-# Run with coverage
 docker compose -f infra/docker-compose.yml exec api vendor/bin/phpunit --coverage-html coverage
 
-# Run specific test
-docker compose -f infra/docker-compose.yml exec api vendor/bin/phpunit tests/Unit/Entity/UserTest.php
-```
-
-#### Web Tests
-
-```bash
-# Run all tests
+# Web tests
 docker compose -f infra/docker-compose.yml exec web npm test
-
-# Run with coverage
 docker compose -f infra/docker-compose.yml exec web npm run test:coverage
-
-# Run in watch mode
-docker compose -f infra/docker-compose.yml exec web npm run test:watch
 ```
 
 ### Code Quality
 
-#### API Code Quality
-
 ```bash
-# PHP-CS-Fixer (code style)
+# API
 docker compose -f infra/docker-compose.yml exec api vendor/bin/php-cs-fixer fix --dry-run
-
-# PHPStan (static analysis)
 docker compose -f infra/docker-compose.yml exec api vendor/bin/phpstan analyse src
-
-# Security audit
 docker compose -f infra/docker-compose.yml exec api composer audit
-```
 
-#### Web Code Quality
-
-```bash
-# ESLint
+# Web
 docker compose -f infra/docker-compose.yml exec web npm run lint
-
-# Prettier check
 docker compose -f infra/docker-compose.yml exec web npm run format:check
-
-# Fix formatting
-docker compose -f infra/docker-compose.yml exec web npm run format
 ```
 
 ### Database Management
@@ -251,6 +213,45 @@ docker compose -f infra/docker-compose.yml exec api php bin/console doctrine:mig
 # Access database CLI
 docker compose -f infra/docker-compose.yml exec db mysql -u gtd -pgtd_dev gtd_app
 ```
+
+## Deployment
+
+### Environments
+
+| Environment | API URL | Web URL |
+|-------------|---------|---------|
+| **Production** | https://gtd-api-prod.onrender.com | https://gtd-web-prod.onrender.com |
+| **Staging** | https://gtd-api-staging.onrender.com | https://gtd-web-staging.onrender.com |
+
+### Staging Environment Limitations
+
+> **Important:** The staging environment uses [Resend](https://resend.com) for email delivery. Due to Resend's free tier restrictions and the absence of a custom domain configuration, **emails in staging can only be sent to the repository owner's email address**.
+>
+> This means:
+> - Registration emails, password reset emails, and verification emails will only work for the owner's email
+> - Other email addresses will fail silently or return an error
+> - For full email testing, use the **local development environment** with MailHog
+>
+> To enable emails for all addresses in staging, a custom sending domain must be configured in Resend.
+
+### CI/CD Pipeline
+
+- **Staging**: Automatically deploys from `001-gtd-todo-app` branch
+- **Production**: Deploys from `main` branch or version tags (e.g., `v1.0.0`)
+
+Every push triggers:
+- **API**: PHP lint, PHPStan, PHPUnit, security audit
+- **Web**: ESLint, Prettier, Jest, build check, security audit
+
+### Required GitHub Secrets
+
+For Render deployment:
+- `SONAR_TOKEN`: SonarCloud authentication token
+- `RENDER_API_KEY`: Render API key for deployments
+- `RENDER_SERVICE_ID_API_PROD`: Render service ID for production API
+- `RENDER_SERVICE_ID_API_STAGING`: Render service ID for staging API
+- `RENDER_SERVICE_ID_WEB_PROD`: Render service ID for production Web
+- `RENDER_SERVICE_ID_WEB_STAGING`: Render service ID for staging Web
 
 ## Project Structure
 
@@ -321,12 +322,18 @@ All API endpoints are prefixed with `/api/v1`:
 
 ## Email Testing
 
-MailHog captures all emails sent by the application in development:
+### Local Development (MailHog)
+
+MailHog captures all emails sent by the application:
 
 1. Open http://localhost:8025 in your browser
 2. Register a new user in the app
 3. Check MailHog for the verification email
 4. Click the verification link or copy the token
+
+### Staging/Production (Resend)
+
+Emails are sent via Resend. See [Staging Environment Limitations](#staging-environment-limitations) for important restrictions.
 
 ## Apple Sign-In Configuration
 
@@ -379,7 +386,7 @@ docker compose -f infra/docker-compose.yml logs db
 # Verify JWT keys exist
 ls -la api/config/jwt/
 
-# Regenerate keys if needed (see Installation step 3)
+# Regenerate keys if needed (see Environment Configuration)
 
 # Check JWT_PASSPHRASE in api/.env matches
 ```
@@ -398,9 +405,6 @@ docker compose -f infra/docker-compose.yml exec api chown -R www-data:www-data v
 ### Tests failing
 
 ```bash
-# Make sure test database is configured
-# Check api/.env.test or api/phpunit.xml
-
 # Clear test cache
 docker compose -f infra/docker-compose.yml exec api php bin/console cache:clear --env=test
 
@@ -415,7 +419,7 @@ docker compose -f infra/docker-compose.yml exec api php bin/console doctrine:mig
 1. Create a feature branch: `git checkout -b feat/your-feature`
 2. Make your changes
 3. Run tests: `composer test` and `npm test`
-4. Run code quality checks (see Code Quality section)
+4. Run code quality checks
 5. Commit your changes following conventional commits
 6. Push and create a Pull Request
 
@@ -434,43 +438,6 @@ Examples:
 - `feat(auth): Add password reset functionality`
 - `fix(api): Resolve JWT token expiration issue`
 - `docs(readme): Update installation instructions`
-
-## Deployment URLs
-
-### Production
-- **Web App**: https://gtd-web-prod.onrender.com
-- **API**: https://gtd-api-prod.onrender.com
-- **Health Check**: https://gtd-api-prod.onrender.com/api/health
-
-### Staging
-- **Web App**: https://gtd-web-staging.onrender.com
-- **API**: https://gtd-api-staging.onrender.com
-- **Health Check**: https://gtd-api-staging.onrender.com/api/health
-
-## CI/CD
-
-### Continuous Integration
-
-Every push and pull request triggers:
-- **API**: PHP lint, PHPStan, PHPUnit, security audit
-- **Web**: ESLint, Prettier, Jest, build check, security audit
-- **Coverage**: Reports sent to Codecov
-- **SonarCloud**: Code quality and security analysis
-
-### Continuous Deployment (Render)
-
-- **Staging**: Automatically deploys from `001-gtd-todo-app` branch
-- **Production**: Deploys from `main` branch or version tags (e.g., `v1.0.0`)
-
-### Required GitHub Secrets
-
-For Render deployment, configure these secrets in your repository:
-- `SONAR_TOKEN`: SonarCloud authentication token
-- `RENDER_API_KEY`: Render API key for deployments
-- `RENDER_SERVICE_ID_API_PROD`: Render service ID for production API
-- `RENDER_SERVICE_ID_API_STAGING`: Render service ID for staging API
-- `RENDER_SERVICE_ID_WEB_PROD`: Render service ID for production Web
-- `RENDER_SERVICE_ID_WEB_STAGING`: Render service ID for staging Web
 
 ## Contributing
 
