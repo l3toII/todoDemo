@@ -194,6 +194,43 @@ class TaskController extends AbstractController
         $task = $result['task'];
         $data = json_decode($request->getContent(), true) ?? [];
 
+        // Validate and extract clarification data
+        $validationResult = $this->validateClarifyRequest($task, $data);
+        if ($validationResult instanceof JsonResponse) {
+            return $validationResult;
+        }
+
+        // Capture original status before clarification modifies the task
+        $originalStatus = $task->getStatus();
+
+        try {
+            $clarifiedTask = $this->taskService->clarify(
+                $task,
+                $validationResult['target_status'],
+                $validationResult['options']
+            );
+
+            return $this->json([
+                'message' => 'Task clarified successfully',
+                'task' => $clarifiedTask->toArray(),
+                'transition' => [
+                    'from' => $originalStatus,
+                    'to' => $clarifiedTask->getStatus(),
+                ],
+            ]);
+        } catch (\InvalidArgumentException $e) {
+            return $this->errorResponse($e->getMessage(), 'CLARIFICATION_FAILED', Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    /**
+     * Validate clarify request data.
+     *
+     * @param array<string, mixed> $data
+     * @return array{target_status: string, options: array<string, mixed>}|JsonResponse
+     */
+    private function validateClarifyRequest(Task $task, array $data): array|JsonResponse
+    {
         // Validate required field
         if (!isset($data['target_status']) || !is_string($data['target_status'])) {
             return $this->errorResponse('target_status is required', 'MISSING_TARGET_STATUS', Response::HTTP_BAD_REQUEST);
@@ -213,11 +250,7 @@ class TaskController extends AbstractController
         // Check if transition is allowed
         if (!$this->taskService->isValidTransition($task->getStatus(), $targetStatus)) {
             return $this->json([
-                'error' => sprintf(
-                    'Invalid status transition from "%s" to "%s"',
-                    $task->getStatus(),
-                    $targetStatus
-                ),
+                'error' => sprintf('Invalid status transition from "%s" to "%s"', $task->getStatus(), $targetStatus),
                 'code' => 'INVALID_TRANSITION',
                 'current_status' => $task->getStatus(),
                 'target_status' => $targetStatus,
@@ -225,7 +258,23 @@ class TaskController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        // Build options array
+        // Build and validate options
+        $optionsResult = $this->buildClarifyOptions($data);
+        if ($optionsResult instanceof JsonResponse) {
+            return $optionsResult;
+        }
+
+        return ['target_status' => $targetStatus, 'options' => $optionsResult];
+    }
+
+    /**
+     * Build clarify options from request data.
+     *
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>|JsonResponse
+     */
+    private function buildClarifyOptions(array $data): array|JsonResponse
+    {
         $options = [];
 
         if (isset($data['energy_level'])) {
@@ -241,11 +290,7 @@ class TaskController extends AbstractController
 
         if (isset($data['time_estimate'])) {
             if (!is_int($data['time_estimate']) || $data['time_estimate'] <= 0) {
-                return $this->errorResponse(
-                    'time_estimate must be a positive integer (minutes)',
-                    'INVALID_TIME_ESTIMATE',
-                    Response::HTTP_BAD_REQUEST
-                );
+                return $this->errorResponse('time_estimate must be a positive integer (minutes)', 'INVALID_TIME_ESTIMATE', Response::HTTP_BAD_REQUEST);
             }
             $options['time_estimate'] = $data['time_estimate'];
         }
@@ -255,11 +300,7 @@ class TaskController extends AbstractController
                 $dueDate = new \DateTimeImmutable($data['due_date']);
                 $options['due_date'] = $dueDate->format('Y-m-d');
             } catch (\Exception) {
-                return $this->errorResponse(
-                    'Invalid due_date format. Use Y-m-d.',
-                    'INVALID_DUE_DATE',
-                    Response::HTTP_BAD_REQUEST
-                );
+                return $this->errorResponse('Invalid due_date format. Use Y-m-d.', 'INVALID_DUE_DATE', Response::HTTP_BAD_REQUEST);
             }
         }
 
@@ -267,23 +308,7 @@ class TaskController extends AbstractController
             $options['notes'] = $data['notes'];
         }
 
-        // Capture original status before clarification modifies the task
-        $originalStatus = $task->getStatus();
-
-        try {
-            $clarifiedTask = $this->taskService->clarify($task, $targetStatus, $options);
-
-            return $this->json([
-                'message' => 'Task clarified successfully',
-                'task' => $clarifiedTask->toArray(),
-                'transition' => [
-                    'from' => $originalStatus,
-                    'to' => $clarifiedTask->getStatus(),
-                ],
-            ]);
-        } catch (\InvalidArgumentException $e) {
-            return $this->errorResponse($e->getMessage(), 'CLARIFICATION_FAILED', Response::HTTP_BAD_REQUEST);
-        }
+        return $options;
     }
 
     /**
