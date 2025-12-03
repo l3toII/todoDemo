@@ -11,7 +11,8 @@
       "Bash(php bin/phpunit:*)",
       "Bash(docker exec:*)",
       "Bash(gh api:*)",
-      "WebFetch(domain:sonarcloud.io)"
+      "WebFetch(domain:sonarcloud.io)",
+      "Bash(npm run test:coverage:*)"
     ],
     "deny": [],
     "ask": []
