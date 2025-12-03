@@ -77,6 +77,14 @@ const ClarifyPage = () => {
 
   // Empty inbox state (but not when there's an error - show error instead)
   if (!loading && inboxTasks.length === 0 && !error) {
+    const getCompletionMessage = () => {
+      if (clarifiedCount === 0) {
+        return 'Your inbox is empty. All tasks have been processed.';
+      }
+      const taskWord = clarifiedCount === 1 ? 'task' : 'tasks';
+      return `Great work! You've clarified ${clarifiedCount} ${taskWord}.`;
+    };
+
     return (
       <div className="max-w-4xl mx-auto py-12 px-4">
         <div className="text-center">
@@ -87,9 +95,7 @@ const ClarifyPage = () => {
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-2">Inbox Zero!</h2>
           <p className="text-gray-600 mb-6">
-            {clarifiedCount > 0
-              ? `Great work! You've clarified ${clarifiedCount} task${clarifiedCount > 1 ? 's' : ''}.`
-              : 'Your inbox is empty. All tasks have been processed.'}
+            {getCompletionMessage()}
           </p>
           <div className="space-x-4">
             <button

@@ -103,15 +103,12 @@ export const tasksAPI = {
   // Clarification helpers
   clarify: (id, clarificationData) => {
     if (!clarificationData.status) {
-      return Promise.reject({
-        response: {
-          data: {
-            message: 'Missing target status in clarification data',
-            code: 'MISSING_TARGET_STATUS'
-          },
-          status: 400
-        }
-      });
+      const error = new Error('Missing target status in clarification data');
+      error.response = {
+        data: { message: error.message, code: 'MISSING_TARGET_STATUS' },
+        status: 400
+      };
+      return Promise.reject(error);
     }
     return apiClient.patch(`/tasks/${id}/clarify`, {
       target_status: clarificationData.status,
@@ -124,15 +121,14 @@ export const tasksAPI = {
   },
   setContexts: (id, contextIds) => apiClient.put(`/tasks/${id}/contexts`, { context_ids: contextIds }),
   // Convert task to project (not yet implemented in backend)
-  convertToProject: (id, projectData) => Promise.reject({
-    response: {
-      data: {
-        message: 'Convert to project is not yet implemented',
-        code: 'NOT_IMPLEMENTED'
-      },
+  convertToProject: () => {
+    const error = new Error('Convert to project is not yet implemented');
+    error.response = {
+      data: { message: error.message, code: 'NOT_IMPLEMENTED' },
       status: 501
-    }
-  }),
+    };
+    return Promise.reject(error);
+  },
 };
 
 // Projects API endpoints

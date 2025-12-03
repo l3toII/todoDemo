@@ -298,10 +298,11 @@ const ClarifyTaskModal = ({ task, onClarify, onClose, onConvertToProject, isLoad
               // Project form
               <>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="project-title" className="block text-sm font-medium text-gray-700 mb-1">
                     Project Title
                   </label>
                   <input
+                    id="project-title"
                     type="text"
                     value={clarificationData.projectTitle}
                     onChange={(e) => updateData('projectTitle', e.target.value)}
@@ -310,10 +311,11 @@ const ClarifyTaskModal = ({ task, onClarify, onClose, onConvertToProject, isLoad
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="project-outcome" className="block text-sm font-medium text-gray-700 mb-1">
                     Outcome Description
                   </label>
                   <textarea
+                    id="project-outcome"
                     value={clarificationData.projectOutcome}
                     onChange={(e) => updateData('projectOutcome', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -326,10 +328,11 @@ const ClarifyTaskModal = ({ task, onClarify, onClose, onConvertToProject, isLoad
               // Task form
               <>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="task-notes" className="block text-sm font-medium text-gray-700 mb-1">
                     Notes (optional)
                   </label>
                   <textarea
+                    id="task-notes"
                     value={clarificationData.notes}
                     onChange={(e) => updateData('notes', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -338,10 +341,10 @@ const ClarifyTaskModal = ({ task, onClarify, onClose, onConvertToProject, isLoad
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                <fieldset>
+                  <legend className="block text-sm font-medium text-gray-700 mb-1">
                     Energy Level
-                  </label>
+                  </legend>
                   <div className="flex space-x-2">
                     {[
                       { value: ENERGY_LEVEL.LOW, label: 'Low', color: 'green' },
@@ -361,15 +364,16 @@ const ClarifyTaskModal = ({ task, onClarify, onClose, onConvertToProject, isLoad
                       </button>
                     ))}
                   </div>
-                </div>
+                </fieldset>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="time-estimate" className="block text-sm font-medium text-gray-700 mb-1">
                     Time Estimate (minutes)
                   </label>
                   <select
+                    id="time-estimate"
                     value={clarificationData.timeEstimate || ''}
-                    onChange={(e) => updateData('timeEstimate', e.target.value ? parseInt(e.target.value) : null)}
+                    onChange={(e) => updateData('timeEstimate', e.target.value ? Number.parseInt(e.target.value, 10) : null)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="">Select...</option>
@@ -383,10 +387,11 @@ const ClarifyTaskModal = ({ task, onClarify, onClose, onConvertToProject, isLoad
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="due-date" className="block text-sm font-medium text-gray-700 mb-1">
                     Due Date (optional)
                   </label>
                   <input
+                    id="due-date"
                     type="date"
                     value={clarificationData.dueDate || ''}
                     onChange={(e) => updateData('dueDate', e.target.value || null)}

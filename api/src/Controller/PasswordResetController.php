@@ -241,12 +241,11 @@ class PasswordResetController extends AbstractController
             return 'Password must be at least 8 characters long';
         }
 
-        if (!preg_match('/[A-Z]/', $password)) {
-            return 'Password must contain at least one uppercase letter';
-        }
-
-        if (!preg_match('/[0-9]/', $password)) {
-            return 'Password must contain at least one number';
+        // Must contain uppercase and number
+        if (!preg_match('/[A-Z]/', $password) || !preg_match('/\d/', $password)) {
+            return !preg_match('/[A-Z]/', $password)
+                ? 'Password must contain at least one uppercase letter'
+                : 'Password must contain at least one number';
         }
 
         return null;

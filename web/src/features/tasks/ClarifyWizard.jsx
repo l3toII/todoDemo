@@ -417,10 +417,11 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="wizard-notes" className="block text-sm font-medium text-gray-700 mb-1">
                   Notes
                 </label>
                 <textarea
+                  id="wizard-notes"
                   value={formData.notes}
                   onChange={(e) => updateForm('notes', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -431,10 +432,10 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
 
               {outcome === OUTCOMES.NEXT_ACTION && (
                 <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <fieldset>
+                    <legend className="block text-sm font-medium text-gray-700 mb-2">
                       Energy Level
-                    </label>
+                    </legend>
                     <div className="flex space-x-2">
                       {['low', 'medium', 'high'].map((level) => (
                         <button
@@ -450,15 +451,16 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
                         </button>
                       ))}
                     </div>
-                  </div>
+                  </fieldset>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="wizard-time-estimate" className="block text-sm font-medium text-gray-700 mb-1">
                       Time Estimate
                     </label>
                     <select
+                      id="wizard-time-estimate"
                       value={formData.timeEstimate || ''}
-                      onChange={(e) => updateForm('timeEstimate', e.target.value ? parseInt(e.target.value) : null)}
+                      onChange={(e) => updateForm('timeEstimate', e.target.value ? Number.parseInt(e.target.value, 10) : null)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="">Select...</option>
@@ -471,10 +473,11 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="wizard-due-date" className="block text-sm font-medium text-gray-700 mb-1">
                       Due Date (optional)
                     </label>
                     <input
+                      id="wizard-due-date"
                       type="date"
                       value={formData.dueDate}
                       onChange={(e) => updateForm('dueDate', e.target.value)}
@@ -486,10 +489,11 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
 
               {outcome === OUTCOMES.WAITING_FOR && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="wizard-waiting-for" className="block text-sm font-medium text-gray-700 mb-1">
                     Waiting for whom?
                   </label>
                   <input
+                    id="wizard-waiting-for"
                     type="text"
                     value={formData.waitingForPerson}
                     onChange={(e) => updateForm('waitingForPerson', e.target.value)}
@@ -533,10 +537,11 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="wizard-project-title" className="block text-sm font-medium text-gray-700 mb-1">
                   Project Title
                 </label>
                 <input
+                  id="wizard-project-title"
                   type="text"
                   value={formData.projectTitle}
                   onChange={(e) => updateForm('projectTitle', e.target.value)}
@@ -546,10 +551,11 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="wizard-project-outcome" className="block text-sm font-medium text-gray-700 mb-1">
                   Success Looks Like...
                 </label>
                 <textarea
+                  id="wizard-project-outcome"
                   value={formData.projectOutcome}
                   onChange={(e) => updateForm('projectOutcome', e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"

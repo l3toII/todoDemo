@@ -263,7 +263,7 @@ class RegistrationController extends AbstractController
             $this->emailService->sendVerificationEmail($email, $verificationUrl);
         } catch (\Exception $e) {
             // Log error but don't reveal to user / don't fail the operation
-            error_log(sprintf('Failed to send verification email to %s: %s', $email, $e->getMessage()));
+            error_log(sprintf('Failed to send verification email: %s', $e->getMessage()));
         }
     }
 
@@ -278,12 +278,11 @@ class RegistrationController extends AbstractController
             return 'Password must be at least 8 characters long';
         }
 
-        if (!preg_match('/[A-Z]/', $password)) {
-            return 'Password must contain at least one uppercase letter';
-        }
-
-        if (!preg_match('/[0-9]/', $password)) {
-            return 'Password must contain at least one number';
+        // Must contain uppercase and number
+        if (!preg_match('/[A-Z]/', $password) || !preg_match('/\d/', $password)) {
+            return !preg_match('/[A-Z]/', $password)
+                ? 'Password must contain at least one uppercase letter'
+                : 'Password must contain at least one number';
         }
 
         return null;
