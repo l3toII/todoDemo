@@ -419,3 +419,19 @@ export const projectsAPI = {
 ## CI Fixes (if any)
 
 None - all tests and build pass. ESLint config is a pre-existing infrastructure issue unrelated to this phase.
+
+---
+
+## Iteration - 2025-12-03
+
+### Requested Changes
+- Bug fix: Projects link was missing from Navigation menu
+
+### Files Modified
+| File | Change |
+|------|--------|
+| web/src/components/Navigation.jsx | Added Projects link between Contexts and Next Actions |
+| web/src/tests/unit/components/Navigation.test.jsx | Added test for Projects link |
+
+### Commits
+- `0ffb187` fix(nav): add Projects link to navigation menu
