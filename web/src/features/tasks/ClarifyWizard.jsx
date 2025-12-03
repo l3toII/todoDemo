@@ -579,7 +579,7 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
     <div className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-auto overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-semibold text-white">Clarify Task</h2>
           {onSkip && (
             <button
@@ -590,6 +590,9 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
             </button>
           )}
         </div>
+        <p className="text-white font-medium text-base truncate pr-2" title={task?.title}>
+          {task?.title}
+        </p>
       </div>
 
       {/* Content */}
