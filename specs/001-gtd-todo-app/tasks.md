@@ -12,8 +12,8 @@ Total tasks: 203
 - P1 User Account Management: 56 tasks (52 complete, 4 remaining) - 93% complete
 - P2 Capture Ideas and Tasks: 14 tasks (14 complete) - 100% complete
 - P3 Clarify and Process: 12 tasks ✅ COMPLETE
-- P4 Organize with Contexts: 19 tasks (14 complete)
-- P5 Project Management: 14 tasks
+- P4 Organize with Contexts: 19 tasks ✅ COMPLETE
+- P5 Project Management: 14 tasks ✅ COMPLETE
 - P6 Weekly Review: 12 tasks
 - P7 Calendar and Deadlines: 12 tasks
 - Cross-Cutting (Sync & Offline): 5 tasks
@@ -285,19 +285,21 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 - [X] [P4-013b] [Story-4] Add Contexts link to Navigation component `web/src/components/Navigation.jsx`
 
-### Phase 4.4: Frontend - GTD List Views (FR-016)
+### Phase 4.4: Frontend - GTD List Views (FR-016) ✅
 
-- [ ] [P4-014] [Story-4] Create NextActionsPage with filtered task list `web/src/pages/NextActionsPage.tsx`
-- [ ] [P4-015] [Story-4] Create WaitingForPage with delegated/blocked tasks `web/src/pages/WaitingForPage.tsx`
-- [ ] [P4-016] [Story-4] Create SomedayMaybePage with deferred tasks `web/src/pages/SomedayMaybePage.tsx`
-- [ ] [P4-017] [Story-4] Create ReferencePage for non-actionable items `web/src/pages/ReferencePage.tsx`
-- [ ] [P4-018] [Story-4] Write E2E tests for context filtering and GTD lists `web/tests/e2e/contexts.spec.ts`
+- [X] [P4-014] [Story-4] Create NextActionsPage with filtered task list `web/src/pages/NextActionsPage.jsx`
+- [X] [P4-015] [Story-4] Create WaitingForPage with delegated/blocked tasks `web/src/pages/WaitingForPage.jsx`
+- [X] [P4-016] [Story-4] Create SomedayMaybePage with deferred tasks `web/src/pages/SomedayMaybePage.jsx`
+- [X] [P4-017] [Story-4] Create ReferencePage for non-actionable items `web/src/pages/ReferencePage.jsx`
+- [X] [P4-018] [Story-4] Write E2E tests for context filtering and GTD lists `web/src/tests/e2e/gtd-lists.spec.jsx`
 
 ---
 
 ## P5: Project Management (FR-017 to FR-019)
 
 **User Story**: As a user, I want to manage projects with their next actions so that I can keep an overview while focusing on the next step.
+
+**Status**: ✅ COMPLETE (14/14 tasks)
 
 ### Phase 5.1: Backend - Project Entity ✅
 
@@ -306,21 +308,21 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 - [X] [P5-003] [Story-5] Create Project repository with computed properties `api/src/Repository/ProjectRepository.php`
 - [X] [P5-004] [Story-5] Create database migration for projects table `api/migrations/Version010AddProjectFields.php`
 
-### Phase 5.2: Backend - Project Endpoints
+### Phase 5.2: Backend - Project Endpoints ✅
 
-- [ ] [P5-005] [Story-5] Create ProjectService with next action logic `api/src/Service/ProjectService.php`
-- [ ] [P5-006] [Story-5] Write unit tests for next action computation `api/tests/Unit/Service/ProjectServiceTest.php`
-- [ ] [P5-007] [Story-5] Create ProjectController with CRUD endpoints `api/src/Controller/ProjectController.php`
-- [ ] [P5-008] [Story-5] Write functional tests for project endpoints `api/tests/Functional/Project/ProjectTest.php`
+- [X] [P5-005] [Story-5] Create ProjectService with next action logic `api/src/Service/ProjectService.php`
+- [X] [P5-006] [Story-5] Write unit tests for next action computation `api/tests/Unit/Service/ProjectServiceTest.php`
+- [X] [P5-007] [Story-5] Create ProjectController with CRUD endpoints `api/src/Controller/ProjectController.php`
+- [X] [P5-008] [Story-5] Write functional tests for project endpoints `api/tests/Functional/Project/ProjectTest.php`
 
-### Phase 5.3: Frontend - Projects Module
+### Phase 5.3: Frontend - Projects Module ✅
 
-- [ ] [P5-009] [Story-5] Create projects Redux slice `web/src/features/projects/projectsSlice.ts`
-- [ ] [P5-010] [Story-5] Replace ProjectsPage placeholder with full implementation `web/src/pages/ProjectsPage.tsx`
-- [ ] [P5-011] [Story-5] Write unit tests for ProjectsPage `web/tests/unit/pages/ProjectsPage.test.tsx`
-- [ ] [P5-012] [Story-5] Create ProjectDetailPage with task list `web/src/pages/ProjectDetailPage.tsx`
-- [ ] [P5-013] [Story-5] Create ProjectCard component `web/src/components/ProjectCard.tsx`
-- [ ] [P5-014] [Story-5] Write E2E tests for project management `web/tests/e2e/projects.spec.ts`
+- [X] [P5-009] [Story-5] Create projects Redux slice `web/src/features/projects/projectsSlice.js`
+- [X] [P5-010] [Story-5] Replace ProjectsPage placeholder with full implementation `web/src/pages/ProjectsPage.jsx`
+- [X] [P5-011] [Story-5] Write unit tests for ProjectsPage `web/src/tests/unit/pages/ProjectsPage.test.jsx`
+- [X] [P5-012] [Story-5] Create ProjectDetailPage with task list `web/src/pages/ProjectDetailPage.jsx`
+- [X] [P5-013] [Story-5] Create ProjectCard component `web/src/components/ProjectCard.jsx`
+- [X] [P5-014] [Story-5] Write E2E tests for project management `web/src/tests/e2e/projects.spec.jsx`
 
 ---
 
