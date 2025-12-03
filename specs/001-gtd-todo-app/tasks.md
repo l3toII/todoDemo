@@ -12,7 +12,7 @@ Total tasks: 203
 - P1 User Account Management: 56 tasks (52 complete, 4 remaining) - 93% complete
 - P2 Capture Ideas and Tasks: 14 tasks (14 complete) - 100% complete
 - P3 Clarify and Process: 12 tasks ✅ COMPLETE
-- P4 Organize with Contexts: 18 tasks (8 complete)
+- P4 Organize with Contexts: 19 tasks (14 complete)
 - P5 Project Management: 14 tasks
 - P6 Weekly Review: 12 tasks
 - P7 Calendar and Deadlines: 12 tasks
@@ -275,11 +275,15 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 ### Phase 4.3: Frontend - Context Module
 
-- [ ] [P4-009] [Story-4] Create contexts Redux slice `web/src/features/contexts/contextsSlice.ts`
-- [ ] [P4-010] [Story-4] Replace ContextsPage placeholder with full implementation `web/src/pages/ContextsPage.tsx`
-- [ ] [P4-011] [Story-4] Write unit tests for ContextsPage `web/tests/unit/pages/ContextsPage.test.tsx`
-- [ ] [P4-012] [Story-4] Create ContextFilterSidebar component `web/src/components/ContextFilterSidebar.tsx`
-- [ ] [P4-013] [Story-4] Write unit tests for ContextFilterSidebar `web/tests/unit/components/ContextFilterSidebar.test.tsx`
+- [X] [P4-009] [Story-4] Create contexts Redux slice `web/src/features/contexts/contextsSlice.js`
+- [X] [P4-010] [Story-4] Replace ContextsPage placeholder with full implementation `web/src/pages/ContextsPage.jsx`
+- [X] [P4-011] [Story-4] Write unit tests for ContextsPage `web/src/tests/unit/pages/ContextsPage.test.jsx`
+- [X] [P4-012] [Story-4] Create ContextFilterSidebar component `web/src/components/ContextFilterSidebar.jsx`
+- [X] [P4-013] [Story-4] Write unit tests for ContextFilterSidebar `web/src/tests/unit/components/ContextFilterSidebar.test.jsx`
+
+### Phase 4.3 Iteration Tasks (added during testing)
+
+- [X] [P4-013b] [Story-4] Add Contexts link to Navigation component `web/src/components/Navigation.jsx`
 
 ### Phase 4.4: Frontend - GTD List Views (FR-016)
 
