@@ -10,6 +10,7 @@ import ContextsPage from './pages/ContextsPage';
 import NextActionsPage from './pages/NextActionsPage';
 import WaitingForPage from './pages/WaitingForPage';
 import SomedayMaybePage from './pages/SomedayMaybePage';
+import ReferencePage from './pages/ReferencePage';
 import AccountSettingsPage from './pages/AccountSettingsPage';
 import AccountDeletionPage from './pages/AccountDeletionPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -91,6 +92,16 @@ function App() {
             <ProtectedRoute>
               <AuthenticatedLayout>
                 <SomedayMaybePage />
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reference"
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
+                <ReferencePage />
               </AuthenticatedLayout>
             </ProtectedRoute>
           }
