@@ -8,6 +8,7 @@ import InboxPage from './pages/InboxPage';
 import ClarifyPage from './pages/ClarifyPage';
 import ContextsPage from './pages/ContextsPage';
 import NextActionsPage from './pages/NextActionsPage';
+import WaitingForPage from './pages/WaitingForPage';
 import AccountSettingsPage from './pages/AccountSettingsPage';
 import AccountDeletionPage from './pages/AccountDeletionPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -69,6 +70,16 @@ function App() {
             <ProtectedRoute>
               <AuthenticatedLayout>
                 <NextActionsPage />
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/waiting-for"
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
+                <WaitingForPage />
               </AuthenticatedLayout>
             </ProtectedRoute>
           }
