@@ -113,9 +113,14 @@ class PasswordResetController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
+        // Return masked email for UX (e.g., "j***@example.com")
+        // This prevents full email exposure while still helping users confirm the account
+        $email = $user->getEmail();
+        $maskedEmail = $this->maskEmail($email);
+
         return $this->json([
             'message' => 'Token is valid',
-            'email' => $user->getEmail(), // Useful for the reset form
+            'email_hint' => $maskedEmail,
         ]);
     }
 
@@ -138,9 +143,10 @@ class PasswordResetController extends AbstractController
         }
 
         // Validate password strength
-        if (strlen($data['password']) < 8) {
+        $passwordError = $this->validatePasswordStrength($data['password']);
+        if ($passwordError !== null) {
             return $this->json([
-                'error' => 'Password must be at least 8 characters long',
+                'error' => $passwordError,
                 'code' => 'WEAK_PASSWORD',
             ], Response::HTTP_BAD_REQUEST);
         }
@@ -189,5 +195,59 @@ class PasswordResetController extends AbstractController
         return $this->json([
             'message' => 'Password reset successfully. You can now log in with your new password.',
         ]);
+    }
+
+    /**
+     * Mask an email address for display (e.g., "john@example.com" -> "j***@e***.com")
+     */
+    private function maskEmail(string $email): string
+    {
+        $parts = explode('@', $email);
+        if (count($parts) !== 2) {
+            return '***@***.***';
+        }
+
+        [$local, $domain] = $parts;
+
+        // Mask local part: show first char, mask rest
+        $maskedLocal = strlen($local) > 1
+            ? $local[0] . str_repeat('*', min(3, strlen($local) - 1))
+            : '*';
+
+        // Mask domain: show first char of domain name, mask rest, keep TLD
+        $domainParts = explode('.', $domain);
+        if (count($domainParts) >= 2) {
+            $domainName = $domainParts[0];
+            $tld = implode('.', array_slice($domainParts, 1));
+            $maskedDomain = strlen($domainName) > 1
+                ? $domainName[0] . str_repeat('*', min(3, strlen($domainName) - 1))
+                : '*';
+            $maskedDomainFull = $maskedDomain . '.' . $tld;
+        } else {
+            $maskedDomainFull = str_repeat('*', 3) . '.***';
+        }
+
+        return $maskedLocal . '@' . $maskedDomainFull;
+    }
+
+    /**
+     * Validate password strength requirements.
+     *
+     * @return string|null Error message if validation fails, null if valid
+     */
+    private function validatePasswordStrength(string $password): ?string
+    {
+        if (strlen($password) < 8) {
+            return 'Password must be at least 8 characters long';
+        }
+
+        // Must contain uppercase and number
+        if (!preg_match('/[A-Z]/', $password) || !preg_match('/\d/', $password)) {
+            return !preg_match('/[A-Z]/', $password)
+                ? 'Password must contain at least one uppercase letter'
+                : 'Password must contain at least one number';
+        }
+
+        return null;
     }
 }

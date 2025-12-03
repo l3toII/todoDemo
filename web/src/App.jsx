@@ -5,6 +5,7 @@ import VerifyEmailPage from './pages/VerifyEmailPage';
 import PasswordResetRequestPage from './pages/PasswordResetRequestPage';
 import PasswordResetConfirmPage from './pages/PasswordResetConfirmPage';
 import InboxPage from './pages/InboxPage';
+import ClarifyPage from './pages/ClarifyPage';
 import AccountSettingsPage from './pages/AccountSettingsPage';
 import AccountDeletionPage from './pages/AccountDeletionPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -36,6 +37,16 @@ function App() {
             <ProtectedRoute>
               <AuthenticatedLayout>
                 <InboxPage />
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/clarify"
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
+                <ClarifyPage />
               </AuthenticatedLayout>
             </ProtectedRoute>
           }

@@ -88,36 +88,7 @@ class AuthController extends AbstractController
         $user->updateLastLogin();
         $this->userRepository->save($user);
 
-        // Generate JWT access token
-        $accessToken = $this->jwtManager->create($user);
-
-        // Generate and store refresh token
-        $refreshTokenPlain = RefreshToken::generateToken();
-        $refreshTokenHash = RefreshToken::hashToken($refreshTokenPlain);
-
-        $expiresAt = (new \DateTimeImmutable())->modify(sprintf('+%d days', self::REFRESH_TOKEN_TTL_DAYS));
-        $refreshToken = new RefreshToken($user, $refreshTokenHash, $expiresAt);
-
-        // Optional: Store device info
-        $userAgent = $request->headers->get('User-Agent');
-        if ($userAgent) {
-            $refreshToken->setDeviceInfo(substr($userAgent, 0, 255));
-        }
-
-        $this->refreshTokenRepository->save($refreshToken);
-
-        return $this->json([
-            'access_token' => $accessToken,
-            'refresh_token' => $refreshTokenPlain,
-            'token_type' => 'Bearer',
-            'expires_in' => self::ACCESS_TOKEN_TTL_SECONDS,
-            'user' => [
-                'id' => (string) $user->getId(),
-                'email' => $user->getEmail(),
-                'timezone' => $user->getTimezone(),
-                'notification_preferences' => $user->getNotificationPreferences(),
-            ],
-        ]);
+        return $this->createAuthResponse($user, $request);
     }
 
     /**
@@ -344,6 +315,14 @@ class AuthController extends AbstractController
         $user->updateLastLogin();
         $this->userRepository->save($user);
 
+        return $this->createAuthResponse($user, $request);
+    }
+
+    /**
+     * Create authentication response with access and refresh tokens.
+     */
+    private function createAuthResponse(User $user, Request $request): JsonResponse
+    {
         // Generate JWT access token
         $accessToken = $this->jwtManager->create($user);
 
@@ -367,12 +346,22 @@ class AuthController extends AbstractController
             'refresh_token' => $refreshTokenPlain,
             'token_type' => 'Bearer',
             'expires_in' => self::ACCESS_TOKEN_TTL_SECONDS,
-            'user' => [
-                'id' => (string) $user->getId(),
-                'email' => $user->getEmail(),
-                'timezone' => $user->getTimezone(),
-                'notification_preferences' => $user->getNotificationPreferences(),
-            ],
+            'user' => $this->userToArray($user),
         ]);
+    }
+
+    /**
+     * Convert user entity to array for API response.
+     *
+     * @return array<string, mixed>
+     */
+    private function userToArray(User $user): array
+    {
+        return [
+            'id' => (string) $user->getId(),
+            'email' => $user->getEmail(),
+            'timezone' => $user->getTimezone(),
+            'notification_preferences' => $user->getNotificationPreferences(),
+        ];
     }
 }
