@@ -8,6 +8,7 @@ import InboxPage from './pages/InboxPage';
 import ClarifyPage from './pages/ClarifyPage';
 import ContextsPage from './pages/ContextsPage';
 import ProjectsPage from './pages/ProjectsPage';
+import ProjectDetailPage from './pages/ProjectDetailPage';
 import NextActionsPage from './pages/NextActionsPage';
 import WaitingForPage from './pages/WaitingForPage';
 import SomedayMaybePage from './pages/SomedayMaybePage';
@@ -73,6 +74,16 @@ function App() {
             <ProtectedRoute>
               <AuthenticatedLayout>
                 <ProjectsPage />
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects/:id"
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
+                <ProjectDetailPage />
               </AuthenticatedLayout>
             </ProtectedRoute>
           }
