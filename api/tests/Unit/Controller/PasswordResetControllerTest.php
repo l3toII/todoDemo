@@ -243,7 +243,10 @@ class PasswordResetControllerTest extends TestCase
 
         $data = json_decode($response->getContent(), true);
         $this->assertEquals('Token is valid', $data['message']);
-        $this->assertEquals('user@example.com', $data['email']);
+        // Email is now masked for security (e.g., "u***@e***.com")
+        $this->assertArrayHasKey('email_hint', $data);
+        $this->assertStringContainsString('@', $data['email_hint']);
+        $this->assertStringContainsString('*', $data['email_hint']);
     }
 
     // =========================================================================

@@ -52,10 +52,11 @@ class RegistrationController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        // Validate password strength (min 8 characters)
-        if (strlen($data['password']) < 8) {
+        // Validate password strength
+        $passwordError = $this->validatePasswordStrength($data['password']);
+        if ($passwordError !== null) {
             return $this->json([
-                'error' => 'Password must be at least 8 characters long',
+                'error' => $passwordError,
                 'code' => 'WEAK_PASSWORD',
             ], Response::HTTP_BAD_REQUEST);
         }
@@ -113,19 +114,7 @@ class RegistrationController extends AbstractController
             $this->userRepository->save($user);
 
             // Send verification email
-            try {
-                $verificationUrl = sprintf(
-                    '%s/verify-email?token=%s',
-                    $_ENV['WEB_URL'] ?? 'http://localhost:3000',
-                    $verificationToken
-                );
-
-                $this->emailService->sendVerificationEmail($user->getEmail(), $verificationUrl);
-            } catch (\Exception $e) {
-                // Log error but don't fail registration
-                // User can request resend if email fails
-                error_log(sprintf('Failed to send verification email to %s: %s', $user->getEmail(), $e->getMessage()));
-            }
+            $this->sendVerificationEmailSafely($user->getEmail(), $verificationToken);
 
             return $this->json([
                 'message' => 'Registration successful. Please check your email to verify your account.',
@@ -252,21 +241,50 @@ class RegistrationController extends AbstractController
         $this->userRepository->save($user);
 
         // Send verification email
-        try {
-            $verificationUrl = sprintf(
-                '%s/verify-email?token=%s',
-                $_ENV['WEB_URL'] ?? 'http://localhost:3000',
-                $verificationToken
-            );
-
-            $this->emailService->sendVerificationEmail($user->getEmail(), $verificationUrl);
-        } catch (\Exception $e) {
-            // Log error but don't reveal to user
-            error_log(sprintf('Failed to resend verification email to %s: %s', $user->getEmail(), $e->getMessage()));
-        }
+        $this->sendVerificationEmailSafely($user->getEmail(), $verificationToken);
 
         return $this->json([
             'message' => 'If an account exists with this email, a verification email has been sent.',
         ]);
+    }
+
+    /**
+     * Send verification email safely, logging errors without throwing.
+     */
+    private function sendVerificationEmailSafely(string $email, string $token): void
+    {
+        try {
+            $verificationUrl = sprintf(
+                '%s/verify-email?token=%s',
+                $_ENV['WEB_URL'] ?? 'http://localhost:3000',
+                $token
+            );
+
+            $this->emailService->sendVerificationEmail($email, $verificationUrl);
+        } catch (\Exception $e) {
+            // Log error but don't reveal to user / don't fail the operation
+            error_log(sprintf('Failed to send verification email: %s', $e->getMessage()));
+        }
+    }
+
+    /**
+     * Validate password strength requirements.
+     *
+     * @return string|null Error message if validation fails, null if valid
+     */
+    private function validatePasswordStrength(string $password): ?string
+    {
+        if (strlen($password) < 8) {
+            return 'Password must be at least 8 characters long';
+        }
+
+        // Must contain uppercase and number
+        if (!preg_match('/[A-Z]/', $password) || !preg_match('/\d/', $password)) {
+            return !preg_match('/[A-Z]/', $password)
+                ? 'Password must contain at least one uppercase letter'
+                : 'Password must contain at least one number';
+        }
+
+        return null;
     }
 }

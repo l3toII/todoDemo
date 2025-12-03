@@ -25,7 +25,7 @@ A GTD (Getting Things Done) productivity application with web and iOS clients. T
 
 **Testing**:
 - Backend: PHPUnit, Symfony Test Framework
-- Frontend: Jest, React Testing Library, Cypress (E2E)
+- Frontend: Vitest, React Testing Library (unit + E2E)
 - iOS: XCTest, XCUITest
 
 **Target Platform**:
