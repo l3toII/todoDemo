@@ -236,5 +236,13 @@ describe('Navigation', () => {
       expect(contextsLink).toBeInTheDocument();
       expect(contextsLink).toHaveAttribute('href', '/contexts');
     });
+
+    it('renders Projects link', () => {
+      const store = createStore({ user: { email: 'test@example.com' } });
+      renderNavigation(store);
+      const projectsLink = screen.getByRole('link', { name: /projects/i });
+      expect(projectsLink).toBeInTheDocument();
+      expect(projectsLink).toHaveAttribute('href', '/projects');
+    });
   });
 });

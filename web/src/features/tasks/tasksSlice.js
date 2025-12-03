@@ -323,8 +323,8 @@ const tasksSlice = createSlice({
       })
       .addCase(convertToProject.fulfilled, (state, action) => {
         state.loading = false;
-        // Task is now converted, remove from inbox
-        const taskId = action.payload.original_task_id;
+        // Task is now linked to project, remove from inbox (it's now a next action)
+        const taskId = action.payload.taskId || action.payload.original_task_id;
         if (taskId) {
           removeTaskFromAllLists(state, taskId);
         }
