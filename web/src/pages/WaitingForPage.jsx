@@ -14,7 +14,9 @@ import ErrorAlert from '../components/ErrorAlert';
 import PageHeader from '../components/PageHeader';
 import LoadingState from '../components/LoadingState';
 import EmptyState from '../components/EmptyState';
-import TaskContextBadges from '../components/TaskContextBadges';
+import TaskList from '../components/TaskList';
+import TaskListItem from '../components/TaskListItem';
+import DueDateBadge from '../components/DueDateBadge';
 import useAutoCleanError from '../hooks/useAutoCleanError';
 
 const WaitingForPage = () => {
@@ -110,61 +112,23 @@ const WaitingForPage = () => {
         />
       )}
 
-      {tasksWithDuration.length > 0 && (
-        <div className="bg-white shadow rounded-lg divide-y divide-gray-200">
-          {tasksWithDuration.map((task) => (
-            <div key={task.id} className="p-4 hover:bg-gray-50 transition-colors">
-              <div className="flex items-start gap-3">
-                <button
-                  onClick={() => handleCompleteTask(task.id)}
-                  className="mt-0.5 flex-shrink-0 w-5 h-5 rounded-full border-2 border-gray-300 hover:border-green-500 hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
-                  aria-label={`Complete "${task.title}"`}
-                  title="Complete task"
-                >
-                  <span className="sr-only">Complete</span>
-                </button>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium text-gray-900 break-words">
-                      {task.title}
-                    </p>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getWaitingBadgeColor(task.waitingDays)}`}>
-                      {formatWaitingDuration(task.waitingDays)}
-                    </span>
-                  </div>
-                  {task.notes && (
-                    <p className="mt-1 text-sm text-gray-500 break-words line-clamp-2">
-                      {task.notes}
-                    </p>
-                  )}
-
-                  <div className="mt-2 flex flex-wrap items-center gap-2">
-                    {task.due_date && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
-                        <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        {new Date(task.due_date).toLocaleDateString()}
-                      </span>
-                    )}
-
-                    <TaskContextBadges contexts={task.contexts} />
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => handleMoveToNextActions(task.id)}
-                  className="flex-shrink-0 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-                  aria-label="Move to Next Actions"
-                >
-                  Move to Next Actions
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <TaskList>
+        {tasksWithDuration.map((task) => (
+          <TaskListItem
+            key={task.id}
+            task={task}
+            onComplete={handleCompleteTask}
+            onAction={handleMoveToNextActions}
+            actionLabel="Move to Next Actions"
+            titleBadge={
+              <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${getWaitingBadgeColor(task.waitingDays)}`}>
+                {formatWaitingDuration(task.waitingDays)}
+              </span>
+            }
+            metadataBadges={<DueDateBadge date={task.due_date} />}
+          />
+        ))}
+      </TaskList>
     </div>
   );
 };
