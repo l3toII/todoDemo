@@ -435,3 +435,20 @@ None - all tests and build pass. ESLint config is a pre-existing infrastructure 
 
 ### Commits
 - `0ffb187` fix(nav): add Projects link to navigation menu
+
+---
+
+## Iteration 2 - 2025-12-03
+
+### Requested Changes
+- Fix: Clarify to Project workflow was not implemented
+
+### Files Modified
+| File | Change |
+|------|--------|
+| web/src/services/api.js | Implemented convertToProject to create project and link task |
+| web/src/features/tasks/tasksSlice.js | Updated reducer to handle new response format |
+| web/src/tests/unit/services/api.test.js | Updated tests for new implementation |
+
+### Commits
+- `e050bb9` feat(clarify): implement convert to project workflow
