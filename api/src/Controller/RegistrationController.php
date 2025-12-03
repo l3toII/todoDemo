@@ -114,19 +114,7 @@ class RegistrationController extends AbstractController
             $this->userRepository->save($user);
 
             // Send verification email
-            try {
-                $verificationUrl = sprintf(
-                    '%s/verify-email?token=%s',
-                    $_ENV['WEB_URL'] ?? 'http://localhost:3000',
-                    $verificationToken
-                );
-
-                $this->emailService->sendVerificationEmail($user->getEmail(), $verificationUrl);
-            } catch (\Exception $e) {
-                // Log error but don't fail registration
-                // User can request resend if email fails
-                error_log(sprintf('Failed to send verification email to %s: %s', $user->getEmail(), $e->getMessage()));
-            }
+            $this->sendVerificationEmailSafely($user->getEmail(), $verificationToken);
 
             return $this->json([
                 'message' => 'Registration successful. Please check your email to verify your account.',
@@ -253,22 +241,30 @@ class RegistrationController extends AbstractController
         $this->userRepository->save($user);
 
         // Send verification email
-        try {
-            $verificationUrl = sprintf(
-                '%s/verify-email?token=%s',
-                $_ENV['WEB_URL'] ?? 'http://localhost:3000',
-                $verificationToken
-            );
-
-            $this->emailService->sendVerificationEmail($user->getEmail(), $verificationUrl);
-        } catch (\Exception $e) {
-            // Log error but don't reveal to user
-            error_log(sprintf('Failed to resend verification email to %s: %s', $user->getEmail(), $e->getMessage()));
-        }
+        $this->sendVerificationEmailSafely($user->getEmail(), $verificationToken);
 
         return $this->json([
             'message' => 'If an account exists with this email, a verification email has been sent.',
         ]);
+    }
+
+    /**
+     * Send verification email safely, logging errors without throwing.
+     */
+    private function sendVerificationEmailSafely(string $email, string $token): void
+    {
+        try {
+            $verificationUrl = sprintf(
+                '%s/verify-email?token=%s',
+                $_ENV['WEB_URL'] ?? 'http://localhost:3000',
+                $token
+            );
+
+            $this->emailService->sendVerificationEmail($email, $verificationUrl);
+        } catch (\Exception $e) {
+            // Log error but don't reveal to user / don't fail the operation
+            error_log(sprintf('Failed to send verification email to %s: %s', $email, $e->getMessage()));
+        }
     }
 
     /**
