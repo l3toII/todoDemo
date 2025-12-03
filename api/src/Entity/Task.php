@@ -58,9 +58,9 @@ class Task
     #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private User $user;
 
-    #[ORM\ManyToOne(targetEntity: 'App\Entity\Project')]
+    #[ORM\ManyToOne(targetEntity: Project::class, inversedBy: 'tasks')]
     #[ORM\JoinColumn(name: 'project_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
-    private ?object $project = null;
+    private ?Project $project = null;
 
     #[ORM\Column(type: Types::STRING, length: 500)]
     #[Assert\NotBlank(message: 'Task title is required')]
@@ -140,12 +140,12 @@ class Task
         return $this;
     }
 
-    public function getProject(): ?object
+    public function getProject(): ?Project
     {
         return $this->project;
     }
 
-    public function setProject(?object $project): self
+    public function setProject(?Project $project): self
     {
         $this->project = $project;
         return $this;
