@@ -6,6 +6,7 @@ import PasswordResetRequestPage from './pages/PasswordResetRequestPage';
 import PasswordResetConfirmPage from './pages/PasswordResetConfirmPage';
 import InboxPage from './pages/InboxPage';
 import ClarifyPage from './pages/ClarifyPage';
+import ContextsPage from './pages/ContextsPage';
 import AccountSettingsPage from './pages/AccountSettingsPage';
 import AccountDeletionPage from './pages/AccountDeletionPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -47,6 +48,16 @@ function App() {
             <ProtectedRoute>
               <AuthenticatedLayout>
                 <ClarifyPage />
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/contexts"
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
+                <ContextsPage />
               </AuthenticatedLayout>
             </ProtectedRoute>
           }
