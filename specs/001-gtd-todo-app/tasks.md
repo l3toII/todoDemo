@@ -299,12 +299,12 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 **User Story**: As a user, I want to manage projects with their next actions so that I can keep an overview while focusing on the next step.
 
-### Phase 5.1: Backend - Project Entity
+### Phase 5.1: Backend - Project Entity ✅
 
-- [ ] [P5-001] [Story-5] Create Project Doctrine entity `api/src/Entity/Project.php`
-- [ ] [P5-002] [Story-5] Write unit tests for Project entity `api/tests/Unit/Entity/ProjectTest.php`
-- [ ] [P5-003] [Story-5] Create Project repository with computed properties `api/src/Repository/ProjectRepository.php`
-- [ ] [P5-004] [Story-5] Create database migration for projects table `api/migrations/Version003CreateProjectsTable.php`
+- [X] [P5-001] [Story-5] Create Project Doctrine entity `api/src/Entity/Project.php`
+- [X] [P5-002] [Story-5] Write unit tests for Project entity `api/tests/Unit/Entity/ProjectTest.php`
+- [X] [P5-003] [Story-5] Create Project repository with computed properties `api/src/Repository/ProjectRepository.php`
+- [X] [P5-004] [Story-5] Create database migration for projects table `api/migrations/Version010AddProjectFields.php`
 
 ### Phase 5.2: Backend - Project Endpoints
 
