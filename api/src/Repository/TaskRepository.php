@@ -179,6 +179,38 @@ class TaskRepository extends ServiceEntityRepository
     }
 
     /**
+     * Find all next_action tasks for a project ordered by position
+     *
+     * @return Task[]
+     */
+    public function findNextActionsByProject(object $project): array
+    {
+        return $this->createQueryBuilder('t')
+            ->where('t.project = :project')
+            ->andWhere(self::STATUS_FILTER)
+            ->setParameter('project', $project)
+            ->setParameter('status', Task::STATUS_NEXT_ACTION)
+            ->orderBy('t.position', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+     * Count all non-deleted tasks for a project
+     */
+    public function countByProject(object $project): int
+    {
+        return (int) $this->createQueryBuilder('t')
+            ->select('COUNT(t.id)')
+            ->where('t.project = :project')
+            ->andWhere('t.status != :deleted')
+            ->setParameter('project', $project)
+            ->setParameter('deleted', Task::STATUS_DELETED)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
+    /**
      * @return Task[]
      */
     public function findModifiedSince(User $user, \DateTimeImmutable $since): array
