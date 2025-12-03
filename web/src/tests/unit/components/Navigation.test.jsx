@@ -211,4 +211,30 @@ describe('Navigation', () => {
     const updatedSvg = button.querySelector('svg');
     expect(updatedSvg.className.baseVal).toContain('rotate-180');
   });
+
+  describe('main navigation links', () => {
+    it('renders Inbox link', () => {
+      const store = createStore({ user: { email: 'test@example.com' } });
+      renderNavigation(store);
+      const inboxLink = screen.getByRole('link', { name: /inbox/i });
+      expect(inboxLink).toBeInTheDocument();
+      expect(inboxLink).toHaveAttribute('href', '/inbox');
+    });
+
+    it('renders Clarify link', () => {
+      const store = createStore({ user: { email: 'test@example.com' } });
+      renderNavigation(store);
+      const clarifyLink = screen.getByRole('link', { name: /clarify/i });
+      expect(clarifyLink).toBeInTheDocument();
+      expect(clarifyLink).toHaveAttribute('href', '/clarify');
+    });
+
+    it('renders Contexts link', () => {
+      const store = createStore({ user: { email: 'test@example.com' } });
+      renderNavigation(store);
+      const contextsLink = screen.getByRole('link', { name: /contexts/i });
+      expect(contextsLink).toBeInTheDocument();
+      expect(contextsLink).toHaveAttribute('href', '/contexts');
+    });
+  });
 });
