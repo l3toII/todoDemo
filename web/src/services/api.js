@@ -138,6 +138,13 @@ export const projectsAPI = {
   create: (data) => apiClient.post('/projects', data),
   update: (id, data) => apiClient.patch(`/projects/${id}`, data),
   delete: (id) => apiClient.delete(`/projects/${id}`),
+  // Status transitions
+  complete: (id) => apiClient.post(`/projects/${id}/complete`),
+  hold: (id) => apiClient.post(`/projects/${id}/hold`),
+  activate: (id) => apiClient.post(`/projects/${id}/activate`),
+  // GTD-specific
+  getNeedingAttention: () => apiClient.get('/projects/needing-attention'),
+  getDueForReview: () => apiClient.get('/projects/due-for-review'),
 };
 
 // Contexts API endpoints

@@ -4,6 +4,7 @@ import accountReducer from '../features/account/accountSlice';
 import inboxReducer from '../features/inbox/inboxSlice';
 import tasksReducer from '../features/tasks/tasksSlice';
 import contextsReducer from '../features/contexts/contextsSlice';
+import projectsReducer from '../features/projects/projectsSlice';
 
 export const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ export const store = configureStore({
     inbox: inboxReducer,
     tasks: tasksReducer,
     contexts: contextsReducer,
+    projects: projectsReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
