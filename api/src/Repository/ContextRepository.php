@@ -16,6 +16,11 @@ use Symfony\Component\Uid\Uuid;
  */
 class ContextRepository extends ServiceEntityRepository
 {
+    // DQL query conditions as constants to avoid duplication
+    private const WHERE_USER_EQUALS = 'c.user = :user';
+    private const WHERE_USER_OR_DEFAULT = 'c.user = :user OR c.user IS NULL';
+    private const WHERE_STATUS_EQUALS = 'c.status = :status';
+
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Context::class);
@@ -52,8 +57,8 @@ class ContextRepository extends ServiceEntityRepository
     public function findAllForUser(User $user): array
     {
         return $this->createQueryBuilder('c')
-            ->where('c.user = :user OR c.user IS NULL')
-            ->andWhere('c.status = :status')
+            ->where(self::WHERE_USER_OR_DEFAULT)
+            ->andWhere(self::WHERE_STATUS_EQUALS)
             ->setParameter('user', $user)
             ->setParameter('status', Context::STATUS_ACTIVE)
             ->orderBy('c.isDefault', 'DESC')
@@ -87,8 +92,8 @@ class ContextRepository extends ServiceEntityRepository
     public function findCustomByUser(User $user): array
     {
         return $this->createQueryBuilder('c')
-            ->where('c.user = :user')
-            ->andWhere('c.status = :status')
+            ->where(self::WHERE_USER_EQUALS)
+            ->andWhere(self::WHERE_STATUS_EQUALS)
             ->setParameter('user', $user)
             ->setParameter('status', Context::STATUS_ACTIVE)
             ->orderBy('c.position', 'ASC')
@@ -104,7 +109,7 @@ class ContextRepository extends ServiceEntityRepository
     {
         return $this->createQueryBuilder('c')
             ->where('c.name = :name')
-            ->andWhere('c.user = :user OR c.user IS NULL')
+            ->andWhere(self::WHERE_USER_OR_DEFAULT)
             ->setParameter('name', $name)
             ->setParameter('user', $user)
             ->setMaxResults(1)
@@ -120,7 +125,7 @@ class ContextRepository extends ServiceEntityRepository
         $qb = $this->createQueryBuilder('c')
             ->select('COUNT(c.id)')
             ->where('c.name = :name')
-            ->andWhere('c.user = :user OR c.user IS NULL')
+            ->andWhere(self::WHERE_USER_OR_DEFAULT)
             ->setParameter('name', $name)
             ->setParameter('user', $user);
 
@@ -140,8 +145,8 @@ class ContextRepository extends ServiceEntityRepository
     public function findArchivedByUser(User $user): array
     {
         return $this->createQueryBuilder('c')
-            ->where('c.user = :user')
-            ->andWhere('c.status = :status')
+            ->where(self::WHERE_USER_EQUALS)
+            ->andWhere(self::WHERE_STATUS_EQUALS)
             ->setParameter('user', $user)
             ->setParameter('status', Context::STATUS_ARCHIVED)
             ->orderBy('c.name', 'ASC')
@@ -156,8 +161,8 @@ class ContextRepository extends ServiceEntityRepository
     {
         return (int) $this->createQueryBuilder('c')
             ->select('COUNT(c.id)')
-            ->where('c.user = :user')
-            ->andWhere('c.status = :status')
+            ->where(self::WHERE_USER_EQUALS)
+            ->andWhere(self::WHERE_STATUS_EQUALS)
             ->setParameter('user', $user)
             ->setParameter('status', Context::STATUS_ACTIVE)
             ->getQuery()
@@ -171,7 +176,7 @@ class ContextRepository extends ServiceEntityRepository
     {
         $result = $this->createQueryBuilder('c')
             ->select('MAX(c.position)')
-            ->where('c.user = :user')
+            ->where(self::WHERE_USER_EQUALS)
             ->setParameter('user', $user)
             ->getQuery()
             ->getSingleScalarResult();
