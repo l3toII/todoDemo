@@ -244,7 +244,7 @@ describe('api.js', () => {
 
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/projects', { title: 'New Project', outcome: 'Test outcome' });
       expect(mockAxiosInstance.patch).toHaveBeenCalledWith('/tasks/task-123/clarify', {
-        status: 'next_action',
+        target_status: 'next_action',
         project_id: 'proj-new',
       });
       expect(result.data.project).toEqual(mockProject);

@@ -128,7 +128,7 @@ export const tasksAPI = {
 
     // 2. Link the original task to the new project and mark as next action
     await apiClient.patch(`/tasks/${taskId}/clarify`, {
-      status: 'next_action',
+      target_status: 'next_action',
       project_id: project.id,
     });
 
