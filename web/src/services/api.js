@@ -101,8 +101,8 @@ export const tasksAPI = {
   restore: (id) => apiClient.post(`/tasks/${id}/restore`),
   getStats: () => apiClient.get('/tasks/stats'),
   // Clarification helpers
-  clarify: (id, clarificationData) => apiClient.patch(`/tasks/${id}`, {
-    status: clarificationData.status,
+  clarify: (id, clarificationData) => apiClient.patch(`/tasks/${id}/clarify`, {
+    target_status: clarificationData.status,
     notes: clarificationData.notes,
     energy_level: clarificationData.energyLevel,
     time_estimate: clarificationData.timeEstimate,

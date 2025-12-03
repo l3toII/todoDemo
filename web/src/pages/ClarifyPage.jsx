@@ -37,9 +37,12 @@ const ClarifyPage = () => {
   }, [inboxTasks.length, initialCount]);
 
   // Reset index if it's out of bounds after task removal
+  // When a task is removed, the array shrinks, so we need to adjust the index
+  // to point to the next valid task (which is now at the same index position)
   useEffect(() => {
     if (inboxTasks.length > 0 && currentTaskIndex >= inboxTasks.length) {
-      setCurrentTaskIndex(0);
+      // Clamp to the last valid index instead of resetting to 0
+      setCurrentTaskIndex(inboxTasks.length - 1);
     }
   }, [inboxTasks.length, currentTaskIndex]);
 

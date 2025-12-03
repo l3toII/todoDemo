@@ -67,8 +67,8 @@ describe('ClarifyPage', () => {
   });
 
   it('renders empty inbox state when no tasks', async () => {
-    // Mock API to return empty inbox
-    tasksAPI.getByStatus.mockResolvedValue({ data: { data: [], total: 0 } });
+    // Mock API to return empty inbox (format: { tasks: [...], count: N })
+    tasksAPI.getByStatus.mockResolvedValue({ data: { tasks: [], count: 0 } });
 
     const store = createTestStore({
       tasks: {
@@ -102,8 +102,8 @@ describe('ClarifyPage', () => {
       status: 'inbox',
     };
 
-    // Mock API to return the same task
-    tasksAPI.getByStatus.mockResolvedValue({ data: { data: [mockTask], total: 1 } });
+    // Mock API to return the same task (format: { tasks: [...], count: N })
+    tasksAPI.getByStatus.mockResolvedValue({ data: { tasks: [mockTask], count: 1 } });
 
     const store = createTestStore({
       tasks: {
@@ -166,8 +166,8 @@ describe('ClarifyPage', () => {
       { id: '3', title: 'Task 3', status: 'inbox' },
     ];
 
-    // Mock API to return the same tasks
-    tasksAPI.getByStatus.mockResolvedValue({ data: { data: mockTasks, total: 3 } });
+    // Mock API to return the same tasks (format: { tasks: [...], count: N })
+    tasksAPI.getByStatus.mockResolvedValue({ data: { tasks: mockTasks, count: 3 } });
 
     const store = createTestStore({
       tasks: {
@@ -207,8 +207,8 @@ describe('ClarifyPage', () => {
       status: 'inbox',
     };
 
-    // Mock API to return the same task
-    tasksAPI.getByStatus.mockResolvedValue({ data: { data: [mockTask], total: 1 } });
+    // Mock API to return the same task (format: { tasks: [...], count: N })
+    tasksAPI.getByStatus.mockResolvedValue({ data: { tasks: [mockTask], count: 1 } });
 
     const store = createTestStore({
       tasks: {
@@ -241,8 +241,8 @@ describe('ClarifyPage', () => {
       { id: '3', title: 'Task 3', status: 'inbox' },
     ];
 
-    // Mock API to return the same tasks
-    tasksAPI.getByStatus.mockResolvedValue({ data: { data: mockTasks, total: 3 } });
+    // Mock API to return the same tasks (format: { tasks: [...], count: N })
+    tasksAPI.getByStatus.mockResolvedValue({ data: { tasks: mockTasks, count: 3 } });
 
     const store = createTestStore({
       tasks: {

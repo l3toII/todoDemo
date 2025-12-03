@@ -199,7 +199,8 @@ const tasksSlice = createSlice({
       })
       .addCase(clarifyTask.fulfilled, (state, action) => {
         state.clarifying = false;
-        const updatedTask = action.payload;
+        // API returns { message: '...', task: {...} }
+        const updatedTask = action.payload.task || action.payload;
         // Remove from inbox
         state.inbox = state.inbox.filter((t) => t.id !== updatedTask.id);
         // Add to appropriate list based on new status
@@ -239,7 +240,8 @@ const tasksSlice = createSlice({
       })
       .addCase(completeTask.fulfilled, (state, action) => {
         state.loading = false;
-        const completedTask = action.payload;
+        // API returns { message: '...', task: {...} } or just the task
+        const completedTask = action.payload.task || action.payload;
         removeTaskFromAllLists(state, completedTask.id);
       })
       .addCase(completeTask.rejected, (state, action) => {
@@ -321,12 +323,15 @@ function removeTaskFromAllLists(state, taskId) {
 export const { clearError, setCurrentTask, clearCurrentTask, optimisticStatusUpdate } = tasksSlice.actions;
 
 // Selectors
-export const selectInboxTasks = (state) => state.tasks.inbox;
+// Filter to only return tasks with inbox status as a safety measure
+export const selectInboxTasks = (state) =>
+  state.tasks.inbox.filter((task) => task.status === TASK_STATUS.INBOX);
 export const selectCurrentTask = (state) => state.tasks.currentTask;
 export const selectTasksLoading = (state) => state.tasks.loading;
 export const selectTasksClarifying = (state) => state.tasks.clarifying;
 export const selectTasksError = (state) => state.tasks.error;
-export const selectInboxCount = (state) => state.tasks.inbox.length;
+export const selectInboxCount = (state) =>
+  state.tasks.inbox.filter((task) => task.status === TASK_STATUS.INBOX).length;
 export const selectNextActions = (state) => state.tasks.nextActions;
 export const selectWaitingFor = (state) => state.tasks.waitingFor;
 export const selectSomedayMaybe = (state) => state.tasks.somedayMaybe;
