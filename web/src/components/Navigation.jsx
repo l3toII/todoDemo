@@ -101,6 +101,30 @@ const Navigation = () => {
               >
                 Contexts
               </Link>
+              <Link
+                to="/next-actions"
+                className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+              >
+                Next Actions
+              </Link>
+              <Link
+                to="/waiting-for"
+                className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+              >
+                Waiting For
+              </Link>
+              <Link
+                to="/someday-maybe"
+                className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+              >
+                Someday
+              </Link>
+              <Link
+                to="/reference"
+                className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+              >
+                Reference
+              </Link>
             </div>
           </div>
 

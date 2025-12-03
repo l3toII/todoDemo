@@ -7,6 +7,10 @@ import PasswordResetConfirmPage from './pages/PasswordResetConfirmPage';
 import InboxPage from './pages/InboxPage';
 import ClarifyPage from './pages/ClarifyPage';
 import ContextsPage from './pages/ContextsPage';
+import NextActionsPage from './pages/NextActionsPage';
+import WaitingForPage from './pages/WaitingForPage';
+import SomedayMaybePage from './pages/SomedayMaybePage';
+import ReferencePage from './pages/ReferencePage';
 import AccountSettingsPage from './pages/AccountSettingsPage';
 import AccountDeletionPage from './pages/AccountDeletionPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -58,6 +62,46 @@ function App() {
             <ProtectedRoute>
               <AuthenticatedLayout>
                 <ContextsPage />
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/next-actions"
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
+                <NextActionsPage />
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/waiting-for"
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
+                <WaitingForPage />
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/someday-maybe"
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
+                <SomedayMaybePage />
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reference"
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
+                <ReferencePage />
               </AuthenticatedLayout>
             </ProtectedRoute>
           }
