@@ -82,7 +82,7 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
           })).unwrap();
           break;
 
-        default:
+        default: {
           // Map outcome to status
           const statusMap = {
             [OUTCOMES.NEXT_ACTION]: TASK_STATUS.NEXT_ACTION,
@@ -91,16 +91,23 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
             [OUTCOMES.REFERENCE]: TASK_STATUS.REFERENCE,
           };
 
+          const targetStatus = statusMap[finalOutcome];
+          if (!targetStatus) {
+            console.error('ClarifyWizard: Invalid outcome for clarification:', finalOutcome);
+            throw new Error(`Invalid outcome: ${finalOutcome}`);
+          }
+
           await dispatch(clarifyTask({
             taskId: task.id,
             clarificationData: {
-              status: statusMap[finalOutcome],
+              status: targetStatus,
               notes: formData.notes,
               energyLevel: formData.energyLevel,
               timeEstimate: formData.timeEstimate,
               dueDate: formData.dueDate || null,
             },
           })).unwrap();
+        }
       }
 
       onComplete(task.id);
@@ -501,7 +508,7 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
                 Start Over
               </button>
               <button
-                onClick={handleSubmit}
+                onClick={() => handleSubmit()}
                 disabled={isClarifying}
                 className="flex-1 py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
               >
@@ -560,7 +567,7 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
                 Back
               </button>
               <button
-                onClick={handleSubmit}
+                onClick={() => handleSubmit()}
                 disabled={isClarifying || !formData.projectTitle.trim()}
                 className="flex-1 py-3 px-4 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50"
               >
