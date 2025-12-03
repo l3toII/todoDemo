@@ -2,10 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
 import { MemoryRouter } from 'react-router-dom';
-import tasksReducer from '../../../features/tasks/tasksSlice';
-import contextsReducer from '../../../features/contexts/contextsSlice';
+import { createGtdStore } from '../../helpers/gtdTestHelpers';
 import SomedayMaybePage from '../../../pages/SomedayMaybePage';
 
 // Mock the API module
@@ -54,38 +52,6 @@ describe('SomedayMaybePage', () => {
     { id: 'ctx-1', name: '@Travel', is_default: false, status: 'active' },
   ];
 
-  const createStore = (tasksState = {}, contextsState = {}) => {
-    return configureStore({
-      reducer: {
-        tasks: tasksReducer,
-        contexts: contextsReducer,
-      },
-      preloadedState: {
-        tasks: {
-          inbox: [],
-          clarified: [],
-          nextActions: [],
-          waitingFor: [],
-          somedayMaybe: [],
-          reference: [],
-          currentTask: null,
-          loading: false,
-          clarifying: false,
-          error: null,
-          nextCursor: null,
-          total: 0,
-          ...tasksState,
-        },
-        contexts: {
-          contexts: [],
-          loading: false,
-          error: null,
-          ...contextsState,
-        },
-      },
-    });
-  };
-
   const renderPage = (store) => {
     return render(
       <Provider store={store}>
@@ -112,7 +78,7 @@ describe('SomedayMaybePage', () => {
 
   describe('loading state', () => {
     it('should show loading spinner while fetching', () => {
-      const store = createStore({ loading: true });
+      const store = createGtdStore({ loading: true });
       renderPage(store);
 
       expect(screen.getByText(/loading someday/i)).toBeInTheDocument();
@@ -124,7 +90,7 @@ describe('SomedayMaybePage', () => {
       tasksAPI.getByStatus.mockResolvedValue({
         data: { tasks: [mockTask1, mockTask2], count: 2 },
       });
-      const store = createStore({ somedayMaybe: [mockTask1, mockTask2] });
+      const store = createGtdStore({ somedayMaybe: [mockTask1, mockTask2] });
       renderPage(store);
 
       await waitFor(() => {
@@ -137,7 +103,7 @@ describe('SomedayMaybePage', () => {
       tasksAPI.getByStatus.mockResolvedValue({
         data: { tasks: [], count: 0 },
       });
-      const store = createStore({ somedayMaybe: [] });
+      const store = createGtdStore({ somedayMaybe: [] });
       renderPage(store);
 
       await waitFor(() => {
@@ -149,7 +115,7 @@ describe('SomedayMaybePage', () => {
       tasksAPI.getByStatus.mockRejectedValue({
         response: { data: { message: 'Failed to fetch tasks' } },
       });
-      const store = createStore();
+      const store = createGtdStore();
       renderPage(store);
 
       await waitFor(() => {
@@ -159,7 +125,7 @@ describe('SomedayMaybePage', () => {
     });
 
     it('should display task count in header', async () => {
-      const store = createStore({ somedayMaybe: [mockTask1, mockTask2] });
+      const store = createGtdStore({ somedayMaybe: [mockTask1, mockTask2] });
       renderPage(store);
 
       await waitFor(() => {
@@ -176,7 +142,7 @@ describe('SomedayMaybePage', () => {
       tasksAPI.update.mockResolvedValue({
         data: { ...mockTask1, status: 'next_action' },
       });
-      const store = createStore({ somedayMaybe: [mockTask1] });
+      const store = createGtdStore({ somedayMaybe: [mockTask1] });
       renderPage(store);
 
       const user = userEvent.setup();
@@ -198,7 +164,7 @@ describe('SomedayMaybePage', () => {
       tasksAPI.getByStatus.mockResolvedValue({
         data: { tasks: [mockTask1], count: 1 },
       });
-      const store = createStore({ somedayMaybe: [mockTask1] });
+      const store = createGtdStore({ somedayMaybe: [mockTask1] });
       renderPage(store);
 
       const user = userEvent.setup();
@@ -219,14 +185,14 @@ describe('SomedayMaybePage', () => {
 
   describe('page header', () => {
     it('should display page title', () => {
-      const store = createStore();
+      const store = createGtdStore();
       renderPage(store);
 
       expect(screen.getByRole('heading', { name: /someday\/maybe/i })).toBeInTheDocument();
     });
 
     it('should display GTD description', () => {
-      const store = createStore();
+      const store = createGtdStore();
       renderPage(store);
 
       expect(screen.getByText(/ideas and tasks deferred for later/i)).toBeInTheDocument();
@@ -235,14 +201,14 @@ describe('SomedayMaybePage', () => {
 
   describe('refresh functionality', () => {
     it('should have refresh button', () => {
-      const store = createStore();
+      const store = createGtdStore();
       renderPage(store);
 
       expect(screen.getByRole('button', { name: /refresh/i })).toBeInTheDocument();
     });
 
     it('should fetch tasks when refresh clicked', async () => {
-      const store = createStore();
+      const store = createGtdStore();
       renderPage(store);
 
       const user = userEvent.setup();

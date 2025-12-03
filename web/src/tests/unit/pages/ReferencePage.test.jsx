@@ -2,10 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
 import { MemoryRouter } from 'react-router-dom';
-import tasksReducer from '../../../features/tasks/tasksSlice';
-import contextsReducer from '../../../features/contexts/contextsSlice';
+import { createGtdStore } from '../../helpers/gtdTestHelpers';
 import ReferencePage from '../../../pages/ReferencePage';
 
 // Mock the API module
@@ -66,38 +64,6 @@ describe('ReferencePage', () => {
     { id: 'ctx-2', name: '@Personal', is_default: false, status: 'active' },
   ];
 
-  const createStore = (tasksState = {}, contextsState = {}) => {
-    return configureStore({
-      reducer: {
-        tasks: tasksReducer,
-        contexts: contextsReducer,
-      },
-      preloadedState: {
-        tasks: {
-          inbox: [],
-          clarified: [],
-          nextActions: [],
-          waitingFor: [],
-          somedayMaybe: [],
-          reference: [],
-          currentTask: null,
-          loading: false,
-          clarifying: false,
-          error: null,
-          nextCursor: null,
-          total: 0,
-          ...tasksState,
-        },
-        contexts: {
-          contexts: [],
-          loading: false,
-          error: null,
-          ...contextsState,
-        },
-      },
-    });
-  };
-
   const renderPage = (store) => {
     return render(
       <Provider store={store}>
@@ -121,7 +87,7 @@ describe('ReferencePage', () => {
 
   describe('loading state', () => {
     it('should show loading spinner while fetching', () => {
-      const store = createStore({ loading: true });
+      const store = createGtdStore({ loading: true });
       renderPage(store);
 
       expect(screen.getByText(/loading reference/i)).toBeInTheDocument();
@@ -133,7 +99,7 @@ describe('ReferencePage', () => {
       tasksAPI.getByStatus.mockResolvedValue({
         data: { tasks: [mockItem1, mockItem2, mockItem3], count: 3 },
       });
-      const store = createStore({ reference: [mockItem1, mockItem2, mockItem3] });
+      const store = createGtdStore({ reference: [mockItem1, mockItem2, mockItem3] });
       renderPage(store);
 
       await waitFor(() => {
@@ -147,7 +113,7 @@ describe('ReferencePage', () => {
       tasksAPI.getByStatus.mockResolvedValue({
         data: { tasks: [], count: 0 },
       });
-      const store = createStore({ reference: [] });
+      const store = createGtdStore({ reference: [] });
       renderPage(store);
 
       await waitFor(() => {
@@ -159,7 +125,7 @@ describe('ReferencePage', () => {
       tasksAPI.getByStatus.mockRejectedValue({
         response: { data: { message: 'Failed to fetch items' } },
       });
-      const store = createStore();
+      const store = createGtdStore();
       renderPage(store);
 
       await waitFor(() => {
@@ -169,7 +135,7 @@ describe('ReferencePage', () => {
     });
 
     it('should display item count in header', async () => {
-      const store = createStore({ reference: [mockItem1, mockItem2] });
+      const store = createGtdStore({ reference: [mockItem1, mockItem2] });
       renderPage(store);
 
       await waitFor(() => {
@@ -184,7 +150,7 @@ describe('ReferencePage', () => {
       tasksAPI.getByStatus.mockResolvedValue({
         data: { tasks: [mockItem1, mockItem2, mockItem3], count: 3 },
       });
-      const store = createStore({ reference: [mockItem1, mockItem2, mockItem3] });
+      const store = createGtdStore({ reference: [mockItem1, mockItem2, mockItem3] });
       renderPage(store);
 
       const user = userEvent.setup();
@@ -211,7 +177,7 @@ describe('ReferencePage', () => {
       tasksAPI.getByStatus.mockResolvedValue({
         data: { tasks: [mockItem1, mockItem2, mockItem3], count: 3 },
       });
-      const store = createStore({ reference: [mockItem1, mockItem2, mockItem3] });
+      const store = createGtdStore({ reference: [mockItem1, mockItem2, mockItem3] });
       renderPage(store);
 
       const user = userEvent.setup();
@@ -236,7 +202,7 @@ describe('ReferencePage', () => {
       tasksAPI.getByStatus.mockResolvedValue({
         data: { tasks: [mockItem1], count: 1 },
       });
-      const store = createStore({ reference: [mockItem1] });
+      const store = createGtdStore({ reference: [mockItem1] });
       renderPage(store);
 
       const user = userEvent.setup();
@@ -257,14 +223,14 @@ describe('ReferencePage', () => {
 
   describe('page header', () => {
     it('should display page title', () => {
-      const store = createStore();
+      const store = createGtdStore();
       renderPage(store);
 
       expect(screen.getByRole('heading', { name: /reference/i })).toBeInTheDocument();
     });
 
     it('should display GTD description', () => {
-      const store = createStore();
+      const store = createGtdStore();
       renderPage(store);
 
       expect(screen.getByText(/non-actionable information for later/i)).toBeInTheDocument();
@@ -273,14 +239,14 @@ describe('ReferencePage', () => {
 
   describe('refresh functionality', () => {
     it('should have refresh button', () => {
-      const store = createStore();
+      const store = createGtdStore();
       renderPage(store);
 
       expect(screen.getByRole('button', { name: /refresh/i })).toBeInTheDocument();
     });
 
     it('should fetch items when refresh clicked', async () => {
-      const store = createStore();
+      const store = createGtdStore();
       renderPage(store);
 
       const user = userEvent.setup();

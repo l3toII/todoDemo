@@ -2,13 +2,10 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Provider } from 'react-redux';
-import { configureStore } from '@reduxjs/toolkit';
 import { MemoryRouter } from 'react-router-dom';
-import tasksReducer from '../../../features/tasks/tasksSlice';
-import contextsReducer from '../../../features/contexts/contextsSlice';
+import { createGtdStore } from '../../helpers/gtdTestHelpers';
 import WaitingForPage from '../../../pages/WaitingForPage';
 
-// Mock the API module
 vi.mock('../../../services/api', () => ({
   tasksAPI: {
     getByStatus: vi.fn(),
@@ -23,7 +20,6 @@ vi.mock('../../../services/api', () => ({
 import { tasksAPI, contextsAPI } from '../../../services/api';
 
 describe('WaitingForPage', () => {
-  // Task waiting for 5 days
   const mockTask1 = {
     id: 'task-1',
     title: 'Waiting for client feedback',
@@ -37,7 +33,6 @@ describe('WaitingForPage', () => {
     updated_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
   };
 
-  // Task waiting for 2 weeks
   const mockTask2 = {
     id: 'task-2',
     title: 'Waiting for parts delivery',
@@ -56,38 +51,6 @@ describe('WaitingForPage', () => {
     { id: 'ctx-2', name: '@Home', is_default: true, status: 'active' },
   ];
 
-  const createStore = (tasksState = {}, contextsState = {}) => {
-    return configureStore({
-      reducer: {
-        tasks: tasksReducer,
-        contexts: contextsReducer,
-      },
-      preloadedState: {
-        tasks: {
-          inbox: [],
-          clarified: [],
-          nextActions: [],
-          waitingFor: [],
-          somedayMaybe: [],
-          reference: [],
-          currentTask: null,
-          loading: false,
-          clarifying: false,
-          error: null,
-          nextCursor: null,
-          total: 0,
-          ...tasksState,
-        },
-        contexts: {
-          contexts: [],
-          loading: false,
-          error: null,
-          ...contextsState,
-        },
-      },
-    });
-  };
-
   const renderPage = (store) => {
     return render(
       <Provider store={store}>
@@ -100,15 +63,11 @@ describe('WaitingForPage', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    tasksAPI.getByStatus.mockResolvedValue({
-      data: { tasks: [], count: 0 },
-    });
+    tasksAPI.getByStatus.mockResolvedValue({ data: { tasks: [], count: 0 } });
     tasksAPI.complete.mockResolvedValue({
       data: { task: { ...mockTask1, status: 'completed' }, message: 'Task completed' },
     });
-    tasksAPI.update.mockResolvedValue({
-      data: { ...mockTask1, status: 'next_action' },
-    });
+    tasksAPI.update.mockResolvedValue({ data: { ...mockTask1, status: 'next_action' } });
     contextsAPI.getAll.mockResolvedValue({
       data: { contexts: mockContexts, count: mockContexts.length },
     });
@@ -116,9 +75,8 @@ describe('WaitingForPage', () => {
 
   describe('loading state', () => {
     it('should show loading spinner while fetching', () => {
-      const store = createStore({ loading: true });
+      const store = createGtdStore({ loading: true });
       renderPage(store);
-
       expect(screen.getByText(/loading waiting for/i)).toBeInTheDocument();
     });
   });
@@ -128,7 +86,7 @@ describe('WaitingForPage', () => {
       tasksAPI.getByStatus.mockResolvedValue({
         data: { tasks: [mockTask1, mockTask2], count: 2 },
       });
-      const store = createStore({ waitingFor: [mockTask1, mockTask2] });
+      const store = createGtdStore({ waitingFor: [mockTask1, mockTask2] });
       renderPage(store);
 
       await waitFor(() => {
@@ -138,12 +96,8 @@ describe('WaitingForPage', () => {
     });
 
     it('should show empty state when no tasks', async () => {
-      tasksAPI.getByStatus.mockResolvedValue({
-        data: { tasks: [], count: 0 },
-      });
-      const store = createStore({ waitingFor: [] });
+      const store = createGtdStore({ waitingFor: [] });
       renderPage(store);
-
       await waitFor(() => {
         expect(screen.getByText(/no waiting for items/i)).toBeInTheDocument();
       });
@@ -153,7 +107,7 @@ describe('WaitingForPage', () => {
       tasksAPI.getByStatus.mockRejectedValue({
         response: { data: { message: 'Failed to fetch tasks' } },
       });
-      const store = createStore();
+      const store = createGtdStore();
       renderPage(store);
 
       await waitFor(() => {
@@ -163,20 +117,17 @@ describe('WaitingForPage', () => {
     });
 
     it('should display task count in header', async () => {
-      const store = createStore({ waitingFor: [mockTask1, mockTask2] });
+      const store = createGtdStore({ waitingFor: [mockTask1, mockTask2] });
       renderPage(store);
-
       await waitFor(() => {
         expect(screen.getByText('2')).toBeInTheDocument();
       });
     });
 
     it('should show "waiting since" duration', async () => {
-      const store = createStore({ waitingFor: [mockTask1] });
+      const store = createGtdStore({ waitingFor: [mockTask1] });
       renderPage(store);
-
       await waitFor(() => {
-        // Task1 is 5 days old
         expect(screen.getByText(/5 days/i)).toBeInTheDocument();
       });
     });
@@ -184,22 +135,15 @@ describe('WaitingForPage', () => {
 
   describe('task actions', () => {
     it('should allow moving task to next_action', async () => {
-      tasksAPI.getByStatus.mockResolvedValue({
-        data: { tasks: [mockTask1], count: 1 },
-      });
-      tasksAPI.update.mockResolvedValue({
-        data: { ...mockTask1, status: 'next_action' },
-      });
-      const store = createStore({ waitingFor: [mockTask1] });
+      tasksAPI.getByStatus.mockResolvedValue({ data: { tasks: [mockTask1], count: 1 } });
+      const store = createGtdStore({ waitingFor: [mockTask1] });
       renderPage(store);
 
       const user = userEvent.setup();
-
       await waitFor(() => {
         expect(screen.getByText('Waiting for client feedback')).toBeInTheDocument();
       });
 
-      // Find and click the "Move to Next Actions" button
       const moveButton = screen.getByRole('button', { name: /move to next actions/i });
       await user.click(moveButton);
 
@@ -209,19 +153,15 @@ describe('WaitingForPage', () => {
     });
 
     it('should allow completing a task', async () => {
-      tasksAPI.getByStatus.mockResolvedValue({
-        data: { tasks: [mockTask1], count: 1 },
-      });
-      const store = createStore({ waitingFor: [mockTask1] });
+      tasksAPI.getByStatus.mockResolvedValue({ data: { tasks: [mockTask1], count: 1 } });
+      const store = createGtdStore({ waitingFor: [mockTask1] });
       renderPage(store);
 
       const user = userEvent.setup();
-
       await waitFor(() => {
         expect(screen.getByText('Waiting for client feedback')).toBeInTheDocument();
       });
 
-      // Find and click complete button
       const completeButton = screen.getByRole('button', { name: /complete "waiting for client feedback"/i });
       await user.click(completeButton);
 
@@ -233,30 +173,27 @@ describe('WaitingForPage', () => {
 
   describe('page header', () => {
     it('should display page title', () => {
-      const store = createStore();
+      const store = createGtdStore();
       renderPage(store);
-
       expect(screen.getByRole('heading', { name: /waiting for/i })).toBeInTheDocument();
     });
 
     it('should display GTD description', () => {
-      const store = createStore();
+      const store = createGtdStore();
       renderPage(store);
-
       expect(screen.getByText(/tasks delegated or waiting on others/i)).toBeInTheDocument();
     });
   });
 
   describe('refresh functionality', () => {
     it('should have refresh button', () => {
-      const store = createStore();
+      const store = createGtdStore();
       renderPage(store);
-
       expect(screen.getByRole('button', { name: /refresh/i })).toBeInTheDocument();
     });
 
     it('should fetch tasks when refresh clicked', async () => {
-      const store = createStore();
+      const store = createGtdStore();
       renderPage(store);
 
       const user = userEvent.setup();
