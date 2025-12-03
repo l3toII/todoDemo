@@ -583,6 +583,145 @@ class ContextTest extends WebTestCase
     }
 
     // =========================================================================
+    // Additional Coverage Tests
+    // =========================================================================
+
+    public function testUpdateContextWithEmptyNameFails(): void
+    {
+        $tokens = $this->authenticateUser('update-empty-name@example.com');
+        $contextId = $this->createContext($tokens['access_token'], '@EmptyUpdate');
+
+        $this->client->request('PATCH', '/api/v1/contexts/' . $contextId, [], [], [
+            'HTTP_AUTHORIZATION' => 'Bearer ' . $tokens['access_token'],
+            'CONTENT_TYPE' => 'application/json',
+        ], json_encode([
+            'name' => '   ',
+        ]));
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
+
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertEquals('INVALID_NAME', $response['code']);
+    }
+
+    public function testUpdateContextPosition(): void
+    {
+        $tokens = $this->authenticateUser('update-position@example.com');
+        $contextId = $this->createContext($tokens['access_token'], '@PosUpdate');
+
+        $this->client->request('PATCH', '/api/v1/contexts/' . $contextId, [], [], [
+            'HTTP_AUTHORIZATION' => 'Bearer ' . $tokens['access_token'],
+            'CONTENT_TYPE' => 'application/json',
+        ], json_encode([
+            'position' => 99,
+        ]));
+
+        $this->assertResponseIsSuccessful();
+
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertEquals(99, $response['context']['position']);
+    }
+
+    public function testUpdateContextClearIcon(): void
+    {
+        $tokens = $this->authenticateUser('update-clear-icon@example.com');
+
+        // Create context with icon
+        $this->client->request('POST', '/api/v1/contexts', [], [], [
+            'HTTP_AUTHORIZATION' => 'Bearer ' . $tokens['access_token'],
+            'CONTENT_TYPE' => 'application/json',
+        ], json_encode([
+            'name' => '@IconCtx',
+            'icon' => 'star',
+        ]));
+
+        $createResponse = json_decode($this->client->getResponse()->getContent(), true);
+        $contextId = $createResponse['context']['id'];
+
+        // Clear the icon
+        $this->client->request('PATCH', '/api/v1/contexts/' . $contextId, [], [], [
+            'HTTP_AUTHORIZATION' => 'Bearer ' . $tokens['access_token'],
+            'CONTENT_TYPE' => 'application/json',
+        ], json_encode([
+            'icon' => null,
+        ]));
+
+        $this->assertResponseIsSuccessful();
+
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertNull($response['context']['icon']);
+    }
+
+    public function testUpdateContextClearColor(): void
+    {
+        $tokens = $this->authenticateUser('update-clear-color@example.com');
+
+        // Create context with color
+        $this->client->request('POST', '/api/v1/contexts', [], [], [
+            'HTTP_AUTHORIZATION' => 'Bearer ' . $tokens['access_token'],
+            'CONTENT_TYPE' => 'application/json',
+        ], json_encode([
+            'name' => '@ColorCtx',
+            'color' => '#FF0000',
+        ]));
+
+        $createResponse = json_decode($this->client->getResponse()->getContent(), true);
+        $contextId = $createResponse['context']['id'];
+
+        // Clear the color
+        $this->client->request('PATCH', '/api/v1/contexts/' . $contextId, [], [], [
+            'HTTP_AUTHORIZATION' => 'Bearer ' . $tokens['access_token'],
+            'CONTENT_TYPE' => 'application/json',
+        ], json_encode([
+            'color' => null,
+        ]));
+
+        $this->assertResponseIsSuccessful();
+
+        $response = json_decode($this->client->getResponse()->getContent(), true);
+        $this->assertNull($response['context']['color']);
+    }
+
+    public function testGetContextRequiresAuthentication(): void
+    {
+        $this->client->request('GET', '/api/v1/contexts/00000000-0000-0000-0000-000000000001');
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
+    }
+
+    public function testUpdateContextRequiresAuthentication(): void
+    {
+        $this->client->request('PATCH', '/api/v1/contexts/00000000-0000-0000-0000-000000000001', [], [], [
+            'CONTENT_TYPE' => 'application/json',
+        ], json_encode([
+            'name' => '@Test',
+        ]));
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
+    }
+
+    public function testDeleteContextRequiresAuthentication(): void
+    {
+        $this->client->request('DELETE', '/api/v1/contexts/00000000-0000-0000-0000-000000000001');
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
+    }
+
+    public function testRestoreContextRequiresAuthentication(): void
+    {
+        $this->client->request('POST', '/api/v1/contexts/00000000-0000-0000-0000-000000000001/restore');
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
+    }
+
+    public function testDefaultsEndpointRequiresAuthentication(): void
+    {
+        $this->client->request('GET', '/api/v1/contexts/defaults');
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_UNAUTHORIZED);
+    }
+
+    // =========================================================================
     // Helper Methods
     // =========================================================================
 
