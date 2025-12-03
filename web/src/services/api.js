@@ -101,15 +101,38 @@ export const tasksAPI = {
   restore: (id) => apiClient.post(`/tasks/${id}/restore`),
   getStats: () => apiClient.get('/tasks/stats'),
   // Clarification helpers
-  clarify: (id, clarificationData) => apiClient.patch(`/tasks/${id}/clarify`, {
-    target_status: clarificationData.status,
-    notes: clarificationData.notes,
-    energy_level: clarificationData.energyLevel,
-    time_estimate: clarificationData.timeEstimate,
-    due_date: clarificationData.dueDate,
-    project_id: clarificationData.projectId,
-  }),
+  clarify: (id, clarificationData) => {
+    if (!clarificationData.status) {
+      return Promise.reject({
+        response: {
+          data: {
+            message: 'Missing target status in clarification data',
+            code: 'MISSING_TARGET_STATUS'
+          },
+          status: 400
+        }
+      });
+    }
+    return apiClient.patch(`/tasks/${id}/clarify`, {
+      target_status: clarificationData.status,
+      notes: clarificationData.notes,
+      energy_level: clarificationData.energyLevel,
+      time_estimate: clarificationData.timeEstimate,
+      due_date: clarificationData.dueDate,
+      project_id: clarificationData.projectId,
+    });
+  },
   setContexts: (id, contextIds) => apiClient.put(`/tasks/${id}/contexts`, { context_ids: contextIds }),
+  // Convert task to project (not yet implemented in backend)
+  convertToProject: (id, projectData) => Promise.reject({
+    response: {
+      data: {
+        message: 'Convert to project is not yet implemented',
+        code: 'NOT_IMPLEMENTED'
+      },
+      status: 501
+    }
+  }),
 };
 
 // Projects API endpoints
