@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Controller;
 
+use App\Entity\Project;
 use App\Entity\Task;
 use App\Entity\User;
+use App\Repository\ProjectRepository;
 use App\Repository\TaskRepository;
 use App\Service\TaskService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -26,6 +28,7 @@ class TaskController extends AbstractController
 
     public function __construct(
         private readonly TaskRepository $taskRepository,
+        private readonly ProjectRepository $projectRepository,
         private readonly ValidatorInterface $validator,
         private readonly TaskService $taskService,
     ) {
@@ -532,6 +535,14 @@ class TaskController extends AbstractController
             $task->setNotes($data['notes']);
         }
 
+        // Handle project_id separately since it requires lookup
+        if (array_key_exists('project_id', $data)) {
+            $projectError = $this->validateAndSetProject($task, $data['project_id']);
+            if ($projectError !== null) {
+                return $projectError;
+            }
+        }
+
         foreach ($fieldUpdaters as $field => $updater) {
             if (array_key_exists($field, $data)) {
                 $error = $updater($data[$field]);
@@ -604,6 +615,34 @@ class TaskController extends AbstractController
             return $this->errorResponse('Position must be a non-negative integer', 'INVALID_POSITION', Response::HTTP_BAD_REQUEST);
         }
         $task->setPosition($value);
+
+        return null;
+    }
+
+    private function validateAndSetProject(Task $task, mixed $projectId): ?JsonResponse
+    {
+        if ($projectId === null) {
+            $task->setProject(null);
+
+            return null;
+        }
+
+        if (!is_string($projectId) || !Uuid::isValid($projectId)) {
+            return $this->errorResponse('Invalid project_id format', 'INVALID_PROJECT_ID', Response::HTTP_BAD_REQUEST);
+        }
+
+        $project = $this->projectRepository->findById(Uuid::fromString($projectId));
+
+        if ($project === null) {
+            return $this->errorResponse('Project not found', 'PROJECT_NOT_FOUND', Response::HTTP_NOT_FOUND);
+        }
+
+        // Verify the project belongs to the same user as the task
+        if ($project->getUser()->getId()->toRfc4122() !== $task->getUser()->getId()->toRfc4122()) {
+            return $this->errorResponse('Project not found', 'PROJECT_NOT_FOUND', Response::HTTP_NOT_FOUND);
+        }
+
+        $task->setProject($project);
 
         return null;
     }
