@@ -101,6 +101,12 @@ const Navigation = () => {
               >
                 Contexts
               </Link>
+              <Link
+                to="/next-actions"
+                className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+              >
+                Next Actions
+              </Link>
             </div>
           </div>
 

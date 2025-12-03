@@ -105,6 +105,55 @@ export const convertToProject = createAsyncThunk(
   }
 );
 
+// Fetch tasks by GTD status
+export const fetchNextActions = createAsyncThunk(
+  'tasks/fetchNextActions',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await tasksAPI.getByStatus(TASK_STATUS.NEXT_ACTION);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || { message: 'Failed to fetch next actions' });
+    }
+  }
+);
+
+export const fetchWaitingFor = createAsyncThunk(
+  'tasks/fetchWaitingFor',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await tasksAPI.getByStatus(TASK_STATUS.WAITING_FOR);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || { message: 'Failed to fetch waiting for tasks' });
+    }
+  }
+);
+
+export const fetchSomedayMaybe = createAsyncThunk(
+  'tasks/fetchSomedayMaybe',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await tasksAPI.getByStatus(TASK_STATUS.SOMEDAY_MAYBE);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || { message: 'Failed to fetch someday/maybe tasks' });
+    }
+  }
+);
+
+export const fetchReference = createAsyncThunk(
+  'tasks/fetchReference',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await tasksAPI.getByStatus(TASK_STATUS.REFERENCE);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || { message: 'Failed to fetch reference items' });
+    }
+  }
+);
+
 const initialState = {
   // Tasks by status for quick access
   inbox: [],
@@ -283,6 +332,62 @@ const tasksSlice = createSlice({
       .addCase(convertToProject.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || 'Failed to convert to project';
+      })
+
+      // Fetch next actions
+      .addCase(fetchNextActions.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchNextActions.fulfilled, (state, action) => {
+        state.loading = false;
+        state.nextActions = action.payload.tasks || [];
+      })
+      .addCase(fetchNextActions.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || 'Failed to fetch next actions';
+      })
+
+      // Fetch waiting for
+      .addCase(fetchWaitingFor.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchWaitingFor.fulfilled, (state, action) => {
+        state.loading = false;
+        state.waitingFor = action.payload.tasks || [];
+      })
+      .addCase(fetchWaitingFor.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || 'Failed to fetch waiting for tasks';
+      })
+
+      // Fetch someday/maybe
+      .addCase(fetchSomedayMaybe.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchSomedayMaybe.fulfilled, (state, action) => {
+        state.loading = false;
+        state.somedayMaybe = action.payload.tasks || [];
+      })
+      .addCase(fetchSomedayMaybe.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || 'Failed to fetch someday/maybe tasks';
+      })
+
+      // Fetch reference
+      .addCase(fetchReference.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchReference.fulfilled, (state, action) => {
+        state.loading = false;
+        state.reference = action.payload.tasks || [];
+      })
+      .addCase(fetchReference.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload?.message || 'Failed to fetch reference items';
       });
   },
 });
