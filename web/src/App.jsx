@@ -7,6 +7,7 @@ import PasswordResetConfirmPage from './pages/PasswordResetConfirmPage';
 import InboxPage from './pages/InboxPage';
 import ClarifyPage from './pages/ClarifyPage';
 import ContextsPage from './pages/ContextsPage';
+import ProjectsPage from './pages/ProjectsPage';
 import NextActionsPage from './pages/NextActionsPage';
 import WaitingForPage from './pages/WaitingForPage';
 import SomedayMaybePage from './pages/SomedayMaybePage';
@@ -62,6 +63,16 @@ function App() {
             <ProtectedRoute>
               <AuthenticatedLayout>
                 <ContextsPage />
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/projects"
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
+                <ProjectsPage />
               </AuthenticatedLayout>
             </ProtectedRoute>
           }
