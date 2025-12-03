@@ -52,10 +52,11 @@ class RegistrationController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        // Validate password strength (min 8 characters)
-        if (strlen($data['password']) < 8) {
+        // Validate password strength
+        $passwordError = $this->validatePasswordStrength($data['password']);
+        if ($passwordError !== null) {
             return $this->json([
-                'error' => 'Password must be at least 8 characters long',
+                'error' => $passwordError,
                 'code' => 'WEAK_PASSWORD',
             ], Response::HTTP_BAD_REQUEST);
         }
@@ -268,5 +269,27 @@ class RegistrationController extends AbstractController
         return $this->json([
             'message' => 'If an account exists with this email, a verification email has been sent.',
         ]);
+    }
+
+    /**
+     * Validate password strength requirements.
+     *
+     * @return string|null Error message if validation fails, null if valid
+     */
+    private function validatePasswordStrength(string $password): ?string
+    {
+        if (strlen($password) < 8) {
+            return 'Password must be at least 8 characters long';
+        }
+
+        if (!preg_match('/[A-Z]/', $password)) {
+            return 'Password must contain at least one uppercase letter';
+        }
+
+        if (!preg_match('/[0-9]/', $password)) {
+            return 'Password must contain at least one number';
+        }
+
+        return null;
     }
 }

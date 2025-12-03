@@ -143,9 +143,10 @@ class PasswordResetController extends AbstractController
         }
 
         // Validate password strength
-        if (strlen($data['password']) < 8) {
+        $passwordError = $this->validatePasswordStrength($data['password']);
+        if ($passwordError !== null) {
             return $this->json([
-                'error' => 'Password must be at least 8 characters long',
+                'error' => $passwordError,
                 'code' => 'WEAK_PASSWORD',
             ], Response::HTTP_BAD_REQUEST);
         }
@@ -227,5 +228,27 @@ class PasswordResetController extends AbstractController
         }
 
         return $maskedLocal . '@' . $maskedDomainFull;
+    }
+
+    /**
+     * Validate password strength requirements.
+     *
+     * @return string|null Error message if validation fails, null if valid
+     */
+    private function validatePasswordStrength(string $password): ?string
+    {
+        if (strlen($password) < 8) {
+            return 'Password must be at least 8 characters long';
+        }
+
+        if (!preg_match('/[A-Z]/', $password)) {
+            return 'Password must contain at least one uppercase letter';
+        }
+
+        if (!preg_match('/[0-9]/', $password)) {
+            return 'Password must contain at least one number';
+        }
+
+        return null;
     }
 }
