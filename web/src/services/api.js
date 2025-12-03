@@ -120,14 +120,19 @@ export const tasksAPI = {
     });
   },
   setContexts: (id, contextIds) => apiClient.put(`/tasks/${id}/contexts`, { context_ids: contextIds }),
-  // Convert task to project (not yet implemented in backend)
-  convertToProject: () => {
-    const error = new Error('Convert to project is not yet implemented');
-    error.response = {
-      data: { message: error.message, code: 'NOT_IMPLEMENTED' },
-      status: 501
-    };
-    return Promise.reject(error);
+  // Convert task to project: creates a project and links the task to it
+  convertToProject: async (taskId, projectData) => {
+    // 1. Create the project
+    const projectResponse = await apiClient.post('/projects', projectData);
+    const project = projectResponse.data.project;
+
+    // 2. Link the original task to the new project and mark as next action
+    await apiClient.patch(`/tasks/${taskId}/clarify`, {
+      status: 'next_action',
+      project_id: project.id,
+    });
+
+    return { data: { project, taskId } };
   },
 };
 

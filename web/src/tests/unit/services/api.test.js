@@ -235,26 +235,28 @@ describe('api.js', () => {
   });
 
   describe('tasksAPI.convertToProject', () => {
-    it('should reject with not implemented error', async () => {
-      await expect(tasksAPI.convertToProject('task-123', { title: 'Project' })).rejects.toMatchObject({
-        message: 'Convert to project is not yet implemented',
-        response: {
-          data: {
-            message: 'Convert to project is not yet implemented',
-            code: 'NOT_IMPLEMENTED',
-          },
-          status: 501,
-        },
+    it('should create a project and link the task to it', async () => {
+      const mockProject = { id: 'proj-new', title: 'New Project', outcome: 'Test outcome' };
+      mockAxiosInstance.post.mockResolvedValueOnce({ data: { project: mockProject } });
+      mockAxiosInstance.patch.mockResolvedValueOnce({ data: { task: { id: 'task-123', project_id: 'proj-new' } } });
+
+      const result = await tasksAPI.convertToProject('task-123', { title: 'New Project', outcome: 'Test outcome' });
+
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/projects', { title: 'New Project', outcome: 'Test outcome' });
+      expect(mockAxiosInstance.patch).toHaveBeenCalledWith('/tasks/task-123/clarify', {
+        status: 'next_action',
+        project_id: 'proj-new',
       });
+      expect(result.data.project).toEqual(mockProject);
+      expect(result.data.taskId).toBe('task-123');
     });
 
-    it('should reject even without arguments', async () => {
-      await expect(tasksAPI.convertToProject()).rejects.toMatchObject({
-        response: {
-          status: 501,
-          data: { code: 'NOT_IMPLEMENTED' },
-        },
-      });
+    it('should propagate error if project creation fails', async () => {
+      const error = new Error('Failed to create project');
+      error.response = { status: 400, data: { message: 'Invalid data' } };
+      mockAxiosInstance.post.mockRejectedValueOnce(error);
+
+      await expect(tasksAPI.convertToProject('task-123', { title: '' })).rejects.toThrow('Failed to create project');
     });
   });
 });
