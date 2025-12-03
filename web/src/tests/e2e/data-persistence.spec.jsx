@@ -199,8 +199,6 @@ describe('Data Persistence E2E Tests', () => {
     });
 
     it('should preserve user preferences after logout and login', async () => {
-      const user = userEvent.setup();
-
       // Initial profile with specific preferences
       const originalPreferences = {
         timezone: 'Europe/Paris',
@@ -241,9 +239,11 @@ describe('Data Persistence E2E Tests', () => {
         expect(screen.getByText('user@example.com')).toBeInTheDocument();
       });
 
-      // Verify timezone is loaded
-      const timezoneSelect = screen.getByLabelText(/timezone/i);
-      expect(timezoneSelect).toHaveValue('Europe/Paris');
+      // Wait for profile to be loaded in store and timezone to be updated in UI
+      await waitFor(() => {
+        const timezoneSelect = screen.getByLabelText(/timezone/i);
+        expect(timezoneSelect).toHaveValue('Europe/Paris');
+      });
     });
 
     it('should update preferences and persist them', async () => {
