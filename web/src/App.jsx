@@ -9,6 +9,7 @@ import ClarifyPage from './pages/ClarifyPage';
 import ContextsPage from './pages/ContextsPage';
 import NextActionsPage from './pages/NextActionsPage';
 import WaitingForPage from './pages/WaitingForPage';
+import SomedayMaybePage from './pages/SomedayMaybePage';
 import AccountSettingsPage from './pages/AccountSettingsPage';
 import AccountDeletionPage from './pages/AccountDeletionPage';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -80,6 +81,16 @@ function App() {
             <ProtectedRoute>
               <AuthenticatedLayout>
                 <WaitingForPage />
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/someday-maybe"
+          element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
+                <SomedayMaybePage />
               </AuthenticatedLayout>
             </ProtectedRoute>
           }
