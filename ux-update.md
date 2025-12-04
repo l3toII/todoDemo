@@ -1,25 +1,51 @@
-# UX Update
+# UX Update - GTD Application
 
-## Current State
+## Summary
 
-<!-- Describe the current UX state -->
+This document tracks the UX improvement initiative for the GTD Todo application.
 
-## Goals
+## Key Documents
 
-<!-- What do we want to achieve with this UX update? -->
+1. **Gap Analysis**: `specs/001-gtd-todo-app/ux-gap-analysis.md`
+   - Backend capabilities (complete)
+   - Frontend gaps (6 items identified)
+   - Required changes summary
 
-## Proposed Changes
+2. **Improvement Proposal**: `specs/001-gtd-todo-app/ux-improvement-proposal.md`
+   - Enhanced ClarifyWizard
+   - Inline clarification
+   - Unified Actions page
+   - Simplified navigation
 
-<!-- List proposed UX changes -->
+3. **Visual Mockups**: `specs/001-gtd-todo-app/ux-visual-mockups.md`
+   - ASCII wireframes for all screens
+   - Desktop and mobile views
+   - Interaction states
 
-## Pages/Components Affected
+## Key Finding
 
-<!-- Which pages and components will be modified -->
+**The backend API is complete**. All GTD features (contexts, projects, status transitions, energy levels, time estimates) are fully implemented. The gaps are exclusively in the frontend.
 
-## User Flow Changes
+## Frontend Gaps Summary
 
-<!-- Describe any changes to user flows -->
+| Gap | Current State | Fix |
+|-----|---------------|-----|
+| Context selection | Not in ClarifyWizard | Add step to ADD_DETAILS |
+| Project assignment | Only "convert to project" | Add "assign to existing project" |
+| Waiting for person | Field not sent to API | Append to notes |
+| Inline clarification | Must use separate page | Add panel to InboxPage |
+| Fragmented lists | 4 separate pages | Create unified ActionsPage |
+| Navigation | 8 tabs | Reduce to 4 tabs |
 
-## Notes
+## Implementation Phases
 
-<!-- Additional notes and considerations -->
+- **P6.1**: ClarifyWizard Enhancement (no backend changes)
+- **P6.2**: Inline Clarification (no backend changes)
+- **P6.3**: Unified Actions Page (no backend changes)
+- **P6.4**: Navigation Update (no backend changes)
+- **P6.5**: Cleanup & Polish
+
+## Status
+
+**Phase**: Planning complete, ready for implementation
+**Backend changes required**: None
