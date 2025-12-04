@@ -5,6 +5,8 @@ import { BrowserRouter } from 'react-router-dom';
 import { configureStore } from '@reduxjs/toolkit';
 import ClarifyPage from '../../../pages/ClarifyPage';
 import tasksReducer from '../../../features/tasks/tasksSlice';
+import contextsReducer from '../../../features/contexts/contextsSlice';
+import projectsReducer from '../../../features/projects/projectsSlice';
 import { tasksAPI } from '../../../services/api';
 
 // Mock the API
@@ -14,16 +16,50 @@ vi.mock('../../../services/api', () => ({
     clarify: vi.fn(),
     complete: vi.fn(),
     delete: vi.fn(),
+    setContexts: vi.fn(() => Promise.resolve({ data: {} })),
+  },
+  contextsAPI: {
+    getAll: vi.fn(() => Promise.resolve({ data: [] })),
+  },
+  projectsAPI: {
+    getAll: vi.fn(() => Promise.resolve({ data: { projects: [] } })),
   },
 }));
+
+// Default mock contexts and projects for tests
+const defaultContexts = [
+  { id: 'ctx-1', name: 'Office', is_default: true, status: 'active' },
+  { id: 'ctx-2', name: 'Home', is_default: true, status: 'active' },
+];
+
+const defaultProjects = [
+  { id: 'proj-1', title: 'Project A', status: 'active', has_next_action: true },
+];
 
 // Helper to create a test store
 const createTestStore = (preloadedState = {}) => {
   return configureStore({
     reducer: {
       tasks: tasksReducer,
+      contexts: contextsReducer,
+      projects: projectsReducer,
     },
-    preloadedState,
+    preloadedState: {
+      ...preloadedState,
+      contexts: {
+        contexts: defaultContexts,
+        loading: false,
+        error: null,
+        ...preloadedState.contexts,
+      },
+      projects: {
+        projects: defaultProjects,
+        currentProject: null,
+        loading: false,
+        error: null,
+        ...preloadedState.projects,
+      },
+    },
   });
 };
 
