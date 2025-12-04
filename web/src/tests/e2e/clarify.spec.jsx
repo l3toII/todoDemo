@@ -19,6 +19,8 @@ import ClarifyPage from '../../pages/ClarifyPage';
 import tasksReducer from '../../features/tasks/tasksSlice';
 import authReducer from '../../features/auth/authSlice';
 import accountReducer from '../../features/account/accountSlice';
+import contextsReducer from '../../features/contexts/contextsSlice';
+import projectsReducer from '../../features/projects/projectsSlice';
 
 // Mock the API module
 vi.mock('../../services/api', () => ({
@@ -37,9 +39,14 @@ vi.mock('../../services/api', () => ({
     clarify: vi.fn().mockResolvedValue({ data: { id: '1', status: 'next_action' } }),
     complete: vi.fn().mockResolvedValue({ data: { id: '1', status: 'completed' } }),
     delete: vi.fn().mockResolvedValue({ data: { id: '1' } }),
+    setContexts: vi.fn().mockResolvedValue({ data: {} }),
   },
   projectsAPI: {
     create: vi.fn().mockResolvedValue({ data: { id: 'proj-1', title: 'New Project' } }),
+    getAll: vi.fn().mockResolvedValue({ data: { projects: [] } }),
+  },
+  contextsAPI: {
+    getAll: vi.fn().mockResolvedValue({ data: [] }),
   },
   authAPI: {
     logout: vi.fn(),
@@ -55,6 +62,16 @@ vi.mock('../../services/api', () => ({
   },
 }));
 
+// Default mock contexts and projects for tests
+const defaultContexts = [
+  { id: 'ctx-1', name: 'Office', is_default: true, status: 'active' },
+  { id: 'ctx-2', name: 'Home', is_default: true, status: 'active' },
+];
+
+const defaultProjects = [
+  { id: 'proj-1', title: 'Project A', status: 'active', has_next_action: true },
+];
+
 // Create a test store with initial authenticated state
 const createTestStore = (preloadedState = {}) => {
   return configureStore({
@@ -62,6 +79,8 @@ const createTestStore = (preloadedState = {}) => {
       auth: authReducer,
       account: accountReducer,
       tasks: tasksReducer,
+      contexts: contextsReducer,
+      projects: projectsReducer,
     },
     preloadedState: {
       auth: {
@@ -92,6 +111,17 @@ const createTestStore = (preloadedState = {}) => {
         error: null,
         nextCursor: null,
         total: 3,
+      },
+      contexts: {
+        contexts: defaultContexts,
+        loading: false,
+        error: null,
+      },
+      projects: {
+        projects: defaultProjects,
+        currentProject: null,
+        loading: false,
+        error: null,
       },
       ...preloadedState,
     },

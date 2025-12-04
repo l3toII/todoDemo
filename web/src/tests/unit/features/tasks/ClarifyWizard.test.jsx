@@ -4,6 +4,8 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import ClarifyWizard from '../../../../features/tasks/ClarifyWizard';
 import tasksReducer from '../../../../features/tasks/tasksSlice';
+import contextsReducer from '../../../../features/contexts/contextsSlice';
+import projectsReducer from '../../../../features/projects/projectsSlice';
 
 // Mock the tasksSlice actions
 vi.mock('../../../../features/tasks/tasksSlice', async () => {
@@ -17,7 +19,35 @@ vi.mock('../../../../features/tasks/tasksSlice', async () => {
   };
 });
 
+// Mock the contextsSlice actions
+vi.mock('../../../../features/contexts/contextsSlice', async () => {
+  const actual = await vi.importActual('../../../../features/contexts/contextsSlice');
+  return {
+    ...actual,
+    fetchContexts: vi.fn(() => ({ type: 'contexts/fetchAll/pending' })),
+  };
+});
+
+// Mock the projectsSlice actions
+vi.mock('../../../../features/projects/projectsSlice', async () => {
+  const actual = await vi.importActual('../../../../features/projects/projectsSlice');
+  return {
+    ...actual,
+    fetchProjects: vi.fn(() => ({ type: 'projects/fetchAll/pending' })),
+  };
+});
+
+// Mock the API for setContexts
+vi.mock('../../../../services/api', () => ({
+  tasksAPI: {
+    setContexts: vi.fn(() => Promise.resolve({ data: {} })),
+  },
+}));
+
 import { clarifyTask, completeTask, deleteTask, convertToProject } from '../../../../features/tasks/tasksSlice';
+import { fetchContexts } from '../../../../features/contexts/contextsSlice';
+import { fetchProjects } from '../../../../features/projects/projectsSlice';
+import { tasksAPI } from '../../../../services/api';
 
 describe('ClarifyWizard', () => {
   let store;
@@ -30,10 +60,24 @@ describe('ClarifyWizard', () => {
     notes: 'Some notes about the task',
   };
 
+  const mockContexts = [
+    { id: 'ctx-1', name: 'Office', is_default: true, status: 'active' },
+    { id: 'ctx-2', name: 'Home', is_default: true, status: 'active' },
+    { id: 'ctx-3', name: 'Phone', is_default: true, status: 'active' },
+  ];
+
+  const mockProjects = [
+    { id: 'proj-1', title: 'Project Alpha', status: 'active', has_next_action: true },
+    { id: 'proj-2', title: 'Project Beta', status: 'active', has_next_action: false },
+  ];
+
   const createStore = (preloadedState = {}) => {
+    const { tasks: tasksState = {}, contexts: contextsState = {}, projects: projectsState = {} } = preloadedState;
     return configureStore({
       reducer: {
         tasks: tasksReducer,
+        contexts: contextsReducer,
+        projects: projectsReducer,
       },
       preloadedState: {
         tasks: {
@@ -49,7 +93,20 @@ describe('ClarifyWizard', () => {
           error: null,
           nextCursor: null,
           total: 0,
-          ...preloadedState,
+          ...tasksState,
+        },
+        contexts: {
+          contexts: mockContexts,
+          loading: false,
+          error: null,
+          ...contextsState,
+        },
+        projects: {
+          projects: mockProjects,
+          currentProject: null,
+          loading: false,
+          error: null,
+          ...projectsState,
         },
       },
     });
@@ -91,6 +148,13 @@ describe('ClarifyWizard', () => {
       type: 'tasks/convertToProject/pending',
       unwrap: () => Promise.resolve({ project: { id: 'proj-123' } }),
     }));
+    fetchContexts.mockImplementation(() => ({
+      type: 'contexts/fetchAll/pending',
+    }));
+    fetchProjects.mockImplementation(() => ({
+      type: 'projects/fetchAll/pending',
+    }));
+    tasksAPI.setContexts.mockImplementation(() => Promise.resolve({ data: {} }));
   });
 
   describe('Initial Rendering', () => {
@@ -392,6 +456,7 @@ describe('ClarifyWizard', () => {
             energyLevel: 'high',
             timeEstimate: 30,
             dueDate: null,
+            projectId: null, // Added: project ID is now always included
           },
         });
       });
@@ -524,7 +589,7 @@ describe('ClarifyWizard', () => {
 
   describe('Loading States', () => {
     it('shows Saving text when clarifying is in progress', () => {
-      store = createStore({ clarifying: true });
+      store = createStore({ tasks: { clarifying: true } });
       renderWizard();
       fireEvent.click(screen.getByText('Yes'));
       fireEvent.click(screen.getByText('No, longer'));
@@ -535,7 +600,7 @@ describe('ClarifyWizard', () => {
     });
 
     it('disables Save button when clarifying', () => {
-      store = createStore({ clarifying: true });
+      store = createStore({ tasks: { clarifying: true } });
       renderWizard();
       fireEvent.click(screen.getByText('Yes'));
       fireEvent.click(screen.getByText('No, longer'));
@@ -546,7 +611,7 @@ describe('ClarifyWizard', () => {
     });
 
     it('shows Creating text for project creation', () => {
-      store = createStore({ clarifying: true });
+      store = createStore({ tasks: { clarifying: true } });
       renderWizard();
       fireEvent.click(screen.getByText('Yes'));
       fireEvent.click(screen.getByText('No, longer'));
@@ -647,6 +712,338 @@ describe('ClarifyWizard', () => {
 
       // TwoMinuteTimer should be present
       expect(screen.getByText('Do it now!')).toBeInTheDocument();
+    });
+  });
+
+  // P6-001 to P6-003: Context Selection Tests
+  describe('Context Selection (P6-001, P6-002, P6-003)', () => {
+    const navigateToAddDetails = () => {
+      renderWizard();
+      fireEvent.click(screen.getByText('Yes')); // Actionable
+      fireEvent.click(screen.getByText('No, longer')); // More than 2 min
+      fireEvent.click(screen.getByText('Single Action')); // Single action
+      fireEvent.click(screen.getByText('Do it myself')); // Next Action
+    };
+
+    it('should render context chips in ADD_DETAILS step', () => {
+      navigateToAddDetails();
+      expect(screen.getByText('Contexts')).toBeInTheDocument();
+      expect(screen.getByText('@Office')).toBeInTheDocument();
+      expect(screen.getByText('@Home')).toBeInTheDocument();
+      expect(screen.getByText('@Phone')).toBeInTheDocument();
+    });
+
+    it('should allow selecting multiple contexts', () => {
+      navigateToAddDetails();
+      const officeChip = screen.getByText('@Office');
+      const homeChip = screen.getByText('@Home');
+
+      fireEvent.click(officeChip);
+      fireEvent.click(homeChip);
+
+      // Both should be selected (have selected styling)
+      expect(officeChip.closest('button')).toHaveClass('bg-blue-100');
+      expect(homeChip.closest('button')).toHaveClass('bg-blue-100');
+    });
+
+    it('should toggle context selection on click', () => {
+      navigateToAddDetails();
+      const officeChip = screen.getByText('@Office');
+
+      // Click to select
+      fireEvent.click(officeChip);
+      expect(officeChip.closest('button')).toHaveClass('bg-blue-100');
+
+      // Click again to deselect
+      fireEvent.click(officeChip);
+      expect(officeChip.closest('button')).not.toHaveClass('bg-blue-100');
+    });
+
+    it('should handle empty contexts array gracefully', () => {
+      // Set loading: true to prevent the useEffect from triggering another fetch
+      store = createStore({ contexts: { contexts: [], loading: true, error: null } });
+      renderWizard();
+      fireEvent.click(screen.getByText('Yes'));
+      fireEvent.click(screen.getByText('No, longer'));
+      fireEvent.click(screen.getByText('Single Action'));
+      fireEvent.click(screen.getByText('Do it myself'));
+
+      expect(screen.getByText('Contexts')).toBeInTheDocument();
+      // Should show loading indicator when loading is true and contexts are empty
+      expect(screen.getByText(/loading contexts/i)).toBeInTheDocument();
+    });
+
+    it('should dispatch fetchContexts if contexts are empty on mount', () => {
+      store = createStore({ contexts: { contexts: [], loading: false, error: null } });
+      renderWizard();
+
+      expect(fetchContexts).toHaveBeenCalled();
+    });
+
+    it('should not dispatch fetchContexts if already loaded', () => {
+      store = createStore(); // Uses mockContexts
+      renderWizard();
+
+      expect(fetchContexts).not.toHaveBeenCalled();
+    });
+
+    it('should call setContexts API after successful clarify', async () => {
+      navigateToAddDetails();
+
+      // Select contexts
+      fireEvent.click(screen.getByText('@Office'));
+      fireEvent.click(screen.getByText('@Home'));
+
+      // Save
+      fireEvent.click(screen.getByText('Save'));
+
+      await waitFor(() => {
+        expect(tasksAPI.setContexts).toHaveBeenCalledWith('task-123', ['ctx-1', 'ctx-2']);
+      });
+    });
+
+    it('should not call setContexts if no contexts selected', async () => {
+      navigateToAddDetails();
+
+      // Save without selecting contexts
+      fireEvent.click(screen.getByText('Save'));
+
+      await waitFor(() => {
+        expect(clarifyTask).toHaveBeenCalled();
+      });
+
+      expect(tasksAPI.setContexts).not.toHaveBeenCalled();
+    });
+
+    it('should handle setContexts API error gracefully', async () => {
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+      tasksAPI.setContexts.mockRejectedValueOnce(new Error('API Error'));
+
+      navigateToAddDetails();
+      fireEvent.click(screen.getByText('@Office'));
+      fireEvent.click(screen.getByText('Save'));
+
+      // Should still complete even if setContexts fails
+      await waitFor(() => {
+        expect(mockOnComplete).toHaveBeenCalledWith('task-123');
+      });
+
+      consoleError.mockRestore();
+    });
+  });
+
+  // P6-004, P6-005, P6-006: Project Selection Tests
+  describe('Project Assignment (P6-004, P6-005, P6-006)', () => {
+    const navigateToWhatToDo = () => {
+      renderWizard();
+      fireEvent.click(screen.getByText('Yes')); // Actionable
+      fireEvent.click(screen.getByText('No, longer')); // More than 2 min
+      fireEvent.click(screen.getByText('Single Action')); // Single action
+    };
+
+    it('should show "Add to existing project" button in WHAT_TO_DO step', () => {
+      navigateToWhatToDo();
+      expect(screen.getByText('Add to project...')).toBeInTheDocument();
+    });
+
+    it('should navigate to project selection when "Add to project" clicked', () => {
+      navigateToWhatToDo();
+      fireEvent.click(screen.getByText('Add to project...'));
+      expect(screen.getByText('Select Project')).toBeInTheDocument();
+    });
+
+    it('should display list of active projects', () => {
+      navigateToWhatToDo();
+      fireEvent.click(screen.getByText('Add to project...'));
+      expect(screen.getByText('Project Alpha')).toBeInTheDocument();
+      expect(screen.getByText('Project Beta')).toBeInTheDocument();
+    });
+
+    it('should allow selecting a project', () => {
+      navigateToWhatToDo();
+      fireEvent.click(screen.getByText('Add to project...'));
+      fireEvent.click(screen.getByText('Project Alpha'));
+
+      // Project should be visually selected
+      expect(screen.getByText('Project Alpha').closest('button')).toHaveClass('border-blue-500');
+    });
+
+    it('should navigate to ADD_DETAILS after project selection confirmed', () => {
+      navigateToWhatToDo();
+      fireEvent.click(screen.getByText('Add to project...'));
+      fireEvent.click(screen.getByText('Project Alpha'));
+      fireEvent.click(screen.getByText('Add to Project'));
+
+      expect(screen.getByText('Add Details')).toBeInTheDocument();
+    });
+
+    it('should include project_id in clarify API call', async () => {
+      navigateToWhatToDo();
+      fireEvent.click(screen.getByText('Add to project...'));
+      fireEvent.click(screen.getByText('Project Alpha'));
+      fireEvent.click(screen.getByText('Add to Project'));
+      fireEvent.click(screen.getByText('Save'));
+
+      await waitFor(() => {
+        expect(clarifyTask).toHaveBeenCalledWith(
+          expect.objectContaining({
+            clarificationData: expect.objectContaining({
+              projectId: 'proj-1',
+              status: 'next_action',
+            }),
+          })
+        );
+      });
+    });
+
+    it('should show empty state when no projects exist', () => {
+      // Set loading: true to prevent useEffect from triggering fetch
+      store = createStore({ projects: { projects: [], currentProject: null, loading: true, error: null } });
+      renderWizard();
+      fireEvent.click(screen.getByText('Yes'));
+      fireEvent.click(screen.getByText('No, longer'));
+      fireEvent.click(screen.getByText('Single Action'));
+      fireEvent.click(screen.getByText('Add to project...'));
+
+      // Should show loading indicator when loading is true and projects are empty
+      expect(screen.getByText(/loading projects/i)).toBeInTheDocument();
+    });
+
+    it('should have Cancel button to go back', () => {
+      navigateToWhatToDo();
+      fireEvent.click(screen.getByText('Add to project...'));
+      fireEvent.click(screen.getByText('Cancel'));
+
+      expect(screen.getByText('What should happen next?')).toBeInTheDocument();
+    });
+  });
+
+  // P6-007: Waiting For Notes Tests
+  describe('Waiting For Notes (P6-007)', () => {
+    it('should prepend "Waiting for: {person}" to notes for WAITING_FOR outcome', async () => {
+      renderWizard();
+      fireEvent.click(screen.getByText('Yes'));
+      fireEvent.click(screen.getByText('No, longer'));
+      fireEvent.click(screen.getByText('Single Action'));
+      fireEvent.click(screen.getByText('Delegate it'));
+
+      fireEvent.change(screen.getByLabelText('Waiting for whom?'), { target: { value: 'John Smith' } });
+      fireEvent.change(screen.getByLabelText('Notes'), { target: { value: 'Original notes' } });
+      fireEvent.click(screen.getByText('Save'));
+
+      await waitFor(() => {
+        expect(clarifyTask).toHaveBeenCalledWith(
+          expect.objectContaining({
+            clarificationData: expect.objectContaining({
+              status: 'waiting_for',
+              notes: 'Waiting for: John Smith\n\nOriginal notes',
+            }),
+          })
+        );
+      });
+    });
+
+    it('should not modify notes for non-waiting_for outcomes', async () => {
+      renderWizard();
+      fireEvent.click(screen.getByText('Yes'));
+      fireEvent.click(screen.getByText('No, longer'));
+      fireEvent.click(screen.getByText('Single Action'));
+      fireEvent.click(screen.getByText('Do it myself'));
+
+      fireEvent.change(screen.getByLabelText('Notes'), { target: { value: 'Original notes' } });
+      fireEvent.click(screen.getByText('Save'));
+
+      await waitFor(() => {
+        expect(clarifyTask).toHaveBeenCalledWith(
+          expect.objectContaining({
+            clarificationData: expect.objectContaining({
+              notes: 'Original notes',
+            }),
+          })
+        );
+      });
+    });
+
+    it('should handle empty waitingForPerson gracefully', async () => {
+      renderWizard();
+      fireEvent.click(screen.getByText('Yes'));
+      fireEvent.click(screen.getByText('No, longer'));
+      fireEvent.click(screen.getByText('Single Action'));
+      fireEvent.click(screen.getByText('Delegate it'));
+
+      fireEvent.change(screen.getByLabelText('Notes'), { target: { value: 'Original notes' } });
+      // Don't fill waitingForPerson
+      fireEvent.click(screen.getByText('Save'));
+
+      await waitFor(() => {
+        expect(clarifyTask).toHaveBeenCalledWith(
+          expect.objectContaining({
+            clarificationData: expect.objectContaining({
+              notes: 'Original notes', // Should not prepend if person is empty
+            }),
+          })
+        );
+      });
+    });
+  });
+
+  // P6-008: Keyboard Navigation Tests
+  describe('Keyboard Navigation (P6-008)', () => {
+    it('should handle Y key for Yes answers', () => {
+      renderWizard();
+      fireEvent.keyDown(document, { key: 'y' });
+
+      expect(screen.getByText('Will it take less than 2 minutes?')).toBeInTheDocument();
+    });
+
+    it('should handle N key for No answers', () => {
+      renderWizard();
+      fireEvent.keyDown(document, { key: 'n' });
+
+      expect(screen.getByText('What is this?')).toBeInTheDocument();
+    });
+
+    it('should handle 1-4 keys for option selection in WHAT_TO_DO', () => {
+      renderWizard();
+      fireEvent.click(screen.getByText('Yes'));
+      fireEvent.click(screen.getByText('No, longer'));
+      fireEvent.click(screen.getByText('Single Action'));
+
+      // Press 1 to select "Do it myself"
+      fireEvent.keyDown(document, { key: '1' });
+
+      expect(screen.getByText('Add Details')).toBeInTheDocument();
+    });
+
+    it('should handle Backspace for going back', () => {
+      renderWizard();
+      fireEvent.click(screen.getByText('Yes')); // Now on TWO_MINUTE
+
+      fireEvent.keyDown(document, { key: 'Backspace' });
+
+      expect(screen.getByText('Is this actionable?')).toBeInTheDocument();
+    });
+
+    it('should handle Tab for skip', () => {
+      renderWizard();
+      fireEvent.keyDown(document, { key: 'Tab' });
+
+      expect(mockOnSkip).toHaveBeenCalled();
+    });
+
+    it('should ignore keyboard when typing in input fields', () => {
+      renderWizard();
+      fireEvent.click(screen.getByText('Yes'));
+      fireEvent.click(screen.getByText('No, longer'));
+      fireEvent.click(screen.getByText('Single Action'));
+      fireEvent.click(screen.getByText('Do it myself'));
+
+      const notesInput = screen.getByLabelText('Notes');
+      notesInput.focus();
+      fireEvent.keyDown(notesInput, { key: 'y' });
+
+      // Should still be on ADD_DETAILS, not navigate away
+      expect(screen.getByText('Add Details')).toBeInTheDocument();
     });
   });
 });

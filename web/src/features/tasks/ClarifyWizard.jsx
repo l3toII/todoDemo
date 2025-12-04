@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -9,6 +9,17 @@ import {
   selectTasksClarifying,
   TASK_STATUS,
 } from './tasksSlice';
+import {
+  fetchContexts,
+  selectAllContexts,
+  selectContextsLoading,
+} from '../contexts/contextsSlice';
+import {
+  fetchProjects,
+  selectActiveProjects,
+  selectProjectsLoading,
+} from '../projects/projectsSlice';
+import { tasksAPI } from '../../services/api';
 import TwoMinuteTimer from '../../components/TwoMinuteTimer';
 
 // Wizard steps
@@ -21,6 +32,7 @@ const WIZARD_STEPS = {
   NON_ACTIONABLE: 'nonActionable',
   ADD_DETAILS: 'addDetails',
   CREATE_PROJECT: 'createProject',
+  SELECT_PROJECT: 'selectProject',
 };
 
 // Decision outcomes
@@ -32,14 +44,33 @@ const OUTCOMES = {
   REFERENCE: 'reference',
   TRASH: 'trash',
   PROJECT: 'project',
+  ADD_TO_PROJECT: 'addToProject',
+};
+
+// Step history for back navigation
+const STEP_HISTORY = {
+  [WIZARD_STEPS.TWO_MINUTE]: WIZARD_STEPS.ACTIONABLE,
+  [WIZARD_STEPS.DO_IT_NOW]: WIZARD_STEPS.TWO_MINUTE,
+  [WIZARD_STEPS.SINGLE_OR_PROJECT]: WIZARD_STEPS.TWO_MINUTE,
+  [WIZARD_STEPS.WHAT_TO_DO]: WIZARD_STEPS.SINGLE_OR_PROJECT,
+  [WIZARD_STEPS.NON_ACTIONABLE]: WIZARD_STEPS.ACTIONABLE,
+  [WIZARD_STEPS.ADD_DETAILS]: WIZARD_STEPS.WHAT_TO_DO,
+  [WIZARD_STEPS.CREATE_PROJECT]: WIZARD_STEPS.SINGLE_OR_PROJECT,
+  [WIZARD_STEPS.SELECT_PROJECT]: WIZARD_STEPS.WHAT_TO_DO,
 };
 
 const ClarifyWizard = ({ task, onComplete, onSkip }) => {
   const dispatch = useDispatch();
   const isClarifying = useSelector(selectTasksClarifying);
+  const contexts = useSelector(selectAllContexts);
+  const contextsLoading = useSelector(selectContextsLoading);
+  const projects = useSelector(selectActiveProjects);
+  const projectsLoading = useSelector(selectProjectsLoading);
 
   const [currentStep, setCurrentStep] = useState(WIZARD_STEPS.ACTIONABLE);
   const [outcome, setOutcome] = useState(null);
+  const [selectedContexts, setSelectedContexts] = useState([]);
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
   const [formData, setFormData] = useState({
     notes: task?.notes || '',
     energyLevel: null,
@@ -51,14 +82,122 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
     firstActionTitle: '',
   });
 
+  // Fetch contexts on mount if not loaded
+  useEffect(() => {
+    if (contexts.length === 0 && !contextsLoading) {
+      dispatch(fetchContexts());
+    }
+  }, [dispatch, contexts.length, contextsLoading]);
+
+  // Fetch projects on mount if not loaded
+  useEffect(() => {
+    if (projects.length === 0 && !projectsLoading) {
+      dispatch(fetchProjects());
+    }
+  }, [dispatch, projects.length, projectsLoading]);
+
+  // Keyboard navigation handler
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ignore when typing in input/textarea
+      const tagName = e.target?.tagName?.toLowerCase();
+      if (tagName === 'input' || tagName === 'textarea' || tagName === 'select') return;
+
+      const key = e.key.toLowerCase();
+
+      // Y/N for binary choices
+      if (key === 'y' && currentStep === WIZARD_STEPS.ACTIONABLE) {
+        goToStep(WIZARD_STEPS.TWO_MINUTE);
+        return;
+      }
+      if (key === 'n' && currentStep === WIZARD_STEPS.ACTIONABLE) {
+        goToStep(WIZARD_STEPS.NON_ACTIONABLE);
+        return;
+      }
+      if (key === 'y' && currentStep === WIZARD_STEPS.TWO_MINUTE) {
+        goToStep(WIZARD_STEPS.DO_IT_NOW);
+        return;
+      }
+      if (key === 'n' && currentStep === WIZARD_STEPS.TWO_MINUTE) {
+        goToStep(WIZARD_STEPS.SINGLE_OR_PROJECT);
+        return;
+      }
+
+      // 1-4 for option selection
+      if (currentStep === WIZARD_STEPS.WHAT_TO_DO) {
+        if (key === '1') {
+          setOutcome(OUTCOMES.NEXT_ACTION);
+          goToStep(WIZARD_STEPS.ADD_DETAILS);
+          return;
+        }
+        if (key === '2') {
+          setOutcome(OUTCOMES.WAITING_FOR);
+          goToStep(WIZARD_STEPS.ADD_DETAILS);
+          return;
+        }
+        if (key === '3') {
+          setOutcome(OUTCOMES.SOMEDAY_MAYBE);
+          goToStep(WIZARD_STEPS.ADD_DETAILS);
+          return;
+        }
+        if (key === '4') {
+          setOutcome(OUTCOMES.ADD_TO_PROJECT);
+          goToStep(WIZARD_STEPS.SELECT_PROJECT);
+          return;
+        }
+      }
+
+      if (currentStep === WIZARD_STEPS.NON_ACTIONABLE) {
+        if (key === '1') {
+          handleSubmit(OUTCOMES.TRASH);
+          return;
+        }
+        if (key === '2') {
+          setOutcome(OUTCOMES.REFERENCE);
+          goToStep(WIZARD_STEPS.ADD_DETAILS);
+          return;
+        }
+        if (key === '3') {
+          setOutcome(OUTCOMES.SOMEDAY_MAYBE);
+          goToStep(WIZARD_STEPS.ADD_DETAILS);
+          return;
+        }
+      }
+
+      // Backspace for going back
+      if (e.key === 'Backspace' && STEP_HISTORY[currentStep]) {
+        e.preventDefault();
+        goToStep(STEP_HISTORY[currentStep]);
+        return;
+      }
+
+      // Tab for skip
+      if (e.key === 'Tab' && onSkip) {
+        e.preventDefault();
+        onSkip();
+        return;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentStep, onSkip]);
+
+  // Toggle context selection
+  const toggleContext = useCallback((contextId) => {
+    setSelectedContexts(prev =>
+      prev.includes(contextId)
+        ? prev.filter(id => id !== contextId)
+        : [...prev, contextId]
+    );
+  }, []);
+
   // Update form data
   const updateForm = useCallback((field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   }, []);
 
   // Handle final submission based on outcome
-  // Can receive immediateOutcome for cases where we need to submit immediately
-  // without waiting for state update (e.g., timer complete, trash)
   const handleSubmit = useCallback(async (immediateOutcome = null) => {
     const finalOutcome = immediateOutcome || outcome;
 
@@ -89,6 +228,7 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
             [OUTCOMES.WAITING_FOR]: TASK_STATUS.WAITING_FOR,
             [OUTCOMES.SOMEDAY_MAYBE]: TASK_STATUS.SOMEDAY_MAYBE,
             [OUTCOMES.REFERENCE]: TASK_STATUS.REFERENCE,
+            [OUTCOMES.ADD_TO_PROJECT]: TASK_STATUS.NEXT_ACTION,
           };
 
           const targetStatus = statusMap[finalOutcome];
@@ -97,16 +237,33 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
             throw new Error(`Invalid outcome: ${finalOutcome}`);
           }
 
+          // Prepare notes - prepend waiting for person if applicable
+          let finalNotes = formData.notes;
+          if (finalOutcome === OUTCOMES.WAITING_FOR && formData.waitingForPerson.trim()) {
+            finalNotes = `Waiting for: ${formData.waitingForPerson}\n\n${formData.notes}`;
+          }
+
           await dispatch(clarifyTask({
             taskId: task.id,
             clarificationData: {
               status: targetStatus,
-              notes: formData.notes,
+              notes: finalNotes,
               energyLevel: formData.energyLevel,
               timeEstimate: formData.timeEstimate,
               dueDate: formData.dueDate || null,
+              projectId: selectedProjectId,
             },
           })).unwrap();
+
+          // Call setContexts API if contexts were selected
+          if (selectedContexts.length > 0) {
+            try {
+              await tasksAPI.setContexts(task.id, selectedContexts);
+            } catch (contextError) {
+              console.error('Failed to set contexts:', contextError);
+              // Don't block completion if context setting fails
+            }
+          }
         }
       }
 
@@ -114,7 +271,7 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
     } catch (error) {
       console.error('Failed to clarify task:', error);
     }
-  }, [dispatch, task, outcome, formData, onComplete]);
+  }, [dispatch, task, outcome, formData, selectedContexts, selectedProjectId, onComplete]);
 
   // Navigate to next step based on choice
   const goToStep = useCallback((step, newOutcome = null) => {
@@ -334,6 +491,79 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
                   </div>
                 </div>
               </button>
+
+              <div className="border-t border-gray-200 pt-3">
+                <button
+                  onClick={() => {
+                    setOutcome(OUTCOMES.ADD_TO_PROJECT);
+                    goToStep(WIZARD_STEPS.SELECT_PROJECT);
+                  }}
+                  className="w-full p-4 bg-indigo-50 border-2 border-indigo-200 rounded-xl hover:border-indigo-400 hover:bg-indigo-100 transition-all text-left"
+                >
+                  <div className="flex items-center">
+                    <div className="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                      <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <span className="font-medium text-indigo-700">Add to project...</span>
+                      <p className="text-xs text-indigo-600">Link to existing project</p>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+
+      case WIZARD_STEPS.SELECT_PROJECT:
+        return (
+          <div className="space-y-6">
+            <div className="text-center">
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Select Project</h3>
+              <p className="text-gray-600">Choose a project to add this task to</p>
+            </div>
+
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {projectsLoading ? (
+                <div className="text-center py-4 text-gray-500">Loading projects...</div>
+              ) : projects.length === 0 ? (
+                <div className="text-center py-4 text-gray-500">No projects available. Create one first!</div>
+              ) : (
+                projects.map((project) => (
+                  <button
+                    key={project.id}
+                    onClick={() => setSelectedProjectId(project.id)}
+                    className={`w-full p-3 rounded-lg border-2 text-left transition-all ${
+                      selectedProjectId === project.id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <span className="font-medium text-gray-900">{project.title}</span>
+                    {project.outcome && (
+                      <p className="text-xs text-gray-500 mt-1 truncate">{project.outcome}</p>
+                    )}
+                  </button>
+                ))
+              )}
+            </div>
+
+            <div className="flex space-x-4">
+              <button
+                onClick={() => goToStep(WIZARD_STEPS.WHAT_TO_DO)}
+                className="flex-1 py-3 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => goToStep(WIZARD_STEPS.ADD_DETAILS)}
+                disabled={!selectedProjectId}
+                className="flex-1 py-3 px-4 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50"
+              >
+                Add to Project
+              </button>
             </div>
           </div>
         );
@@ -416,6 +646,34 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
             </div>
 
             <div className="space-y-4">
+              {/* Contexts Section */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Contexts
+                </label>
+                {contextsLoading ? (
+                  <div className="text-sm text-gray-500">Loading contexts...</div>
+                ) : contexts.length === 0 ? (
+                  <div className="text-sm text-gray-500">No contexts</div>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    {contexts.map((context) => (
+                      <button
+                        key={context.id}
+                        onClick={() => toggleContext(context.id)}
+                        className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${
+                          selectedContexts.includes(context.id)
+                            ? 'bg-blue-100 text-blue-700 border-2 border-blue-300'
+                            : 'bg-gray-100 text-gray-600 border-2 border-transparent hover:bg-gray-200'
+                        }`}
+                      >
+                        @{context.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
               <div>
                 <label htmlFor="wizard-notes" className="block text-sm font-medium text-gray-700 mb-1">
                   Notes
@@ -430,7 +688,7 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
                 />
               </div>
 
-              {outcome === OUTCOMES.NEXT_ACTION && (
+              {(outcome === OUTCOMES.NEXT_ACTION || outcome === OUTCOMES.ADD_TO_PROJECT) && (
                 <>
                   <fieldset>
                     <legend className="block text-sm font-medium text-gray-700 mb-2">
@@ -586,7 +844,7 @@ const ClarifyWizard = ({ task, onComplete, onSkip }) => {
       default:
         return null;
     }
-  }, [currentStep, task, formData, outcome, isClarifying, goToStep, updateForm, handleSubmit]);
+  }, [currentStep, task, formData, outcome, isClarifying, contexts, contextsLoading, projects, projectsLoading, selectedContexts, selectedProjectId, goToStep, updateForm, handleSubmit, toggleContext]);
 
   return (
     <div className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-auto overflow-hidden">
