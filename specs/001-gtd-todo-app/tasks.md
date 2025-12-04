@@ -14,7 +14,7 @@ Total tasks: 230
 - P3 Clarify and Process: 12 tasks ✅ COMPLETE
 - P4 Organize with Contexts: 19 tasks ✅ COMPLETE
 - P5 Project Management: 14 tasks ✅ COMPLETE
-- **P6 UX Redesign: 27 tasks (NEW)** - GTD workflow improvements
+- **P6 UX Redesign: 57 tasks (NEW)** - GTD workflow improvements (7 phases)
 - P7 Weekly Review: 12 tasks
 - P8 Calendar and Deadlines: 12 tasks
 - Cross-Cutting (Sync & Offline): 5 tasks
@@ -331,7 +331,7 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 **User Story**: As a user, I want a streamlined GTD experience with keyboard shortcuts, inline clarification, and unified task views so that I can work faster and stay in flow.
 
-**Status**: Ready for Development (0/27 tasks)
+**Status**: Ready for Development (0/50 tasks)
 
 **Documentation**:
 - [Gap Analysis](../../docs/ux-redesign/ux-gap-analysis.md) - Backend complete, frontend gaps identified
@@ -345,9 +345,19 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 - Task Lists: 4 separate pages → 1 unified Actions page with collapsible sections
 - Keyboard: None → Full keyboard navigation (`Ctrl+N`, `Esc`, `g i/a/p`, etc.)
 
+**Impact Analysis**:
+| Category | Files | Lines |
+|----------|-------|-------|
+| Pages to DELETE | 5 | -866 |
+| Pages to MODIFY | 3 | +150 |
+| Components to CREATE | 8 | +900 |
+| Tests to DELETE | 5 | -1,257 |
+| Tests to CREATE | 8 | +1,500 |
+| **Net change** | | **+427** |
+
 **Backend Changes**: None required. All GTD features already exist in the API.
 
-### Phase 6.1: ClarifyWizard Enhancement (Frontend Only)
+### Phase 6.1: ClarifyWizard Enhancement (9 tasks)
 
 > Fix missing GTD features in the clarification wizard. API already supports all these features.
 
@@ -355,53 +365,92 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 - [ ] [P6-002] [Story-6] Fetch and display contexts in wizard (use existing contextsSlice) `web/src/features/tasks/ClarifyWizard.jsx`
 - [ ] [P6-003] [Story-6] Call setContexts API after clarify completes `web/src/features/tasks/ClarifyWizard.jsx`
 - [ ] [P6-004] [Story-6] Add "Add to existing project" option in destination step `web/src/features/tasks/ClarifyWizard.jsx`
-- [ ] [P6-005] [Story-6] Create ProjectSelector component for wizard `web/src/components/ProjectSelector.jsx`
+- [ ] [P6-005] [Story-6] Create ProjectSelector component for wizard `web/src/components/ProjectSelector.jsx` (~80 lines)
 - [ ] [P6-006] [Story-6] Send project_id in clarify API call `web/src/features/tasks/ClarifyWizard.jsx`
 - [ ] [P6-007] [Story-6] Fix waitingForPerson field - append to notes before save `web/src/features/tasks/ClarifyWizard.jsx`
 - [ ] [P6-008] [Story-6] Add keyboard navigation to wizard (Y/N, 1-4, Backspace, Tab) `web/src/features/tasks/ClarifyWizard.jsx`
 - [ ] [P6-009] [Story-6] Write unit tests for enhanced ClarifyWizard `web/src/tests/unit/features/ClarifyWizard.test.jsx`
 
-### Phase 6.2: Inline Clarification on Inbox
+### Phase 6.2: Inline Clarification on Inbox (7 tasks)
 
 > Allow clarifying any task directly from Inbox page without navigating to separate Clarify page.
 
 - [ ] [P6-010] [Story-6] Add selectedTask state to InboxPage `web/src/pages/InboxPage.jsx`
-- [ ] [P6-011] [Story-6] Create ClarifyPanel wrapper component `web/src/components/ClarifyPanel.jsx`
-- [ ] [P6-012] [Story-6] Implement split view layout (task list + panel) `web/src/pages/InboxPage.jsx`
+- [ ] [P6-011] [Story-6] Create ClarifyPanel wrapper component `web/src/components/ClarifyPanel.jsx` (~280 lines)
+- [ ] [P6-012] [Story-6] Implement split view layout (task list + panel) `web/src/pages/InboxPage.jsx` (+100 lines)
 - [ ] [P6-013] [Story-6] Add keyboard navigation in task list (↑/↓, Enter, x, c) `web/src/pages/InboxPage.jsx`
 - [ ] [P6-014] [Story-6] Handle clarify complete - deselect and remove from list `web/src/pages/InboxPage.jsx`
-- [ ] [P6-015] [Story-6] Write unit tests for inline clarification `web/src/tests/unit/pages/InboxPage.test.jsx`
+- [ ] [P6-015] [Story-6] Write unit tests for ClarifyPanel `web/src/tests/unit/components/ClarifyPanel.test.jsx` (~350 lines)
+- [ ] [P6-016] [Story-6] Update InboxPage tests for inline clarification `web/src/tests/unit/pages/InboxPage.test.jsx` (+150 lines)
 
-### Phase 6.3: Unified Actions Page
+### Phase 6.3: Unified Actions Page (10 tasks)
 
 > Replace 4 separate pages (Next, Waiting, Someday, Reference) with one unified view.
 
-- [ ] [P6-016] [Story-6] Create ActionsPage component with 4 collapsible sections `web/src/pages/ActionsPage.jsx`
-- [ ] [P6-017] [Story-6] Create CollapsibleSection reusable component `web/src/components/CollapsibleSection.jsx`
-- [ ] [P6-018] [Story-6] Create FilterBar component (status, context, project, energy, search) `web/src/components/FilterBar.jsx`
-- [ ] [P6-019] [Story-6] Implement section keyboard shortcuts (1-4 to toggle sections) `web/src/pages/ActionsPage.jsx`
-- [ ] [P6-020] [Story-6] Add task keyboard actions (c=complete, e=edit, m=move, /=search) `web/src/pages/ActionsPage.jsx`
-- [ ] [P6-021] [Story-6] Persist section collapse states in localStorage `web/src/pages/ActionsPage.jsx`
-- [ ] [P6-022] [Story-6] Write unit tests for ActionsPage `web/src/tests/unit/pages/ActionsPage.test.jsx`
+- [ ] [P6-017] [Story-6] Create ActionsPage with 4 collapsible sections `web/src/pages/ActionsPage.jsx` (~350 lines)
+- [ ] [P6-018] [Story-6] Create CollapsibleSection reusable component `web/src/components/CollapsibleSection.jsx` (~80 lines)
+- [ ] [P6-019] [Story-6] Create FilterBar component (4 tabs) `web/src/components/FilterBar.jsx` (~100 lines)
+- [ ] [P6-020] [Story-6] Add filter state and selectors to tasksSlice `web/src/features/tasks/tasksSlice.js` (+40 lines)
+- [ ] [P6-021] [Story-6] Implement section keyboard shortcuts (1-4 to toggle) `web/src/pages/ActionsPage.jsx`
+- [ ] [P6-022] [Story-6] Add task keyboard actions (c=complete, e=edit, m=move, /=search) `web/src/pages/ActionsPage.jsx`
+- [ ] [P6-023] [Story-6] Persist section collapse states in localStorage `web/src/pages/ActionsPage.jsx`
+- [ ] [P6-024] [Story-6] Reuse ContextFilterSidebar for context filtering `web/src/pages/ActionsPage.jsx`
+- [ ] [P6-025] [Story-6] Write unit tests for ActionsPage `web/src/tests/unit/pages/ActionsPage.test.jsx` (~450 lines)
+- [ ] [P6-026] [Story-6] Write unit tests for FilterBar and CollapsibleSection `web/src/tests/unit/components/` (~250 lines)
 
-### Phase 6.4: Navigation & Global Shortcuts
+### Phase 6.4: Navigation & Global Shortcuts (8 tasks)
 
 > Simplify navigation and add keyboard shortcuts accessible from anywhere.
 
-- [ ] [P6-023] [Story-6] Create useGlobalShortcuts hook (Ctrl+N, Esc, ?, g+i/a/p) `web/src/hooks/useGlobalShortcuts.js`
-- [ ] [P6-024] [Story-6] Create QuickCaptureModal component `web/src/components/QuickCaptureModal.jsx`
-- [ ] [P6-025] [Story-6] Create KeyboardShortcutsHelp modal (? key) `web/src/components/KeyboardShortcutsHelp.jsx`
-- [ ] [P6-026] [Story-6] Update Navigation component (3 tabs + settings dropdown) `web/src/components/Navigation.jsx`
-- [ ] [P6-027] [Story-6] Update App.jsx routes (/actions replaces 4 routes) `web/src/App.jsx`
+- [ ] [P6-027] [Story-6] Create useGlobalShortcuts hook (Ctrl+N, Esc, ?, g+i/a/p) `web/src/hooks/useGlobalShortcuts.js` (~100 lines)
+- [ ] [P6-028] [Story-6] Create QuickCaptureModal component `web/src/components/QuickCaptureModal.jsx` (~100 lines)
+- [ ] [P6-029] [Story-6] Create KeyboardShortcutsHelp modal (? key) `web/src/components/KeyboardShortcutsHelp.jsx` (~120 lines)
+- [ ] [P6-030] [Story-6] Create SettingsDropdown component `web/src/components/SettingsDropdown.jsx` (~150 lines)
+- [ ] [P6-031] [Story-6] Update Navigation component (3 tabs + dropdown) `web/src/components/Navigation.jsx` (-50 lines)
+- [ ] [P6-032] [Story-6] Update App.jsx routes (/actions replaces 4 routes) `web/src/App.jsx` (-55 lines)
+- [ ] [P6-033] [Story-6] Write unit tests for useGlobalShortcuts `web/src/tests/unit/hooks/useGlobalShortcuts.test.js` (~180 lines)
+- [ ] [P6-034] [Story-6] Write unit tests for new modal components `web/src/tests/unit/components/` (~300 lines)
 
-### Phase 6.5: Cleanup & Polish
+### Phase 6.5: Cleanup - Delete Deprecated Files (10 tasks)
 
-> Remove deprecated pages, update routes, ensure all tests pass.
+> Remove deprecated pages and their tests. All functionality now in ActionsPage.
 
-- [ ] [P6-028] [Story-6] Remove deprecated pages (NextActionsPage, WaitingForPage, SomedayMaybePage, ReferencePage)
-- [ ] [P6-029] [Story-6] Add route redirects for old URLs → /actions `web/src/App.jsx`
-- [ ] [P6-030] [Story-6] Add keyboard shortcut hints to UI elements `web/src/components/*.jsx`
-- [ ] [P6-031] [Story-6] Write E2E tests for complete UX flow `web/src/tests/e2e/ux-redesign.spec.jsx`
+**Pages to DELETE (866 lines):**
+- [ ] [P6-035] [Story-6] Delete NextActionsPage.jsx `web/src/pages/NextActionsPage.jsx` (169 lines)
+- [ ] [P6-036] [Story-6] Delete WaitingForPage.jsx `web/src/pages/WaitingForPage.jsx` (136 lines)
+- [ ] [P6-037] [Story-6] Delete SomedayMaybePage.jsx `web/src/pages/SomedayMaybePage.jsx` (135 lines)
+- [ ] [P6-038] [Story-6] Delete ReferencePage.jsx `web/src/pages/ReferencePage.jsx` (164 lines)
+- [ ] [P6-039] [Story-6] Delete ClarifyPage.jsx `web/src/pages/ClarifyPage.jsx` (262 lines)
+
+**Tests to DELETE (1,257 lines):**
+- [ ] [P6-040] [Story-6] Delete NextActionsPage.test.jsx `web/src/tests/unit/pages/` (295 lines)
+- [ ] [P6-041] [Story-6] Delete WaitingForPage.test.jsx `web/src/tests/unit/pages/` (208 lines)
+- [ ] [P6-042] [Story-6] Delete SomedayMaybePage.test.jsx `web/src/tests/unit/pages/` (223 lines)
+- [ ] [P6-043] [Story-6] Delete ReferencePage.test.jsx `web/src/tests/unit/pages/` (261 lines)
+- [ ] [P6-044] [Story-6] Delete ClarifyPage.test.jsx `web/src/tests/unit/pages/` (270 lines)
+
+### Phase 6.6: E2E Tests & Polish (6 tasks)
+
+> Update E2E tests, add redirects, polish UI with keyboard hints.
+
+- [ ] [P6-045] [Story-6] Rewrite gtd-lists.spec.jsx for ActionsPage `web/src/tests/e2e/gtd-lists.spec.jsx` (594 → ~400 lines)
+- [ ] [P6-046] [Story-6] Rewrite clarify.spec.jsx for inline ClarifyPanel `web/src/tests/e2e/clarify.spec.jsx` (420 → ~300 lines)
+- [ ] [P6-047] [Story-6] Add route redirects for old URLs → /actions `web/src/App.jsx`
+- [ ] [P6-048] [Story-6] Add keyboard shortcut hints to UI elements `web/src/components/*.jsx`
+- [ ] [P6-049] [Story-6] Update Navigation.test.jsx for new structure `web/src/tests/unit/components/Navigation.test.jsx`
+- [ ] [P6-050] [Story-6] Write E2E test for keyboard shortcuts flow `web/src/tests/e2e/keyboard-shortcuts.spec.jsx` (~200 lines)
+
+### Phase 6.7: Verification & Quality Assurance (7 tasks)
+
+> Final verification before marking P6 complete.
+
+- [ ] [P6-051] [Story-6] Run full test suite - all unit tests pass (npm run test)
+- [ ] [P6-052] [Story-6] Run full E2E suite - all E2E tests pass (npm run test:e2e)
+- [ ] [P6-053] [Story-6] Verify code coverage ≥ 80% for new components
+- [ ] [P6-054] [Story-6] Manual testing: Complete GTD flow (capture → clarify → organize → review)
+- [ ] [P6-055] [Story-6] Manual testing: All keyboard shortcuts work as documented
+- [ ] [P6-056] [Story-6] Accessibility audit: ARIA labels, focus management, screen reader
+- [ ] [P6-057] [Story-6] Performance check: No regression in Lighthouse score
 
 ---
 
@@ -546,11 +595,13 @@ P4-014 → P4-015 → P4-016 → P4-017 → P4-018 (GTD list views, after P4-006
 P5-001 → P5-002 → P5-003 → P5-004 (Project entity chain)
 EDGE-001 depends on P5-005 (project controller must exist)
 
-P6-001 → P6-009 (ClarifyWizard enhancement chain)
-P6-010 → P6-015 (Inline clarification chain)
-P6-016 → P6-022 (ActionsPage chain)
-P6-023 → P6-027 (Navigation & shortcuts chain)
-P6-028 → P6-031 (Cleanup chain)
+P6-001 → P6-009 (Phase 6.1: ClarifyWizard enhancement)
+P6-010 → P6-016 (Phase 6.2: Inline clarification)
+P6-017 → P6-026 (Phase 6.3: ActionsPage)
+P6-027 → P6-034 (Phase 6.4: Navigation & shortcuts)
+P6-035 → P6-044 (Phase 6.5: Delete deprecated files)
+P6-045 → P6-050 (Phase 6.6: E2E tests & polish)
+P6-051 → P6-057 (Phase 6.7: Verification & QA)
 
 P7-001 → P7-002 → P7-003 (Review entity chain)
 P8-001 → P8-002 → P8-003 (Calendar entity chain)
