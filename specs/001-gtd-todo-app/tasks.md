@@ -7,15 +7,16 @@
 
 ## Overview
 
-Total tasks: 203
+Total tasks: 230
 - Sprint 0 (Infrastructure + GitHub Issues): 35 tasks ✅ COMPLETE
 - P1 User Account Management: 56 tasks (52 complete, 4 remaining) - 93% complete
-- P2 Capture Ideas and Tasks: 14 tasks (14 complete) - 100% complete
+- P2 Capture Ideas and Tasks: 14 tasks ✅ COMPLETE
 - P3 Clarify and Process: 12 tasks ✅ COMPLETE
 - P4 Organize with Contexts: 19 tasks ✅ COMPLETE
 - P5 Project Management: 14 tasks ✅ COMPLETE
-- P6 Weekly Review: 12 tasks
-- P7 Calendar and Deadlines: 12 tasks
+- **P6 UX Redesign: 27 tasks (NEW)** - GTD workflow improvements
+- P7 Weekly Review: 12 tasks
+- P8 Calendar and Deadlines: 12 tasks
 - Cross-Cutting (Sync & Offline): 5 tasks
 - Integration Tests: 6 tasks (1 complete)
 - Edge Cases: 5 tasks
@@ -326,57 +327,135 @@ Per Constitution XVI, all features MUST be tracked as GitHub issues BEFORE imple
 
 ---
 
-## P6: Weekly Review (FR-020 to FR-022)
+## P6: UX Redesign - GTD Workflow Improvements
 
-**User Story**: As a user, I want to perform a guided weekly review so that I maintain trust in my system.
+**User Story**: As a user, I want a streamlined GTD experience with keyboard shortcuts, inline clarification, and unified task views so that I can work faster and stay in flow.
 
-### Phase 6.1: Backend - Review Entity
+**Status**: Ready for Development (0/27 tasks)
 
-- [ ] [P6-001] [Story-6] Create Review Doctrine entity `api/src/Entity/Review.php`
-- [ ] [P6-002] [Story-6] Write unit tests for Review entity `api/tests/Unit/Entity/ReviewTest.php`
-- [ ] [P6-003] [Story-6] Create Review repository `api/src/Repository/ReviewRepository.php`
-- [ ] [P6-004] [Story-6] Create database migration for reviews table `api/migrations/Version006CreateReviewsTable.php`
+**Documentation**:
+- [Gap Analysis](../../docs/ux-redesign/ux-gap-analysis.md) - Backend complete, frontend gaps identified
+- [Improvement Proposal](../../docs/ux-redesign/ux-improvement-proposal.md) - Detailed implementation plan
+- [Visual Mockups](../../docs/ux-redesign/ux-visual-mockups.md) - ASCII wireframes for all screens
+- [Feature Plan](../../docs/ux-redesign/ux-feature-plan.md) - Keyboard shortcuts and feature checklist
 
-### Phase 6.2: Backend - Review Endpoints
+**Key Changes**:
+- Navigation: 8 tabs → 3 tabs (Inbox, Actions, Projects) + Settings dropdown
+- Clarification: Separate page → Inline panel on Inbox page
+- Task Lists: 4 separate pages → 1 unified Actions page with collapsible sections
+- Keyboard: None → Full keyboard navigation (`Ctrl+N`, `Esc`, `g i/a/p`, etc.)
 
-- [ ] [P6-005] [Story-6] Create ReviewController with start/complete endpoints `api/src/Controller/ReviewController.php`
-- [ ] [P6-006] [Story-6] Create review reminder notification service `api/src/Service/ReviewReminderService.php`
-- [ ] [P6-007] [Story-6] Write functional tests for review endpoints `api/tests/Functional/Review/ReviewTest.php`
+**Backend Changes**: None required. All GTD features already exist in the API.
 
-### Phase 6.3: Frontend - Review Module
+### Phase 6.1: ClarifyWizard Enhancement (Frontend Only)
 
-- [ ] [P6-008] [Story-6] Create review Redux slice `web/src/features/review/reviewSlice.ts`
-- [ ] [P6-009] [Story-6] Replace ReviewPage placeholder with ReviewWizard `web/src/pages/ReviewWizard.tsx`
-- [ ] [P6-010] [Story-6] Write unit tests for ReviewWizard `web/tests/unit/pages/ReviewWizard.test.tsx`
-- [ ] [P6-011] [Story-6] Create ReviewStepCard component `web/src/components/ReviewStepCard.tsx`
-- [ ] [P6-012] [Story-6] Write E2E tests for weekly review flow `web/tests/e2e/review.spec.ts`
+> Fix missing GTD features in the clarification wizard. API already supports all these features.
+
+- [ ] [P6-001] [Story-6] Add context selection UI to ADD_DETAILS step `web/src/features/tasks/ClarifyWizard.jsx`
+- [ ] [P6-002] [Story-6] Fetch and display contexts in wizard (use existing contextsSlice) `web/src/features/tasks/ClarifyWizard.jsx`
+- [ ] [P6-003] [Story-6] Call setContexts API after clarify completes `web/src/features/tasks/ClarifyWizard.jsx`
+- [ ] [P6-004] [Story-6] Add "Add to existing project" option in destination step `web/src/features/tasks/ClarifyWizard.jsx`
+- [ ] [P6-005] [Story-6] Create ProjectSelector component for wizard `web/src/components/ProjectSelector.jsx`
+- [ ] [P6-006] [Story-6] Send project_id in clarify API call `web/src/features/tasks/ClarifyWizard.jsx`
+- [ ] [P6-007] [Story-6] Fix waitingForPerson field - append to notes before save `web/src/features/tasks/ClarifyWizard.jsx`
+- [ ] [P6-008] [Story-6] Add keyboard navigation to wizard (Y/N, 1-4, Backspace, Tab) `web/src/features/tasks/ClarifyWizard.jsx`
+- [ ] [P6-009] [Story-6] Write unit tests for enhanced ClarifyWizard `web/src/tests/unit/features/ClarifyWizard.test.jsx`
+
+### Phase 6.2: Inline Clarification on Inbox
+
+> Allow clarifying any task directly from Inbox page without navigating to separate Clarify page.
+
+- [ ] [P6-010] [Story-6] Add selectedTask state to InboxPage `web/src/pages/InboxPage.jsx`
+- [ ] [P6-011] [Story-6] Create ClarifyPanel wrapper component `web/src/components/ClarifyPanel.jsx`
+- [ ] [P6-012] [Story-6] Implement split view layout (task list + panel) `web/src/pages/InboxPage.jsx`
+- [ ] [P6-013] [Story-6] Add keyboard navigation in task list (↑/↓, Enter, x, c) `web/src/pages/InboxPage.jsx`
+- [ ] [P6-014] [Story-6] Handle clarify complete - deselect and remove from list `web/src/pages/InboxPage.jsx`
+- [ ] [P6-015] [Story-6] Write unit tests for inline clarification `web/src/tests/unit/pages/InboxPage.test.jsx`
+
+### Phase 6.3: Unified Actions Page
+
+> Replace 4 separate pages (Next, Waiting, Someday, Reference) with one unified view.
+
+- [ ] [P6-016] [Story-6] Create ActionsPage component with 4 collapsible sections `web/src/pages/ActionsPage.jsx`
+- [ ] [P6-017] [Story-6] Create CollapsibleSection reusable component `web/src/components/CollapsibleSection.jsx`
+- [ ] [P6-018] [Story-6] Create FilterBar component (status, context, project, energy, search) `web/src/components/FilterBar.jsx`
+- [ ] [P6-019] [Story-6] Implement section keyboard shortcuts (1-4 to toggle sections) `web/src/pages/ActionsPage.jsx`
+- [ ] [P6-020] [Story-6] Add task keyboard actions (c=complete, e=edit, m=move, /=search) `web/src/pages/ActionsPage.jsx`
+- [ ] [P6-021] [Story-6] Persist section collapse states in localStorage `web/src/pages/ActionsPage.jsx`
+- [ ] [P6-022] [Story-6] Write unit tests for ActionsPage `web/src/tests/unit/pages/ActionsPage.test.jsx`
+
+### Phase 6.4: Navigation & Global Shortcuts
+
+> Simplify navigation and add keyboard shortcuts accessible from anywhere.
+
+- [ ] [P6-023] [Story-6] Create useGlobalShortcuts hook (Ctrl+N, Esc, ?, g+i/a/p) `web/src/hooks/useGlobalShortcuts.js`
+- [ ] [P6-024] [Story-6] Create QuickCaptureModal component `web/src/components/QuickCaptureModal.jsx`
+- [ ] [P6-025] [Story-6] Create KeyboardShortcutsHelp modal (? key) `web/src/components/KeyboardShortcutsHelp.jsx`
+- [ ] [P6-026] [Story-6] Update Navigation component (3 tabs + settings dropdown) `web/src/components/Navigation.jsx`
+- [ ] [P6-027] [Story-6] Update App.jsx routes (/actions replaces 4 routes) `web/src/App.jsx`
+
+### Phase 6.5: Cleanup & Polish
+
+> Remove deprecated pages, update routes, ensure all tests pass.
+
+- [ ] [P6-028] [Story-6] Remove deprecated pages (NextActionsPage, WaitingForPage, SomedayMaybePage, ReferencePage)
+- [ ] [P6-029] [Story-6] Add route redirects for old URLs → /actions `web/src/App.jsx`
+- [ ] [P6-030] [Story-6] Add keyboard shortcut hints to UI elements `web/src/components/*.jsx`
+- [ ] [P6-031] [Story-6] Write E2E tests for complete UX flow `web/src/tests/e2e/ux-redesign.spec.jsx`
 
 ---
 
-## P7: Calendar and Deadlines (FR-023 to FR-025)
+## P7: Weekly Review (FR-020 to FR-022)
+
+**User Story**: As a user, I want to perform a guided weekly review so that I maintain trust in my system.
+
+### Phase 7.1: Backend - Review Entity
+
+- [ ] [P7-001] [Story-7] Create Review Doctrine entity `api/src/Entity/Review.php`
+- [ ] [P7-002] [Story-7] Write unit tests for Review entity `api/tests/Unit/Entity/ReviewTest.php`
+- [ ] [P7-003] [Story-7] Create Review repository `api/src/Repository/ReviewRepository.php`
+- [ ] [P7-004] [Story-7] Create database migration for reviews table `api/migrations/Version006CreateReviewsTable.php`
+
+### Phase 7.2: Backend - Review Endpoints
+
+- [ ] [P7-005] [Story-7] Create ReviewController with start/complete endpoints `api/src/Controller/ReviewController.php`
+- [ ] [P7-006] [Story-7] Create review reminder notification service `api/src/Service/ReviewReminderService.php`
+- [ ] [P7-007] [Story-7] Write functional tests for review endpoints `api/tests/Functional/Review/ReviewTest.php`
+
+### Phase 7.3: Frontend - Review Module
+
+- [ ] [P7-008] [Story-7] Create review Redux slice `web/src/features/review/reviewSlice.ts`
+- [ ] [P7-009] [Story-7] Replace ReviewPage placeholder with ReviewWizard `web/src/pages/ReviewWizard.tsx`
+- [ ] [P7-010] [Story-7] Write unit tests for ReviewWizard `web/tests/unit/pages/ReviewWizard.test.tsx`
+- [ ] [P7-011] [Story-7] Create ReviewStepCard component `web/src/components/ReviewStepCard.tsx`
+- [ ] [P7-012] [Story-7] Write E2E tests for weekly review flow `web/tests/e2e/review.spec.ts`
+
+---
+
+## P8: Calendar and Deadlines (FR-023 to FR-025)
 
 **User Story**: As a user, I want to see my fixed-date commitments and set deadlines so that I never miss an appointment.
 
-### Phase 7.1: Backend - Calendar Entity
+### Phase 8.1: Backend - Calendar Entity
 
-- [ ] [P7-001] [Story-7] Create CalendarEvent Doctrine entity `api/src/Entity/CalendarEvent.php`
-- [ ] [P7-002] [Story-7] Write unit tests for CalendarEvent entity `api/tests/Unit/Entity/CalendarEventTest.php`
-- [ ] [P7-003] [Story-7] Create CalendarEvent repository `api/src/Repository/CalendarEventRepository.php`
-- [ ] [P7-004] [Story-7] Create database migration for calendar_events table `api/migrations/Version007CreateCalendarEventsTable.php`
+- [ ] [P8-001] [Story-8] Create CalendarEvent Doctrine entity `api/src/Entity/CalendarEvent.php`
+- [ ] [P8-002] [Story-8] Write unit tests for CalendarEvent entity `api/tests/Unit/Entity/CalendarEventTest.php`
+- [ ] [P8-003] [Story-8] Create CalendarEvent repository `api/src/Repository/CalendarEventRepository.php`
+- [ ] [P8-004] [Story-8] Create database migration for calendar_events table `api/migrations/Version007CreateCalendarEventsTable.php`
 
-### Phase 7.2: Backend - Calendar Endpoints
+### Phase 8.2: Backend - Calendar Endpoints
 
-- [ ] [P7-005] [Story-7] Create CalendarController with CRUD endpoints `api/src/Controller/CalendarController.php`
-- [ ] [P7-006] [Story-7] Create deadline reminder notification service `api/src/Service/DeadlineReminderService.php`
-- [ ] [P7-007] [Story-7] Write functional tests for calendar endpoints `api/tests/Functional/Calendar/CalendarTest.php`
+- [ ] [P8-005] [Story-8] Create CalendarController with CRUD endpoints `api/src/Controller/CalendarController.php`
+- [ ] [P8-006] [Story-8] Create deadline reminder notification service `api/src/Service/DeadlineReminderService.php`
+- [ ] [P8-007] [Story-8] Write functional tests for calendar endpoints `api/tests/Functional/Calendar/CalendarTest.php`
 
-### Phase 7.3: Frontend - Calendar Module
+### Phase 8.3: Frontend - Calendar Module
 
-- [ ] [P7-008] [Story-7] Create calendar Redux slice `web/src/features/calendar/calendarSlice.ts`
-- [ ] [P7-009] [Story-7] Replace CalendarPage placeholder with full implementation `web/src/pages/CalendarPage.tsx`
-- [ ] [P7-010] [Story-7] Write unit tests for CalendarPage `web/tests/unit/pages/CalendarPage.test.tsx`
-- [ ] [P7-011] [Story-7] Create CalendarView component (month/week views) `web/src/components/CalendarView.tsx`
-- [ ] [P7-012] [Story-7] Write E2E tests for calendar features `web/tests/e2e/calendar.spec.ts`
+- [ ] [P8-008] [Story-8] Create calendar Redux slice `web/src/features/calendar/calendarSlice.ts`
+- [ ] [P8-009] [Story-8] Replace CalendarPage placeholder with full implementation `web/src/pages/CalendarPage.tsx`
+- [ ] [P8-010] [Story-8] Write unit tests for CalendarPage `web/tests/unit/pages/CalendarPage.test.tsx`
+- [ ] [P8-011] [Story-8] Create CalendarView component (month/week views) `web/src/components/CalendarView.tsx`
+- [ ] [P8-012] [Story-8] Write E2E tests for calendar features `web/tests/e2e/calendar.spec.ts`
 
 ---
 
@@ -467,8 +546,14 @@ P4-014 → P4-015 → P4-016 → P4-017 → P4-018 (GTD list views, after P4-006
 P5-001 → P5-002 → P5-003 → P5-004 (Project entity chain)
 EDGE-001 depends on P5-005 (project controller must exist)
 
-P6-001 → P6-002 → P6-003 (Review entity chain)
-P7-001 → P7-002 → P7-003 (Calendar entity chain)
+P6-001 → P6-009 (ClarifyWizard enhancement chain)
+P6-010 → P6-015 (Inline clarification chain)
+P6-016 → P6-022 (ActionsPage chain)
+P6-023 → P6-027 (Navigation & shortcuts chain)
+P6-028 → P6-031 (Cleanup chain)
+
+P7-001 → P7-002 → P7-003 (Review entity chain)
+P8-001 → P8-002 → P8-003 (Calendar entity chain)
 
 SYNC-* depends on P2-* (Task entity must exist)
 INT-* runs after corresponding feature tasks complete
