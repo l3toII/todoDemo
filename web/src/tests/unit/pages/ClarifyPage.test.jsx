@@ -5,6 +5,8 @@ import { BrowserRouter } from 'react-router-dom';
 import { configureStore } from '@reduxjs/toolkit';
 import ClarifyPage from '../../../pages/ClarifyPage';
 import tasksReducer from '../../../features/tasks/tasksSlice';
+import contextsReducer from '../../../features/contexts/contextsSlice';
+import projectsReducer from '../../../features/projects/projectsSlice';
 import { tasksAPI } from '../../../services/api';
 
 // Mock the API
@@ -14,6 +16,7 @@ vi.mock('../../../services/api', () => ({
     clarify: vi.fn(),
     complete: vi.fn(),
     delete: vi.fn(),
+    setContexts: vi.fn(() => Promise.resolve({ data: { success: true } })),
   },
 }));
 
@@ -22,8 +25,23 @@ const createTestStore = (preloadedState = {}) => {
   return configureStore({
     reducer: {
       tasks: tasksReducer,
+      contexts: contextsReducer,
+      projects: projectsReducer,
     },
-    preloadedState,
+    preloadedState: {
+      ...preloadedState,
+      contexts: preloadedState.contexts || {
+        contexts: [],
+        loading: false,
+        error: null,
+      },
+      projects: preloadedState.projects || {
+        projects: [],
+        currentProject: null,
+        loading: false,
+        error: null,
+      },
+    },
   });
 };
 

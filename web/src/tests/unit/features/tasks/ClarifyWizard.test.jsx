@@ -4,6 +4,8 @@ import { Provider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import ClarifyWizard from '../../../../features/tasks/ClarifyWizard';
 import tasksReducer from '../../../../features/tasks/tasksSlice';
+import contextsReducer from '../../../../features/contexts/contextsSlice';
+import projectsReducer from '../../../../features/projects/projectsSlice';
 
 // Mock the tasksSlice actions
 vi.mock('../../../../features/tasks/tasksSlice', async () => {
@@ -17,7 +19,15 @@ vi.mock('../../../../features/tasks/tasksSlice', async () => {
   };
 });
 
+// Mock the API for setContexts
+vi.mock('../../../../services/api', () => ({
+  tasksAPI: {
+    setContexts: vi.fn(() => Promise.resolve({ data: { success: true } })),
+  },
+}));
+
 import { clarifyTask, completeTask, deleteTask, convertToProject } from '../../../../features/tasks/tasksSlice';
+import { tasksAPI } from '../../../../services/api';
 
 describe('ClarifyWizard', () => {
   let store;
@@ -34,6 +44,8 @@ describe('ClarifyWizard', () => {
     return configureStore({
       reducer: {
         tasks: tasksReducer,
+        contexts: contextsReducer,
+        projects: projectsReducer,
       },
       preloadedState: {
         tasks: {
@@ -50,6 +62,17 @@ describe('ClarifyWizard', () => {
           nextCursor: null,
           total: 0,
           ...preloadedState,
+        },
+        contexts: {
+          contexts: [],
+          loading: false,
+          error: null,
+        },
+        projects: {
+          projects: [],
+          currentProject: null,
+          loading: false,
+          error: null,
         },
       },
     });
@@ -392,6 +415,7 @@ describe('ClarifyWizard', () => {
             energyLevel: 'high',
             timeEstimate: 30,
             dueDate: null,
+            projectId: null,
           },
         });
       });
@@ -647,6 +671,265 @@ describe('ClarifyWizard', () => {
 
       // TwoMinuteTimer should be present
       expect(screen.getByText('Do it now!')).toBeInTheDocument();
+    });
+  });
+
+  describe('Context Selection (P6-001 to P6-003)', () => {
+    const mockContexts = [
+      { id: 'ctx-1', name: '@home', status: 'active', is_default: true },
+      { id: 'ctx-2', name: '@work', status: 'active', is_default: true },
+      { id: 'ctx-3', name: '@errands', status: 'active', is_default: false },
+    ];
+
+    const createStoreWithContexts = () => {
+      return configureStore({
+        reducer: {
+          tasks: tasksReducer,
+          contexts: (state = { contexts: mockContexts, loading: false, error: null }) => state,
+          projects: (state = { projects: [], loading: false, error: null }) => state,
+        },
+        preloadedState: {
+          tasks: {
+            inbox: [],
+            clarified: [],
+            nextActions: [],
+            waitingFor: [],
+            somedayMaybe: [],
+            reference: [],
+            currentTask: null,
+            loading: false,
+            clarifying: false,
+            error: null,
+            nextCursor: null,
+            total: 0,
+          },
+          contexts: {
+            contexts: mockContexts,
+            loading: false,
+            error: null,
+          },
+          projects: {
+            projects: [],
+            loading: false,
+            error: null,
+          },
+        },
+      });
+    };
+
+    it('shows context selection in ADD_DETAILS step for Next Action', () => {
+      store = createStoreWithContexts();
+      renderWizard();
+      fireEvent.click(screen.getByText('Yes'));
+      fireEvent.click(screen.getByText('No, longer'));
+      fireEvent.click(screen.getByText('Single Action'));
+      fireEvent.click(screen.getByText('Do it myself'));
+
+      expect(screen.getByText('Contexts')).toBeInTheDocument();
+      expect(screen.getByText('@home')).toBeInTheDocument();
+      expect(screen.getByText('@work')).toBeInTheDocument();
+      expect(screen.getByText('@errands')).toBeInTheDocument();
+    });
+
+    it('allows selecting multiple contexts', () => {
+      store = createStoreWithContexts();
+      renderWizard();
+      fireEvent.click(screen.getByText('Yes'));
+      fireEvent.click(screen.getByText('No, longer'));
+      fireEvent.click(screen.getByText('Single Action'));
+      fireEvent.click(screen.getByText('Do it myself'));
+
+      const homeCheckbox = screen.getByLabelText('@home');
+      const workCheckbox = screen.getByLabelText('@work');
+
+      fireEvent.click(homeCheckbox);
+      fireEvent.click(workCheckbox);
+
+      expect(homeCheckbox).toBeChecked();
+      expect(workCheckbox).toBeChecked();
+    });
+  });
+
+  describe('Project Assignment (P6-004 to P6-006)', () => {
+    const mockProjects = [
+      { id: 'proj-1', title: 'Project Alpha', status: 'active' },
+      { id: 'proj-2', title: 'Project Beta', status: 'active' },
+    ];
+
+    const createStoreWithProjects = () => {
+      return configureStore({
+        reducer: {
+          tasks: tasksReducer,
+          contexts: (state = { contexts: [], loading: false, error: null }) => state,
+          projects: (state = { projects: mockProjects, loading: false, error: null }) => state,
+        },
+        preloadedState: {
+          tasks: {
+            inbox: [],
+            clarified: [],
+            nextActions: [],
+            waitingFor: [],
+            somedayMaybe: [],
+            reference: [],
+            currentTask: null,
+            loading: false,
+            clarifying: false,
+            error: null,
+            nextCursor: null,
+            total: 0,
+          },
+          contexts: {
+            contexts: [],
+            loading: false,
+            error: null,
+          },
+          projects: {
+            projects: mockProjects,
+            loading: false,
+            error: null,
+          },
+        },
+      });
+    };
+
+    it('shows "Add to existing project" option in SINGLE_OR_PROJECT step', () => {
+      store = createStoreWithProjects();
+      renderWizard();
+      fireEvent.click(screen.getByText('Yes'));
+      fireEvent.click(screen.getByText('No, longer'));
+
+      expect(screen.getByText('Add to Project')).toBeInTheDocument();
+    });
+
+    it('shows project selector when "Add to Project" is clicked', () => {
+      store = createStoreWithProjects();
+      renderWizard();
+      fireEvent.click(screen.getByText('Yes'));
+      fireEvent.click(screen.getByText('No, longer'));
+      fireEvent.click(screen.getByText('Add to Project'));
+
+      expect(screen.getByText('Add to project')).toBeInTheDocument();
+      expect(screen.getByText('Project Alpha')).toBeInTheDocument();
+    });
+
+    it('sends project_id in clarify call when project is selected', async () => {
+      store = createStoreWithProjects();
+      renderWizard();
+      fireEvent.click(screen.getByText('Yes'));
+      fireEvent.click(screen.getByText('No, longer'));
+      fireEvent.click(screen.getByText('Add to Project'));
+
+      // Select a project
+      const select = screen.getByRole('combobox');
+      fireEvent.change(select, { target: { value: 'proj-1' } });
+
+      fireEvent.click(screen.getByText('Save'));
+
+      await waitFor(() => {
+        expect(clarifyTask).toHaveBeenCalledWith(
+          expect.objectContaining({
+            clarificationData: expect.objectContaining({
+              projectId: 'proj-1',
+            }),
+          })
+        );
+      });
+    });
+  });
+
+  describe('WaitingFor Person Fix (P6-007)', () => {
+    it('appends waitingForPerson to notes when saving', async () => {
+      renderWizard();
+      fireEvent.click(screen.getByText('Yes'));
+      fireEvent.click(screen.getByText('No, longer'));
+      fireEvent.click(screen.getByText('Single Action'));
+      fireEvent.click(screen.getByText('Delegate it'));
+
+      // Fill in waiting for person
+      fireEvent.change(screen.getByLabelText('Waiting for whom?'), { target: { value: 'John Doe' } });
+
+      // Keep original notes
+      const notesInput = screen.getByLabelText('Notes');
+      expect(notesInput.value).toBe('Some notes about the task');
+
+      fireEvent.click(screen.getByText('Save'));
+
+      await waitFor(() => {
+        expect(clarifyTask).toHaveBeenCalledWith(
+          expect.objectContaining({
+            clarificationData: expect.objectContaining({
+              notes: expect.stringContaining('Waiting for: John Doe'),
+            }),
+          })
+        );
+      });
+    });
+
+    it('preserves original notes when appending waiting for person', async () => {
+      renderWizard();
+      fireEvent.click(screen.getByText('Yes'));
+      fireEvent.click(screen.getByText('No, longer'));
+      fireEvent.click(screen.getByText('Single Action'));
+      fireEvent.click(screen.getByText('Delegate it'));
+
+      fireEvent.change(screen.getByLabelText('Waiting for whom?'), { target: { value: 'Jane' } });
+      fireEvent.click(screen.getByText('Save'));
+
+      await waitFor(() => {
+        expect(clarifyTask).toHaveBeenCalledWith(
+          expect.objectContaining({
+            clarificationData: expect.objectContaining({
+              notes: expect.stringContaining('Some notes about the task'),
+            }),
+          })
+        );
+      });
+    });
+  });
+
+  describe('Keyboard Navigation (P6-008)', () => {
+    it('responds to Y key for Yes on actionable question', () => {
+      renderWizard();
+      fireEvent.keyDown(document, { key: 'y' });
+
+      expect(screen.getByText('Will it take less than 2 minutes?')).toBeInTheDocument();
+    });
+
+    it('responds to N key for No on actionable question', () => {
+      renderWizard();
+      fireEvent.keyDown(document, { key: 'n' });
+
+      expect(screen.getByText('What is this?')).toBeInTheDocument();
+    });
+
+    it('responds to number keys for options', () => {
+      renderWizard();
+      fireEvent.click(screen.getByText('Yes'));
+      fireEvent.click(screen.getByText('No, longer'));
+      fireEvent.click(screen.getByText('Single Action'));
+
+      // Press 1 for "Do it myself"
+      fireEvent.keyDown(document, { key: '1' });
+
+      expect(screen.getByText('Add Details')).toBeInTheDocument();
+    });
+
+    it('responds to Backspace to go back', () => {
+      renderWizard();
+      fireEvent.click(screen.getByText('Yes'));
+      // Now on two-minute question
+
+      fireEvent.keyDown(document, { key: 'Backspace' });
+
+      // Should be back to actionable question
+      expect(screen.getByText('Is this actionable?')).toBeInTheDocument();
+    });
+
+    it('responds to Escape to trigger skip if available', () => {
+      renderWizard();
+      fireEvent.keyDown(document, { key: 'Escape' });
+
+      expect(mockOnSkip).toHaveBeenCalled();
     });
   });
 });
