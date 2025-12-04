@@ -1,600 +1,589 @@
 # GTD UX Visual Mockups
 
-Visual specifications for the UX improvements. All wireframes are ASCII-based for easy reference during implementation.
+Web-first application with keyboard-centric navigation.
 
 ---
 
-## Navigation Comparison
+## Navigation Bar
 
-### Before (8 tabs)
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│  GTD Todo                                                            [User ▾]   │
+│                                                                                 │
+│  GTD Todo                          [Ctrl+N]                          [⚙️ ▾]     │
+│                                    Quick Add                                    │
+│                                                                                 │
 ├─────────────────────────────────────────────────────────────────────────────────┤
-│  [Inbox] [Clarify] [Next Actions] [Waiting For] [Someday] [Reference] [Contexts] [Projects]
-└─────────────────────────────────────────────────────────────────────────────────┘
-```
-
-### After (4 tabs)
-```
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│  GTD Todo                                                            [⚙️ ▾]     │
-├─────────────────────────────────────────────────────────────────────────────────┤
-│  [📥 Inbox (3)]  [⚡ Actions]  [📁 Projects]                                    │
+│  [📥 Inbox (3)]    [⚡ Actions]    [📁 Projects]                                │
+│       g i               g a             g p                                     │
 └─────────────────────────────────────────────────────────────────────────────────┘
 
-Settings dropdown when clicked:
-┌────────────────┐
-│ Contexts       │
-│ Account        │
-│ ────────────── │
-│ Logout         │
-└────────────────┘
+Settings dropdown (⚙️ click):
+┌─────────────────────┐
+│ 📋 Contexts         │
+│ 👤 Account          │
+│ ⌨️ Shortcuts   ?    │
+│ ─────────────────── │
+│ 🚪 Logout           │
+└─────────────────────┘
 ```
 
 ---
 
-## 1. Inbox Page with Inline Clarification
+## 1. Inbox Page (Split View)
 
-### Desktop (Split View)
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│  GTD Todo                                                            [⚙️ ▾]     │
+│  GTD Todo                              [Ctrl+N]                      [⚙️ ▾]     │
 ├─────────────────────────────────────────────────────────────────────────────────┤
-│  [📥 Inbox (7)]  [⚡ Actions]  [📁 Projects]                                    │
+│  [📥 Inbox (7)]    [⚡ Actions]    [📁 Projects]                                │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                 │
-│  📥 Inbox                                                    [➕ Quick Add]     │
+│  📥 Inbox                                          Press ? for keyboard help   │
 │  ─────────────────────────────────────────────────────────────────────────────  │
 │                                                                                 │
 │  ┌──────────────────────────────────────┬────────────────────────────────────┐ │
 │  │                                      │                                    │ │
-│  │  ☐ Call dentist for appointment      │  ┌──────────────────────────────┐ │ │
-│  │     added 2 hours ago                │  │                              │ │ │
-│  │                                      │  │     Clarify Task             │ │ │
-│  │  ☐ Review Q3 budget proposal   ◀─────│  │                              │ │ │
-│  │     added 1 day ago          SELECTED│  │  ┌────────────────────────┐  │ │ │
-│  │                                      │  │  │ Review Q3 budget       │  │ │ │
-│  │  ☐ Buy birthday gift for Mom         │  │  │ proposal               │  │ │ │
-│  │     added 2 days ago                 │  │  └────────────────────────┘  │ │ │
-│  │                                      │  │                              │ │ │
-│  │  ☐ Research vacation destinations    │  │  ┌────────────────────────┐  │ │ │
-│  │     added 3 days ago                 │  │  │    Is this actionable? │  │ │ │
-│  │                                      │  │  │                        │  │ │ │
-│  │  ☐ Update team wiki                  │  │  │  Can you take action   │  │ │ │
-│  │     added 4 days ago                 │  │  │  on this?              │  │ │ │
-│  │                                      │  │  │                        │  │ │ │
-│  │  ☐ Schedule car maintenance          │  │  │  [✓ Yes]    [✗ No]     │  │ │ │
-│  │     added 5 days ago                 │  │  └────────────────────────┘  │ │ │
-│  │                                      │  │                              │ │ │
-│  │  ☐ Reply to John's email             │  │              [Skip ▶]        │ │ │
-│  │     added 6 days ago                 │  │                              │ │ │
-│  │                                      │  └──────────────────────────────┘ │ │
+│  │  TASK LIST           [↑/↓ navigate]  │  CLARIFY PANEL        [Esc close] │ │
+│  │  ─────────────────────────────────   │  ──────────────────────────────── │ │
+│  │                                      │                                    │ │
+│  │  ○ Call dentist for appointment      │  ┌──────────────────────────────┐ │ │
+│  │    added 2 hours ago                 │  │                              │ │ │
+│  │                                      │  │  "Review Q3 budget proposal" │ │ │
+│  │  ● Review Q3 budget proposal    ◀────│  │                              │ │ │
+│  │    added 1 day ago          SELECTED │  └──────────────────────────────┘ │ │
+│  │                                      │                                    │ │
+│  │  ○ Buy birthday gift for Mom         │  Is this actionable?              │ │
+│  │    added 2 days ago                  │                                    │ │
+│  │                                      │  ┌───────────┐  ┌───────────┐     │ │
+│  │  ○ Research vacation destinations    │  │  Yes [Y]  │  │  No [N]   │     │ │
+│  │    added 3 days ago                  │  └───────────┘  └───────────┘     │ │
+│  │                                      │                                    │ │
+│  │  ○ Update team wiki                  │                                    │ │
+│  │    added 4 days ago                  │  ────────────────────────────────  │ │
+│  │                                      │                                    │ │
+│  │  ○ Schedule car maintenance          │        [Tab] Skip to next          │ │
+│  │    added 5 days ago                  │        [Backspace] Go back         │ │
+│  │                                      │                                    │ │
+│  │  ○ Reply to John's email             │                                    │ │
+│  │    added 6 days ago                  │                                    │ │
+│  │                                      │                                    │ │
+│  │  ─────────────────────────────────   │                                    │ │
+│  │  [Enter] Select  [x] Delete  [c] Done│                                    │ │
 │  │                                      │                                    │ │
 │  └──────────────────────────────────────┴────────────────────────────────────┘ │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### No Task Selected State
+### No Task Selected
+
 ```
 ┌──────────────────────────────────────┬────────────────────────────────────┐
 │                                      │                                    │
-│  ☐ Call dentist for appointment      │  ┌──────────────────────────────┐ │
-│     added 2 hours ago                │  │                              │ │
-│                                      │  │      Select a task           │ │
-│  ☐ Review Q3 budget proposal         │  │      to clarify              │ │
-│     added 1 day ago                  │  │                              │ │
-│                                      │  │      ────────────────        │ │
-│  ☐ Buy birthday gift for Mom         │  │                              │ │
-│     added 2 days ago                 │  │      Click on any task       │ │
-│                                      │  │      in your inbox to        │ │
-│                                      │  │      start the GTD           │ │
-│                                      │  │      clarification           │ │
-│                                      │  │      process.                │ │
+│  ○ Call dentist for appointment      │  ┌──────────────────────────────┐ │
+│    added 2 hours ago                 │  │                              │ │
+│                                      │  │   Select a task to clarify   │ │
+│  ○ Review Q3 budget proposal         │  │                              │ │
+│    added 1 day ago                   │  │   ────────────────────────   │ │
 │                                      │  │                              │ │
+│  ○ Buy birthday gift for Mom         │  │   [↑/↓] Navigate list        │ │
+│    added 2 days ago                  │  │   [Enter] Open clarify       │ │
+│                                      │  │                              │ │
+│  ○ Research vacation destinations    │  │   or click any task          │ │
+│    added 3 days ago                  │  │                              │ │
 │                                      │  └──────────────────────────────┘ │
 │                                      │                                    │
 └──────────────────────────────────────┴────────────────────────────────────┘
 ```
 
-### Mobile (Full Screen Modal)
-```
-┌─────────────────────────┐
-│  📥 Inbox (7)    [➕]   │
-├─────────────────────────┤
-│                         │
-│  ☐ Call dentist...      │
-│     2 hours ago         │
-│                         │
-│  ☐ Review Q3 budget     │ ← Tap
-│     1 day ago           │
-│                         │
-│  ☐ Buy birthday gift    │
-│     2 days ago          │
-│                         │
-├─────────────────────────┤
-│ 📥    ⚡    📁    ⚙️    │
-└─────────────────────────┘
-         │
-         ▼ slides up
-┌─────────────────────────┐
-│  ╳        Clarify       │
-├─────────────────────────┤
-│                         │
-│  ┌───────────────────┐  │
-│  │ Review Q3 budget  │  │
-│  │ proposal          │  │
-│  └───────────────────┘  │
-│                         │
-│  Is this actionable?    │
-│                         │
-│  Can you take action    │
-│  on this, or is it      │
-│  just information?      │
-│                         │
-│  ┌─────────┐ ┌─────────┐│
-│  │  ✓ Yes  │ │  ✗ No   ││
-│  └─────────┘ └─────────┘│
-│                         │
-│         [Skip ▶]        │
-│                         │
-└─────────────────────────┘
-```
-
 ---
 
-## 2. ClarifyWizard: Add Details Step (Enhanced)
+## 2. Clarify Wizard Steps
 
-### With Context Selection
-```
-┌───────────────────────────────────────┐
-│         ⬤⬤⬤●○  Add Details           │
-├───────────────────────────────────────┤
-│                                       │
-│  Contexts (optional)                  │
-│  ┌─────────────────────────────────┐  │
-│  │ [✓@Office] [@Computer] [@Phone] │  │
-│  │ [@Home] [@Errands] [@Waiting]   │  │
-│  └─────────────────────────────────┘  │
-│                                       │
-│  Energy Level                         │
-│  ┌─────────┐┌─────────┐┌─────────┐   │
-│  │   Low   ││ Medium  ││  High   │   │
-│  │   😴    ││   😐    ││   🔥    │   │
-│  └─────────┘└─────────┘└─────────┘   │
-│                                       │
-│  Time Estimate                        │
-│  ┌───────────────────────────────┐   │
-│  │ [5m] [15m] [30m] [1h] [2h+]   │   │
-│  └───────────────────────────────┘   │
-│                                       │
-│  Due Date                             │
-│  ┌───────────────────────────────┐   │
-│  │ ____________________________  │   │
-│  │       📅  Select date         │   │
-│  └───────────────────────────────┘   │
-│                                       │
-│  Notes                                │
-│  ┌───────────────────────────────┐   │
-│  │                               │   │
-│  │                               │   │
-│  └───────────────────────────────┘   │
-│                                       │
-│  ┌──────────────┐ ┌──────────────┐   │
-│  │  Start Over  │ │     Save     │   │
-│  └──────────────┘ └──────────────┘   │
-│                                       │
-└───────────────────────────────────────┘
-```
+### Step 1: Actionable?
 
-### Context Selection States
 ```
-Default contexts (from API):
-
 ┌────────────────────────────────────────┐
-│  [@Office]  [@Home]  [@Phone]          │
-│  [@Errands] [@Computer] [@Waiting]     │
+│           Clarify Task                 │
+├────────────────────────────────────────┤
 │                                        │
-│  Custom contexts:                      │
-│  [@GymTime] [@LowEnergy]               │
+│  ┌──────────────────────────────────┐  │
+│  │ "Review Q3 budget proposal"      │  │
+│  │                                  │  │
+│  │ Notes: Need to check with Sarah  │  │
+│  └──────────────────────────────────┘  │
 │                                        │
-│  [+ Add new context]                   │
-└────────────────────────────────────────┘
-
-Selected state:
-┌────────────────────────────────────────┐
-│  [✓@Office]  [@Home]  [✓@Phone]        │
-│  [@Errands] [✓@Computer] [@Waiting]    │
+│  ┌──────────────────────────────────┐  │
+│  │       Is this actionable?        │  │
+│  │                                  │  │
+│  │  Can you take action on this,    │  │
+│  │  or is it just information?      │  │
+│  └──────────────────────────────────┘  │
+│                                        │
+│  ┌──────────────┐  ┌──────────────┐   │
+│  │     Yes      │  │      No      │   │
+│  │     [Y]      │  │     [N]      │   │
+│  └──────────────┘  └──────────────┘   │
+│                                        │
+│  ────────────────────────────────────  │
+│  [Tab] Skip    [Esc] Close             │
+│                                        │
 └────────────────────────────────────────┘
 ```
 
+### Step 2: Two Minutes?
+
+```
+┌────────────────────────────────────────┐
+│           Clarify Task                 │
+├────────────────────────────────────────┤
+│                                        │
+│  ┌──────────────────────────────────┐  │
+│  │  Will it take less than 2 min?   │  │
+│  │                                  │  │
+│  │  If so, do it right now!         │  │
+│  │  Don't defer quick tasks.        │  │
+│  └──────────────────────────────────┘  │
+│                                        │
+│  ┌──────────────┐  ┌──────────────┐   │
+│  │  Yes, < 2min │  │  No, longer  │   │
+│  │     [Y]      │  │     [N]      │   │
+│  │              │  │              │   │
+│  │  ⏱ Do it now │  │  Defer it    │   │
+│  └──────────────┘  └──────────────┘   │
+│                                        │
+│  ────────────────────────────────────  │
+│  [Backspace] Back    [Esc] Close       │
+│                                        │
+└────────────────────────────────────────┘
+```
+
+### Step 3: Destination
+
+```
+┌────────────────────────────────────────┐
+│           Clarify Task                 │
+├────────────────────────────────────────┤
+│                                        │
+│  What should happen with this?         │
+│                                        │
+│  ┌──────────────────────────────────┐  │
+│  │ [1] ⚡ Next Action                │  │
+│  │     I'll do it myself            │  │
+│  └──────────────────────────────────┘  │
+│                                        │
+│  ┌──────────────────────────────────┐  │
+│  │ [2] 👥 Waiting For                │  │
+│  │     Delegate to someone          │  │
+│  └──────────────────────────────────┘  │
+│                                        │
+│  ┌──────────────────────────────────┐  │
+│  │ [3] 📅 Someday/Maybe              │  │
+│  │     Maybe later, not now         │  │
+│  └──────────────────────────────────┘  │
+│                                        │
+│  ┌──────────────────────────────────┐  │
+│  │ [4] 📁 Add to Project...          │  │
+│  │     Link to existing project     │  │
+│  └──────────────────────────────────┘  │
+│                                        │
+│  ────────────────────────────────────  │
+│  [Backspace] Back    [Esc] Close       │
+│                                        │
+└────────────────────────────────────────┘
+```
+
+### Step 3b: Non-Actionable
+
+```
+┌────────────────────────────────────────┐
+│           Clarify Task                 │
+├────────────────────────────────────────┤
+│                                        │
+│  What is this item?                    │
+│                                        │
+│  ┌──────────────────────────────────┐  │
+│  │ [1] 🗑️ Trash                      │  │
+│  │     Delete it                    │  │
+│  └──────────────────────────────────┘  │
+│                                        │
+│  ┌──────────────────────────────────┐  │
+│  │ [2] 📚 Reference                  │  │
+│  │     Keep for later reference     │  │
+│  └──────────────────────────────────┘  │
+│                                        │
+│  ┌──────────────────────────────────┐  │
+│  │ [3] 📅 Someday/Maybe              │  │
+│  │     Incubate for future review   │  │
+│  └──────────────────────────────────┘  │
+│                                        │
+│  ────────────────────────────────────  │
+│  [Backspace] Back    [Esc] Close       │
+│                                        │
+└────────────────────────────────────────┘
+```
+
+### Step 4: Add Details
+
+```
+┌────────────────────────────────────────┐
+│           Add Details                  │
+├────────────────────────────────────────┤
+│                                        │
+│  Contexts (click to select)            │
+│  ┌──────────────────────────────────┐  │
+│  │ [✓@Office] [@Computer] [@Phone]  │  │
+│  │ [@Home] [@Errands] [@Waiting]    │  │
+│  │ [+ Add new context]              │  │
+│  └──────────────────────────────────┘  │
+│                                        │
+│  Energy Level                          │
+│  ┌─────────┐ ┌─────────┐ ┌─────────┐  │
+│  │   Low   │ │ Medium  │ │  High   │  │
+│  │   🟢    │ │   🟡    │ │   🔴    │  │
+│  └─────────┘ └─────────┘ └─────────┘  │
+│                                        │
+│  Time Estimate                         │
+│  ┌─────┐ ┌─────┐ ┌─────┐ ┌────┐ ┌────┐│
+│  │ 5m  │ │ 15m │ │ 30m │ │ 1h │ │ 2h+││
+│  └─────┘ └─────┘ └─────┘ └────┘ └────┘│
+│                                        │
+│  Due Date                              │
+│  ┌──────────────────────────────────┐  │
+│  │ ____________________________  📅 │  │
+│  └──────────────────────────────────┘  │
+│                                        │
+│  Project (optional)                    │
+│  ┌──────────────────────────────────┐  │
+│  │ None                           ▾ │  │
+│  └──────────────────────────────────┘  │
+│                                        │
+│  Notes                                 │
+│  ┌──────────────────────────────────┐  │
+│  │                                  │  │
+│  │                                  │  │
+│  └──────────────────────────────────┘  │
+│                                        │
+│  ────────────────────────────────────  │
+│  [Backspace] Back        [Ctrl+Enter]  │
+│                               Save     │
+│                                        │
+└────────────────────────────────────────┘
+```
+
+### Project Selection (if [4] chosen)
+
+```
+┌────────────────────────────────────────┐
+│         Select Project                 │
+├────────────────────────────────────────┤
+│                                        │
+│  Your active projects:                 │
+│                                        │
+│  ┌──────────────────────────────────┐  │
+│  │ [1] ○ Website Redesign           │  │
+│  │       3 tasks • due Dec 15       │  │
+│  └──────────────────────────────────┘  │
+│                                        │
+│  ┌──────────────────────────────────┐  │
+│  │ [2] ● Q4 Report              ◀───│  │ SELECTED
+│  │       5 tasks • due Dec 31       │  │
+│  └──────────────────────────────────┘  │
+│                                        │
+│  ┌──────────────────────────────────┐  │
+│  │ [3] ○ Office Move                │  │
+│  │       12 tasks • no due date     │  │
+│  └──────────────────────────────────┘  │
+│                                        │
+│  ┌──────────────────────────────────┐  │
+│  │ [4] ○ Training Program           │  │
+│  │       8 tasks • due Jan 15       │  │
+│  └──────────────────────────────────┘  │
+│                                        │
+│  ────────────────────────────────────  │
+│  [↑/↓] Navigate    [Enter] Select      │
+│  [Backspace] Back  [Esc] Cancel        │
+│                                        │
+└────────────────────────────────────────┘
+```
+
 ---
 
-## 3. ClarifyWizard: Project Assignment Step
+## 3. Actions Page (Unified View)
 
-### What Should Happen Next (Enhanced)
-```
-┌───────────────────────────────────────┐
-│      What should happen next?         │
-├───────────────────────────────────────┤
-│                                       │
-│  ┌─────────────────────────────────┐  │
-│  │  ⚡ Do it myself                │  │
-│  │     Add to Next Actions         │  │
-│  └─────────────────────────────────┘  │
-│                                       │
-│  ┌─────────────────────────────────┐  │
-│  │  👥 Delegate it                 │  │
-│  │     Add to Waiting For          │  │
-│  └─────────────────────────────────┘  │
-│                                       │
-│  ┌─────────────────────────────────┐  │
-│  │  📅 Maybe later                 │  │
-│  │     Add to Someday/Maybe        │  │
-│  └─────────────────────────────────┘  │
-│                                       │
-│  ─────────── OR ───────────           │
-│                                       │
-│  ┌─────────────────────────────────┐  │
-│  │  📁 Add to existing project...  │  │
-│  │     Link to one of your         │  │
-│  │     active projects             │  │
-│  └─────────────────────────────────┘  │
-│                                       │
-└───────────────────────────────────────┘
-```
-
-### Project Selection Modal
-```
-┌───────────────────────────────────────┐
-│      Select Project                   │
-├───────────────────────────────────────┤
-│                                       │
-│  Your active projects:                │
-│                                       │
-│  ┌─────────────────────────────────┐  │
-│  │  ○  Website Redesign            │  │
-│  │      3 tasks • due Dec 15       │  │
-│  └─────────────────────────────────┘  │
-│                                       │
-│  ┌─────────────────────────────────┐  │
-│  │  ●  Q4 Report                   │  │
-│  │      5 tasks • due Dec 31       │  │ ← SELECTED
-│  └─────────────────────────────────┘  │
-│                                       │
-│  ┌─────────────────────────────────┐  │
-│  │  ○  Office Move                 │  │
-│  │      12 tasks • no due date     │  │
-│  └─────────────────────────────────┘  │
-│                                       │
-│  ┌─────────────────────────────────┐  │
-│  │  ○  Training Program            │  │
-│  │      8 tasks • due Jan 15       │  │
-│  └─────────────────────────────────┘  │
-│                                       │
-│  ┌────────────┐ ┌─────────────────┐   │
-│  │   Cancel   │ │ Add to Project  │   │
-│  └────────────┘ └─────────────────┘   │
-│                                       │
-└───────────────────────────────────────┘
-```
-
----
-
-## 4. Unified Actions Page
-
-### Desktop View
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│  GTD Todo                                                            [⚙️ ▾]     │
+│  GTD Todo                              [Ctrl+N]                      [⚙️ ▾]     │
 ├─────────────────────────────────────────────────────────────────────────────────┤
-│  [📥 Inbox (3)]  [⚡ Actions]  [📁 Projects]                                    │
+│  [📥 Inbox (3)]    [⚡ Actions]    [📁 Projects]                                │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                 │
-│  ⚡ Actions                                                                      │
+│  ⚡ Actions                                          Press ? for keyboard help │
 │  ─────────────────────────────────────────────────────────────────────────────  │
 │                                                                                 │
 │  ┌─────────────────────────────────────────────────────────────────────────┐   │
-│  │ Status: [All ▾]   Context: [All ▾]   Project: [All ▾]   [🔍 Search...] │   │
+│  │ Status [All ▾]  Context [All ▾]  Project [All ▾]  Energy [All ▾]        │   │
+│  │                                                              [🔍 / ]    │   │
 │  └─────────────────────────────────────────────────────────────────────────┘   │
 │                                                                                 │
 │  ┌─────────────────────────────────────────────────────────────────────────┐   │
-│  │ ▼ Next Actions (12)                                            [+ Add] │   │
+│  │ [1] ▼ Next Actions (12)                                                 │   │
 │  ├─────────────────────────────────────────────────────────────────────────┤   │
 │  │                                                                         │   │
-│  │  ☐ Call dentist for appointment                                        │   │
-│  │    [@Phone]  🟡 Medium  ⏱ 15m  📅 Today                                │   │
+│  │  ● ☐ Call dentist for appointment                              [c][e]  │   │
+│  │      [@Phone]  🟡 Medium  ⏱ 15m  📅 Today                               │   │
 │  │                                                                         │   │
-│  │  ☐ Review Q3 budget proposal                                           │   │
-│  │    [@Office] [@Computer]  🔴 High  ⏱ 1h  📁 Q4 Report                  │   │
+│  │  ○ ☐ Review Q3 budget proposal                                         │   │
+│  │      [@Office] [@Computer]  🔴 High  ⏱ 1h  📁 Q4 Report                │   │
 │  │                                                                         │   │
-│  │  ☐ Send invoice to client                                              │   │
-│  │    [@Computer]  🟢 Low  ⏱ 5m                                           │   │
+│  │  ○ ☐ Send invoice to client                                            │   │
+│  │      [@Computer]  🟢 Low  ⏱ 5m                                         │   │
 │  │                                                                         │   │
-│  │  ☐ Prepare presentation slides                                         │   │
-│  │    [@Computer]  🔴 High  ⏱ 2h  📁 Website Redesign  📅 Dec 12         │   │
+│  │  ○ ☐ Prepare presentation slides                                       │   │
+│  │      [@Computer]  🔴 High  ⏱ 2h  📁 Website Redesign  📅 Dec 12        │   │
 │  │                                                                         │   │
 │  │  [Show 8 more...]                                                       │   │
 │  └─────────────────────────────────────────────────────────────────────────┘   │
 │                                                                                 │
 │  ┌─────────────────────────────────────────────────────────────────────────┐   │
-│  │ ▶ Waiting For (3)                                                       │   │
+│  │ [2] ▶ Waiting For (3)                                                   │   │
 │  └─────────────────────────────────────────────────────────────────────────┘   │
 │                                                                                 │
 │  ┌─────────────────────────────────────────────────────────────────────────┐   │
-│  │ ▶ Someday/Maybe (8)                                                     │   │
+│  │ [3] ▶ Someday/Maybe (8)                                                 │   │
 │  └─────────────────────────────────────────────────────────────────────────┘   │
 │                                                                                 │
 │  ┌─────────────────────────────────────────────────────────────────────────┐   │
-│  │ ▶ Reference (5)                                                         │   │
+│  │ [4] ▶ Reference (5)                                                     │   │
 │  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  [↑/↓] Navigate  [c] Complete  [e] Edit  [m] Move  [/] Search  [1-4] Sections  │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Expanded Waiting For Section
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ ▼ Waiting For (3)                                                       │
+│ [2] ▼ Waiting For (3)                                                   │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
-│  ☐ Budget approval from finance team                                   │
-│    Waiting for: Sarah (finance)  •  🟡 5 days  •  📁 Q4 Report         │
-│                                        ↑ amber = 3-7 days              │
+│  ○ ☐ Budget approval from finance team                                 │
+│      Waiting for: Sarah (finance)                                       │
+│      🟡 5 days waiting  •  📁 Q4 Report                                 │
 │                                                                         │
-│  ☐ Contract review by legal                                            │
-│    Waiting for: Legal dept  •  🟢 2 days  •  📅 Dec 20                 │
-│                                  ↑ green = <3 days                     │
+│  ○ ☐ Contract review by legal                                          │
+│      Waiting for: Legal dept                                            │
+│      🟢 2 days waiting  •  📅 Dec 20                                    │
 │                                                                         │
-│  ☐ Design mockups from agency                                          │
-│    Waiting for: Creative Agency  •  🔴 15 days  •  📁 Website Redesign │
-│                                       ↑ red = >7 days                  │
+│  ○ ☐ Design mockups from agency                                        │
+│      Waiting for: Creative Agency                                       │
+│      🔴 15 days waiting  •  📁 Website Redesign                         │
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
+
+Waiting duration colors:
+🟢 Green = < 3 days
+🟡 Amber = 3-7 days
+🔴 Red = > 7 days
 ```
 
 ### With Filter Applied
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ Status: [All ▾]   Context: [@Office ▾]   Project: [All ▾]   [🔍]       │
-│                            ↑ FILTERED                                   │
+│ Status [All ▾]  Context [@Office ▾]  Project [All ▾]  Energy [All ▾]   │
+│                         ↑ ACTIVE                                        │
 └─────────────────────────────────────────────────────────────────────────┘
 
-Results show only tasks with @Office context:
+Filtered results (only @Office tasks shown):
 
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ ▼ Next Actions (4 of 12)                                     [+ Add]   │
+│ [1] ▼ Next Actions (4 of 12)                                           │
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
-│  ☐ Review Q3 budget proposal                                           │
-│    [@Office] [@Computer]  🔴 High  ⏱ 1h  📁 Q4 Report                  │
+│  ● ☐ Review Q3 budget proposal                                         │
+│      [@Office] [@Computer]  🔴 High  ⏱ 1h  📁 Q4 Report                │
 │                                                                         │
-│  ☐ Meet with HR about new hire                                         │
-│    [@Office]  🟡 Medium  ⏱ 30m  📅 Tomorrow                            │
+│  ○ ☐ Meet with HR about new hire                                       │
+│      [@Office]  🟡 Medium  ⏱ 30m  📅 Tomorrow                          │
 │                                                                         │
-│  ☐ Organize desk and file papers                                       │
-│    [@Office]  🟢 Low  ⏱ 15m                                            │
+│  ○ ☐ Organize desk and file papers                                     │
+│      [@Office]  🟢 Low  ⏱ 15m                                          │
 │                                                                         │
-│  ☐ Print conference materials                                          │
-│    [@Office]  🟢 Low  ⏱ 10m  📅 Dec 14                                 │
+│  ○ ☐ Print conference materials                                        │
+│      [@Office]  🟢 Low  ⏱ 10m  📅 Dec 14                               │
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Mobile View
+### Move Task Modal (m key)
+
 ```
-┌─────────────────────────┐
-│  ⚡ Actions             │
-├─────────────────────────┤
-│                         │
-│ ┌─────────────────────┐ │
-│ │ [All ▾] [@Office ▾] │ │
-│ │ [Project ▾] [🔍]    │ │
-│ └─────────────────────┘ │
-│                         │
-│ ▼ Next Actions (12)     │
-│ ┌─────────────────────┐ │
-│ │ ☐ Call dentist      │ │
-│ │   @Phone 🟡 ⏱15m    │ │
-│ ├─────────────────────┤ │
-│ │ ☐ Review budget     │ │
-│ │   @Office 🔴 ⏱1h    │ │
-│ ├─────────────────────┤ │
-│ │ ☐ Send invoice      │ │
-│ │   @Computer 🟢 ⏱5m  │ │
-│ └─────────────────────┘ │
-│                         │
-│ ▶ Waiting For (3)       │
-│                         │
-│ ▶ Someday/Maybe (8)     │
-│                         │
-│ ▶ Reference (5)         │
-│                         │
-├─────────────────────────┤
-│ 📥    ⚡    📁    ⚙️    │
-└─────────────────────────┘
+┌────────────────────────────────────┐
+│       Move Task To...              │
+├────────────────────────────────────┤
+│                                    │
+│  [1] ⚡ Next Actions               │
+│  [2] 👥 Waiting For                │
+│  [3] 📅 Someday/Maybe              │
+│  [4] 📚 Reference                  │
+│  [5] 📥 Inbox (reclarify)          │
+│                                    │
+│  ──────────────────────────────    │
+│  [1-5] Select    [Esc] Cancel      │
+│                                    │
+└────────────────────────────────────┘
 ```
 
 ---
 
-## 5. Task Interactions
+## 4. Projects Page
 
-### Swipe Actions (Mobile)
-```
-Swipe Left = Complete
-┌─────────────────────────┐
-│ ☐ Call dentist   ──────────▶  ✓ Done!
-│   @Phone 🟡 ⏱15m         │
-└─────────────────────────┘
-
-Swipe Right = Send to Inbox (reclarify)
-┌─────────────────────────┐
-│ ◀──────────  ☐ Call dentist
-│              @Phone 🟡 ⏱15m   │
-└─────────────────────────┘
-     ↓
-Task moves back to Inbox for re-clarification
-```
-
-### Drag & Drop (Desktop)
-```
-Drag task between sections:
-
-▼ Next Actions (12)
-├─────────────────────────────────────────┐
-│ ☐ Review budget ◄─── Dragging...        │
-│   @Office 🔴 ⏱1h                        │
-└─────────────────────────────────────────┘
-              │
-              ▼ Drop here
-▼ Waiting For (3)
-├─────────────────────────────────────────┐
-│ ┌─────────────────────────────────────┐ │
-│ │        Drop to move here            │ │
-│ │        Status → waiting_for         │ │
-│ └─────────────────────────────────────┘ │
-└─────────────────────────────────────────┘
-```
-
-### Complete Animation
-```
-Before:
-┌─────────────────────────────────────┐
-│ ☐ Call dentist for appointment      │
-│   @Phone 🟡 ⏱15m                    │
-└─────────────────────────────────────┘
-
-Click checkbox:
-┌─────────────────────────────────────┐
-│ ✓ Call dentist for appointment      │  ← Green checkmark
-│   @Phone 🟡 ⏱15m                    │  ← Strikethrough
-└─────────────────────────────────────┘
-
-After 300ms fade:
-(task removed from list)
-
-Toast notification:
-┌──────────────────────────────┐
-│ ✓ Task completed    [Undo]   │
-└──────────────────────────────┘
-```
-
----
-
-## 6. Settings Pages
-
-### Settings Dropdown
-```
-Click [⚙️ ▾]:
-
-┌────────────────────┐
-│ 📋 Contexts        │ → /settings/contexts
-│ 👤 Account         │ → /settings/account
-│ ────────────────── │
-│ 🚪 Logout          │ → /login
-└────────────────────┘
-```
-
-### Contexts Settings Page
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│  GTD Todo                                                            [⚙️ ▾]     │
+│  GTD Todo                              [Ctrl+N]                      [⚙️ ▾]     │
 ├─────────────────────────────────────────────────────────────────────────────────┤
-│  [📥 Inbox (3)]  [⚡ Actions]  [📁 Projects]                                    │
+│  [📥 Inbox (3)]    [⚡ Actions]    [📁 Projects]                                │
 ├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                 │
-│  ⚙️ Settings › Contexts                                                         │
+│  📁 Projects                                      [n] New Project              │
 │  ─────────────────────────────────────────────────────────────────────────────  │
 │                                                                                 │
-│  Default Contexts (read-only)                                                   │
 │  ┌─────────────────────────────────────────────────────────────────────────┐   │
-│  │ @Office    🔵                                                           │   │
-│  │ @Home      🟢                                                           │   │
-│  │ @Phone     🟡                                                           │   │
-│  │ @Errands   🟠                                                           │   │
-│  │ @Computer  🟣                                                           │   │
-│  │ @Waiting   ⚪                                                           │   │
+│  │ [All]  [Active]  [On Hold]  [Completed]                     [🔍 / ]     │   │
 │  └─────────────────────────────────────────────────────────────────────────┘   │
 │                                                                                 │
-│  Custom Contexts                                                    [+ Add]    │
 │  ┌─────────────────────────────────────────────────────────────────────────┐   │
-│  │ @GymTime   🔴     [Edit] [Delete]                                       │   │
-│  │ @LowEnergy ⚫     [Edit] [Delete]                                       │   │
-│  │ @Weekend   🟤     [Edit] [Delete]                                       │   │
+│  │  ● 📁 Website Redesign                                    ● Active      │   │
+│  │       3 tasks                                             Due: Dec 15   │   │
+│  │       Next: "Review mockups with design team"                           │   │
+│  ├─────────────────────────────────────────────────────────────────────────┤   │
+│  │  ○ 📁 Q4 Report                                           ● Active      │   │
+│  │       5 tasks                                             Due: Dec 31   │   │
+│  │       Next: "Gather Q4 metrics from analytics"                          │   │
+│  ├─────────────────────────────────────────────────────────────────────────┤   │
+│  │  ○ 📁 Office Move                                   ⚠️ No next action   │   │
+│  │       12 tasks                                       NEEDS ATTENTION    │   │
+│  │       ⚠️ Add a next action to keep this project moving                  │   │
+│  ├─────────────────────────────────────────────────────────────────────────┤   │
+│  │  ○ 📁 Training Program                                    ● Active      │   │
+│  │       8 tasks                                             Due: Jan 15   │   │
+│  │       Next: "Draft curriculum outline"                                  │   │
 │  └─────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                 │
+│  ─────────────────────────────────────────────────────────────────────────────  │
+│  [↑/↓] Navigate  [Enter] Open  [n] New  [e] Edit  [h] Hold  [a] Activate       │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 7. Empty States
+## 5. Quick Capture Modal (Ctrl+N)
 
-### Empty Inbox
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│  📥 Inbox                                                    [➕ Quick Add]     │
-├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                 │
-│                              ┌─────────────────┐                               │
-│                              │                 │                               │
-│                              │    📥 → ✓       │                               │
-│                              │                 │                               │
-│                              └─────────────────┘                               │
-│                                                                                 │
-│                              Inbox Zero!                                        │
-│                                                                                 │
-│                    All your tasks have been clarified.                          │
-│                    Time to get things done!                                     │
-│                                                                                 │
-│                         [Go to Actions →]                                       │
+│                    ┌─────────────────────────────────────────┐                 │
+│                    │  ╳               Quick Capture          │                 │
+│                    ├─────────────────────────────────────────┤                 │
+│                    │                                         │                 │
+│                    │  ┌─────────────────────────────────┐   │                 │
+│                    │  │                                 │   │                 │
+│                    │  │ What's on your mind?            │   │                 │
+│                    │  │                                 │   │                 │
+│                    │  │                                 │   │                 │
+│                    │  └─────────────────────────────────┘   │                 │
+│                    │                                         │                 │
+│                    │  ☐ Keep open for multiple entries      │                 │
+│                    │                                         │                 │
+│                    │  ───────────────────────────────────   │                 │
+│                    │                                         │                 │
+│                    │  [Esc] Cancel         [Ctrl+Enter] Add  │                 │
+│                    │                                         │                 │
+│                    └─────────────────────────────────────────┘                 │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
+
+Backdrop darkened, modal centered
+Focus trapped inside modal
+Esc closes, Ctrl+Enter submits
 ```
 
-### Empty Next Actions
+---
+
+## 6. Keyboard Shortcuts Help (?)
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────┐
-│ ▼ Next Actions (0)                                                    [+ Add]  │
-├─────────────────────────────────────────────────────────────────────────────────┤
 │                                                                                 │
-│                              ┌─────────────────┐                               │
-│                              │                 │                               │
-│                              │    ⚡ ✓         │                               │
-│                              │                 │                               │
-│                              └─────────────────┘                               │
-│                                                                                 │
-│                           No next actions                                       │
-│                                                                                 │
-│              Clarify tasks from your Inbox to create                            │
-│              actionable next steps.                                             │
-│                                                                                 │
-│                         [Go to Inbox →]                                         │
+│          ┌────────────────────────────────────────────────────────┐            │
+│          │  ╳                Keyboard Shortcuts                   │            │
+│          ├────────────────────────────────────────────────────────┤            │
+│          │                                                        │            │
+│          │  GLOBAL                        NAVIGATION              │            │
+│          │  ──────────────────            ──────────────────      │            │
+│          │  Ctrl+N   Quick capture        g i   Go to Inbox       │            │
+│          │  Esc      Close modal/panel    g a   Go to Actions     │            │
+│          │  ?        This help            g p   Go to Projects    │            │
+│          │  Ctrl+Enter  Submit form                               │            │
+│          │                                                        │            │
+│          │  TASK LIST                     TASK ACTIONS            │            │
+│          │  ──────────────────            ──────────────────      │            │
+│          │  ↑ / ↓    Navigate             c     Complete          │            │
+│          │  Enter    Select/Open          x     Delete            │            │
+│          │  /        Focus search         e     Edit              │            │
+│          │                                m     Move to...        │            │
+│          │                                                        │            │
+│          │  CLARIFY WIZARD                SECTIONS (Actions)      │            │
+│          │  ──────────────────            ──────────────────      │            │
+│          │  Y        Yes                  1     Next Actions      │            │
+│          │  N        No                   2     Waiting For       │            │
+│          │  1-4      Select option        3     Someday/Maybe     │            │
+│          │  Tab      Skip                 4     Reference         │            │
+│          │  Backspace  Go back                                    │            │
+│          │                                                        │            │
+│          │  PROJECTS                                              │            │
+│          │  ──────────────────                                    │            │
+│          │  n     New project                                     │            │
+│          │  h     Put on hold                                     │            │
+│          │  a     Activate                                        │            │
+│          │                                                        │            │
+│          │  ────────────────────────────────────────────────────  │            │
+│          │                                                        │            │
+│          │                        [Esc] Close                     │            │
+│          │                                                        │            │
+│          └────────────────────────────────────────────────────────┘            │
 │                                                                                 │
 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## 8. Responsive Breakpoints
+## 7. Keyboard Shortcut Hints in UI
 
-### Desktop (≥1024px)
-- Split view for Inbox + Clarify panel
-- Full filter bar with all options visible
-- Sidebar navigation
+All actionable elements show their keyboard shortcut:
 
-### Tablet (768px - 1023px)
-- Stacked Inbox, modal for Clarify
-- Condensed filter bar (dropdowns)
-- Top navigation
+```
+Button with shortcut:
+┌─────────────────┐
+│  Yes [Y]        │
+└─────────────────┘
 
-### Mobile (<768px)
-- Single column layout
-- Bottom navigation bar
-- Full-screen modals for clarification
-- Horizontal scrolling filter chips
-- Swipe gestures for task actions
+Navigation tab with shortcut:
+┌─────────────────┐
+│  📥 Inbox (3)   │
+│      g i        │  (shown on hover or always)
+└─────────────────┘
+
+Footer shortcuts bar:
+────────────────────────────────────────────────────────────────
+[↑/↓] Navigate  [c] Complete  [e] Edit  [m] Move  [/] Search
+────────────────────────────────────────────────────────────────
+```
 
 ---
 
@@ -604,11 +593,11 @@ Click [⚙️ ▾]:
 |---------|-------|-----|
 | Primary (buttons, links) | Blue | #3B82F6 |
 | Success (complete) | Green | #10B981 |
-| Warning (waiting) | Amber | #F59E0B |
-| Danger (delete) | Red | #EF4444 |
+| Warning (waiting, attention) | Amber | #F59E0B |
+| Danger (delete, overdue) | Red | #EF4444 |
 | Energy High | Red | #EF4444 |
 | Energy Medium | Amber | #F59E0B |
 | Energy Low | Green | #10B981 |
-| Context badge bg | Gray | #F3F4F6 |
-| Section header bg | Gray | #F9FAFB |
-| Border | Gray | #E5E7EB |
+| Selected item | Light Blue | #EFF6FF |
+| Context badge | Gray bg | #F3F4F6 |
+| Keyboard hint | Gray text | #9CA3AF |
