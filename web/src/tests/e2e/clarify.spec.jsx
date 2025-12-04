@@ -19,6 +19,8 @@ import ClarifyPage from '../../pages/ClarifyPage';
 import tasksReducer from '../../features/tasks/tasksSlice';
 import authReducer from '../../features/auth/authSlice';
 import accountReducer from '../../features/account/accountSlice';
+import contextsReducer from '../../features/contexts/contextsSlice';
+import projectsReducer from '../../features/projects/projectsSlice';
 
 // Mock the API module
 vi.mock('../../services/api', () => ({
@@ -37,6 +39,7 @@ vi.mock('../../services/api', () => ({
     clarify: vi.fn().mockResolvedValue({ data: { id: '1', status: 'next_action' } }),
     complete: vi.fn().mockResolvedValue({ data: { id: '1', status: 'completed' } }),
     delete: vi.fn().mockResolvedValue({ data: { id: '1' } }),
+    setContexts: vi.fn().mockResolvedValue({ data: { success: true } }),
   },
   projectsAPI: {
     create: vi.fn().mockResolvedValue({ data: { id: 'proj-1', title: 'New Project' } }),
@@ -62,6 +65,8 @@ const createTestStore = (preloadedState = {}) => {
       auth: authReducer,
       account: accountReducer,
       tasks: tasksReducer,
+      contexts: contextsReducer,
+      projects: projectsReducer,
     },
     preloadedState: {
       auth: {
@@ -92,6 +97,17 @@ const createTestStore = (preloadedState = {}) => {
         error: null,
         nextCursor: null,
         total: 3,
+      },
+      contexts: {
+        contexts: [],
+        loading: false,
+        error: null,
+      },
+      projects: {
+        projects: [],
+        currentProject: null,
+        loading: false,
+        error: null,
       },
       ...preloadedState,
     },
